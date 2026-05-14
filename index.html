@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="es"><!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -45,7 +44,6 @@
         }
 
         .logo-wrap { display: flex; align-items: center; gap: 14px; }
-
         .logo-svg { width: 48px; height: 30px; }
 
         .logo-name {
@@ -61,6 +59,32 @@
             color: var(--text-dim);
             font-family: 'Space Mono', monospace;
             letter-spacing: 1px;
+        }
+
+        /* Badge de agente activo */
+        .agent-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 1.5px;
+            color: var(--green);
+            background: var(--green-dim);
+            border: 1px solid var(--green-border);
+            padding: 4px 10px;
+            border-radius: 50px;
+        }
+        .agent-badge::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
         .main {
@@ -149,6 +173,20 @@
             border-bottom-left-radius: 4px;
         }
 
+        /* Fuentes usadas por el agente */
+        .msg-sources {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+            margin-top: 6px;
+            padding: 6px 12px;
+            background: var(--green-dim);
+            border-radius: 8px;
+            max-width: 88%;
+        }
+        .msg-sources a { color: var(--green); text-decoration: none; }
+        .msg-sources a:hover { text-decoration: underline; }
+
         .typing-indicator {
             display: flex; gap: 5px;
             padding: 13px 17px;
@@ -189,7 +227,6 @@
         }
         .chip:hover { border-color: var(--green-border); color: var(--green); background: var(--green-dim); }
 
-        /* ── ANIMATED BORDER ── */
         .input-outer {
             position: relative;
             border-radius: 18px;
@@ -269,35 +306,33 @@
 <nav class="navbar">
     <div class="logo-wrap">
         <svg class="logo-svg" viewBox="0 0 48 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Círculo partido (letra O con línea vertical) -->
             <circle cx="15" cy="15" r="13" fill="white"/>
             <rect x="13.5" y="2" width="3" height="26" fill="#080808"/>
-            <!-- C -->
             <path d="M46 4 A13 13 0 1 0 46 26" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
             <rect x="37" y="12.5" width="9" height="5" fill="#080808"/>
         </svg>
         <span class="logo-name">LOVA</span>
     </div>
-    <div class="nav-right">IA · v1.0</div>
+    <div class="agent-badge">AGENTE ACTIVO</div>
 </nav>
 
 <div class="main">
 
     <div class="hero" id="hero">
-        <div class="hero-label">Asistente de IA</div>
+        <div class="hero-label">Agente de IA</div>
         <h1 class="hero-title">Hola. ¿En qué puedo <strong>ayudarte</strong>?</h1>
-        <p class="hero-sub">Pregunta lo que quieras — estoy aquí para ayudar.</p>
+        <p class="hero-sub">Busco en la web en tiempo real para darte respuestas actualizadas.</p>
     </div>
 
     <div class="messages" id="messages"></div>
     <div class="divider" id="divider" style="display:none"></div>
 
     <div class="chips" id="chips">
-        <div class="chip" onclick="sendChip('¿Cómo funciona la inteligencia artificial?')">🤖 ¿Cómo funciona la IA?</div>
-        <div class="chip" onclick="sendChip('Dame ideas para un negocio innovador')">💡 Ideas de negocio</div>
-        <div class="chip" onclick="sendChip('Explícame qué es el universo en términos simples')">🌌 ¿Qué es el universo?</div>
+        <div class="chip" onclick="sendChip('¿Cuáles son las últimas noticias de inteligencia artificial hoy?')">🤖 Noticias de IA hoy</div>
+        <div class="chip" onclick="sendChip('Dame ideas para un negocio innovador en 2025')">💡 Ideas de negocio</div>
+        <div class="chip" onclick="sendChip('¿Cuál es el precio del dólar hoy?')">💵 Precio del dólar</div>
         <div class="chip" onclick="sendChip('¿Cuáles son los mejores hábitos para ser más productivo?')">⚡ Productividad</div>
-        <div class="chip" onclick="sendChip('Escríbeme un poema corto sobre la tecnología')">✍️ Poema tech</div>
+        <div class="chip" onclick="sendChip('Busca las tendencias tecnológicas más importantes de este año')">🌐 Tendencias tech</div>
     </div>
 
     <div class="input-outer" id="inputOuter">
@@ -307,7 +342,7 @@
                 <textarea
                     id="inputField"
                     class="input-field"
-                    placeholder="Escribe tu pregunta..."
+                    placeholder="Pregunta algo... busco en la web por ti"
                     rows="1"
                     onkeydown="handleKey(event)"
                     oninput="autoResize(this)"
@@ -324,7 +359,7 @@
 
 </div>
 
-<footer>LOVA · Inteligencia Artificial · 2026</footer>
+<footer>LOVA · Agente de IA con búsqueda web · 2026</footer>
 
 <script>
     // ── ANIMATED BORDER ──
@@ -373,7 +408,6 @@
             const dist = (angle + t * trailLen) % perimeter;
             const [x, y] = getPoint(dist);
             const alpha = t;
-            const hue = 140 + t * 140;
             ctx.beginPath();
             ctx.arc(x, y, 1.5, 0, Math.PI * 2);
             const color = t < 0.33
@@ -393,13 +427,18 @@
     window.addEventListener('resize', resizeCanvas);
 
     // ── CHAT ──
-    const SYSTEM_PROMPT = `Eres LOVA, un asistente de inteligencia artificial avanzado, amigable y muy capaz.
+    const WORKER_URL = "https://eagleia.clasesbeganeitor.workers.dev/";
+
+    const SYSTEM_PROMPT = `Eres LOVA, un agente de inteligencia artificial avanzado con acceso a búsqueda web en tiempo real.
 Responde siempre en español de forma clara, precisa y útil.
-Puedes ayudar con cualquier tema: ciencia, tecnología, creatividad, negocios, educación, cultura, entretenimiento, y más.
+Cuando necesites información actualizada, busca en la web automáticamente.
 Sé conversacional, empático y directo. Usa emojis con moderación.
-Limita tus respuestas a lo necesario.`;
+Limita tus respuestas a lo necesario pero sé completo cuando la pregunta lo requiera.`;
 
     let isLoading = false;
+    // Historial de mensajes para contexto multi-turno
+    let messageHistory = [];
+
     const messagesEl = document.getElementById('messages');
     const inputEl = document.getElementById('inputField');
     const sendBtn = document.getElementById('sendBtn');
@@ -427,10 +466,19 @@ Limita tus respuestas a lo necesario.`;
         }
     }
 
-    function appendMsg(role, text) {
+    function appendMsg(role, text, sources) {
         const div = document.createElement('div');
         div.className = `msg ${role}`;
-        div.innerHTML = `<div class="msg-label">${role === 'user' ? 'TÚ' : 'LOVA'}</div><div class="msg-bubble">${text}</div>`;
+
+        let sourcesHTML = '';
+        if (sources && sources.length > 0) {
+            const links = sources.map(s =>
+                `<a href="${s.url}" target="_blank" rel="noopener">🔗 ${s.title || s.url}</a>`
+            ).join(' · ');
+            sourcesHTML = `<div class="msg-sources">Fuentes: ${links}</div>`;
+        }
+
+        div.innerHTML = `<div class="msg-label">${role === 'user' ? 'TÚ' : 'LOVA'}</div><div class="msg-bubble">${text}</div>${sourcesHTML}`;
         messagesEl.appendChild(div);
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
@@ -459,15 +507,17 @@ Limita tus respuestas a lo necesario.`;
         appendMsg('user', text);
         showTyping();
 
+        // Añadir al historial
+        messageHistory.push({ role: "user", content: text });
+
         try {
-            const response = await fetch("https://eagleia.clasesbeganeitor.workers.dev", {
+            const response = await fetch(WORKER_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: "claude-sonnet-4-20250514",
-                    max_tokens: 1000,
                     system: SYSTEM_PROMPT,
-                    messages: [{ role: "user", content: text }]
+                    messages: messageHistory,
+                    max_tokens: 1024,
                 })
             });
 
@@ -475,13 +525,18 @@ Limita tus respuestas a lo necesario.`;
             removeTyping();
 
             if (data.content && data.content[0]) {
-                appendMsg('bot', data.content[0].text);
+                const replyText = data.content[0].text;
+                const sources = data.sources || [];
+                appendMsg('bot', replyText, sources);
+                // Añadir respuesta al historial
+                messageHistory.push({ role: "assistant", content: replyText });
             } else {
                 appendMsg('bot', '⚠️ No se pudo obtener respuesta. Intenta de nuevo.');
             }
         } catch (err) {
             removeTyping();
-            appendMsg('bot', '⚠️ Error de conexión. Verifica tu red e intenta de nuevo.');
+            appendMsg('bot', '⚠️ Error de conexión. Verifica que el Worker de Cloudflare esté activo.');
+            console.error(err);
         }
 
         isLoading = false;
