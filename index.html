@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <style>
 :root {
   --black:#080808; --surface:#0e0e0e; --surface2:#161616; --surface3:#1e1e1e;
@@ -168,6 +169,91 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   .sidebar.open{transform:translateX(0);width:var(--sidebar);}
   .sidebar.collapsed{transform:translateX(-100%);}
 }
+/* ── NEW MODE PANELS ── */
+.panel{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.panel.active{display:flex;}
+
+/* TRAINING */
+.training-panel{padding:24px 20px;overflow-y:auto;flex:1;}
+.training-panel::-webkit-scrollbar{width:3px;}.training-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.07);}
+.training-title{font-family:"Space Mono",monospace;font-size:0.7rem;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:18px;}
+.training-block{background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;margin-bottom:14px;}
+.training-block-label{font-size:0.72rem;font-family:"Space Mono",monospace;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.training-textarea{width:100%;background:var(--surface2);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:11px 13px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:0.87rem;outline:none;resize:vertical;min-height:80px;line-height:1.6;transition:border 0.2s;}
+.training-textarea:focus{border-color:var(--green-border);}
+.training-save-btn{margin-top:10px;padding:9px 22px;background:var(--green);border:none;border-radius:10px;color:#fff;font-family:"DM Sans",sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.training-save-btn:hover{filter:brightness(1.15);}
+.training-save-btn.saved{background:rgba(0,191,165,0.2);color:var(--green);border:1px solid var(--green-border);}
+.training-add-btn{padding:7px 14px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:8px;color:var(--green);font-size:0.75rem;cursor:pointer;font-family:"Space Mono",monospace;transition:all 0.2s;margin-top:8px;display:inline-block;}
+.training-add-btn:hover{background:rgba(0,191,165,0.2);}
+.training-del-btn{width:26px;height:26px;background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.15);border-radius:6px;color:rgba(255,80,80,0.7);cursor:pointer;font-size:0.75rem;flex-shrink:0;transition:all 0.2s;}
+.training-del-btn:hover{background:rgba(255,50,50,0.18);color:#ff6b6b;}
+.training-example-row{display:flex;gap:8px;align-items:center;margin-bottom:6px;}
+.training-example-row input{flex:1;background:var(--surface2);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:7px 10px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:0.82rem;outline:none;}
+.training-example-row input:focus{border-color:var(--green-border);}
+
+/* CODE SANDBOX */
+.code-sandbox{display:flex;flex:1;overflow:hidden;flex-direction:column;}
+.sandbox-toolbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border-bottom:1px solid rgba(255,255,255,0.04);flex-shrink:0;}
+.sandbox-tab{padding:5px 14px;border-radius:8px;font-size:0.72rem;font-family:"Space Mono",monospace;cursor:pointer;border:1px solid rgba(255,255,255,0.07);background:none;color:var(--text-dim);transition:all 0.2s;letter-spacing:1px;}
+.sandbox-tab.active{background:var(--green-dim);border-color:var(--green-border);color:var(--green);}
+.sandbox-run-btn{margin-left:auto;padding:6px 18px;background:var(--green);border:none;border-radius:8px;color:#fff;font-size:0.75rem;font-family:"Space Mono",monospace;cursor:pointer;transition:all 0.2s;}
+.sandbox-run-btn:hover{filter:brightness(1.15);}
+.sandbox-body{display:flex;flex:1;overflow:hidden;}
+.sandbox-editor{flex:1;background:var(--surface2);border:none;outline:none;color:#a8ff78;font-family:"Space Mono",monospace;font-size:0.82rem;padding:16px;resize:none;border-right:1px solid rgba(255,255,255,0.04);line-height:1.7;tab-size:2;}
+.sandbox-preview{flex:1;border:none;background:#fff;}
+.sandbox-ai-bar{display:flex;gap:8px;padding:8px 14px;background:var(--surface);border-top:1px solid rgba(255,255,255,0.04);flex-shrink:0;}
+.sandbox-ai-input{flex:1;background:var(--surface2);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px 12px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:0.85rem;outline:none;}
+.sandbox-ai-input:focus{border-color:var(--green-border);}
+.sandbox-ai-btn{padding:8px 18px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:10px;color:var(--green);font-size:0.8rem;font-family:"Space Mono",monospace;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.sandbox-ai-btn:hover{background:rgba(0,191,165,0.2);}
+
+/* SOCIAL PANEL */
+.social-panel{display:flex;flex:1;overflow:hidden;}
+.social-sidebar{width:250px;background:var(--surface);border-right:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;flex-shrink:0;}
+.social-sidebar-top{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,0.04);}
+.social-tabs{display:flex;gap:4px;margin-bottom:10px;}
+.social-tab{flex:1;padding:6px 4px;border-radius:8px;font-size:0.62rem;font-family:"Space Mono",monospace;cursor:pointer;border:1px solid rgba(255,255,255,0.07);background:none;color:var(--text-dim);transition:all 0.2s;text-align:center;}
+.social-tab.active{background:var(--green-dim);border-color:var(--green-border);color:var(--green);}
+.social-search-input{width:100%;background:var(--surface2);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px 11px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:0.82rem;outline:none;margin-bottom:7px;}
+.social-search-input:focus{border-color:var(--green-border);}
+.social-search-btn{width:100%;padding:8px;background:var(--green);border:none;border-radius:9px;color:#fff;font-size:0.8rem;font-family:"DM Sans",sans-serif;font-weight:600;cursor:pointer;}
+.contacts-list{flex:1;overflow-y:auto;padding:6px;}
+.contacts-list::-webkit-scrollbar{width:2px;}
+.contact-item{display:flex;align-items:center;gap:8px;padding:8px 7px;border-radius:10px;cursor:pointer;transition:background 0.15s;position:relative;}
+.contact-item:hover{background:var(--surface2);}
+.contact-item.active{background:var(--green-dim);border:1px solid var(--green-border);}
+.contact-avatar{width:32px;height:32px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green-border);display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:var(--green);font-weight:600;flex-shrink:0;}
+.contact-info{flex:1;min-width:0;}
+.contact-name{font-size:0.8rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.contact-last{font-size:0.67rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.social-chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.social-chat-header{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.social-chat-title{font-size:0.9rem;font-weight:500;}
+.social-chat-sub{font-size:0.68rem;color:var(--text-dim);}
+.social-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;}
+.social-messages::-webkit-scrollbar{width:3px;}
+.social-msg{display:flex;flex-direction:column;gap:3px;max-width:75%;}
+.social-msg.me{align-self:flex-end;align-items:flex-end;}
+.social-msg.them{align-self:flex-start;}
+.social-bubble{padding:9px 13px;border-radius:14px;font-size:0.85rem;line-height:1.6;word-break:break-word;}
+.social-msg.me .social-bubble{background:var(--green-dim);border:1px solid var(--green-border);border-bottom-right-radius:4px;}
+.social-msg.them .social-bubble{background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-bottom-left-radius:4px;}
+.social-msg-time{font-size:0.58rem;color:var(--text-dim);font-family:"Space Mono",monospace;}
+.social-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(255,255,255,0.04);flex-shrink:0;}
+.social-input{flex:1;background:var(--surface2);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:8px 12px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:0.86rem;outline:none;}
+.social-input:focus{border-color:var(--green-border);}
+.social-send-btn{width:36px;height:36px;border-radius:50%;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
+.social-send-btn svg{width:13px;height:13px;}
+.social-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--text-dim);font-size:0.83rem;gap:8px;}
+.request-item{display:flex;align-items:center;gap:8px;padding:8px 7px;border-radius:10px;background:var(--surface2);margin-bottom:5px;}
+.req-btn{padding:4px 10px;border-radius:7px;font-size:0.65rem;font-family:"Space Mono",monospace;cursor:pointer;border:none;transition:all 0.2s;}
+.req-btn.accept{background:var(--green);color:#fff;}
+.req-btn.reject{background:rgba(255,50,50,0.1);color:#ff6b6b;border:1px solid rgba(255,50,50,0.2);}
+.notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:#ff5252;border-radius:50%;border:2px solid var(--black);display:none;}
+.img-gen-loading{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--text-dim);font-family:"Space Mono",monospace;padding:8px 0;}
+.img-gen-loading::before{content:"";width:11px;height:11px;border:2px solid var(--green-border);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -229,6 +315,13 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
         Nuevo chat
       </button>
     </div>
+    <div class="sidebar-section">Modos</div>
+    <div style="padding:0 8px 6px;display:flex;flex-direction:column;gap:3px;">
+      <button onclick="switchView('ai')" id="navAI" class="chat-item active" style="border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;">🤖 &nbsp;Asistente IA</button>
+      <button onclick="switchView('code')" id="navCode" class="chat-item" style="border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;">💻 &nbsp;Programar</button>
+      <button onclick="switchView('training')" id="navTrain" class="chat-item" style="border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;">🧠 &nbsp;Entrenar LOVA</button>
+      <button onclick="switchView('social')" id="navSocial" class="chat-item" style="border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;position:relative;">💬 &nbsp;Red Social <span class="notif-dot" id="socialNotifDot"></span></button>
+    </div>
     <div class="sidebar-section">Conversaciones</div>
     <div class="chat-list" id="chatList"></div>
     <div class="sidebar-bottom">
@@ -248,42 +341,140 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
       <div class="nav-title" id="navTitle">Nueva conversación</div>
       <div class="agent-badge">EN VIVO</div>
     </div>
-    <div class="mode-bar">
-      <button class="mode-btn active" id="modeNormal" onclick="setMode('normal')">📋 Normal</button>
-      <button class="mode-btn" id="modeChat" onclick="setMode('chat')">💬 Chat</button>
-      <div class="web-indicator"><div class="web-dot"></div>Web activa</div>
-    </div>
-    <div class="chat-area" id="chatArea">
-      <div class="hero" id="hero">
-        <div class="hero-label">Agente de Negocios IA</div>
-        <h1 class="hero-title">Hola. ¿En qué puedo <strong>ayudarte</strong>?</h1>
-        <p class="hero-sub">Tu asistente con IA, búsqueda web, voz e imágenes.</p>
-        <div class="chips">
-          <div class="chip" onclick="sendChip('¿Cómo escalo mi negocio de dropshipping?')">📦 Dropshipping</div>
-          <div class="chip" onclick="sendChip('Tendencias de productos en Dropi hoy')">📊 Tendencias Dropi</div>
-          <div class="chip" onclick="sendChip('Estrategias ganadoras de Facebook Ads')">📱 Facebook Ads</div>
-          <div class="chip" onclick="sendChip('Dame ideas de productos ganadores para vender online')">💡 Productos</div>
-          <div class="chip" onclick="sendChip('Crea un plan de negocios efectivo')">📝 Plan de negocios</div>
+
+    <!-- ── AI PANEL ── -->
+    <div class="panel active" id="panelAI">
+      <div class="mode-bar">
+        <button class="mode-btn active" id="modeNormal" onclick="setMode('normal')">📋 Normal</button>
+        <button class="mode-btn" id="modeChat" onclick="setMode('chat')">💬 Chat</button>
+        <div class="web-indicator"><div class="web-dot"></div>Web activa</div>
+      </div>
+      <div class="chat-area" id="chatArea">
+        <div class="hero" id="hero">
+          <div class="hero-label">Agente de Negocios IA</div>
+          <h1 class="hero-title">Hola. ¿En qué puedo <strong>ayudarte</strong>?</h1>
+          <p class="hero-sub">Tu asistente con IA, búsqueda web, voz, imágenes y más.</p>
+          <div class="chips">
+            <div class="chip" onclick="sendChip('¿Cómo escalo mi negocio de dropshipping?')">📦 Dropshipping</div>
+            <div class="chip" onclick="sendChip('Tendencias de productos en Dropi hoy')">📊 Tendencias Dropi</div>
+            <div class="chip" onclick="sendChip('Estrategias ganadoras de Facebook Ads')">📱 Facebook Ads</div>
+            <div class="chip" onclick="sendChip('Dame ideas de productos ganadores para vender online')">💡 Productos</div>
+            <div class="chip" onclick="sendChip('genera imagen de un logo moderno para una tienda online')">🎨 Generar imagen</div>
+          </div>
+        </div>
+        <div class="messages" id="messages"></div>
+      </div>
+      <div class="input-area">
+        <div class="file-strip" id="fileStrip" style="display:none"></div>
+        <div class="input-outer" id="inputOuter">
+          <canvas id="borderCanvas"></canvas>
+          <div class="input-box">
+            <div class="input-row">
+              <textarea id="inputField" class="input-field" placeholder="Escribe, sube archivos, imágenes o usa voz..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+              <div class="action-btns">
+                <label class="icon-btn" title="Subir archivo/imagen" style="cursor:pointer">
+                  <input type="file" id="fileInput" style="display:none" multiple accept="*/*" onchange="handleFiles(this.files)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                </label>
+                <button class="icon-btn" title="Voz" id="voiceBtn" onclick="toggleVoice()">
+                  <svg id="voiceIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                </button>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="messages" id="messages"></div>
     </div>
-    <div class="input-area">
-      <div class="file-strip" id="fileStrip" style="display:none"></div>
-      <div class="input-outer" id="inputOuter">
-        <canvas id="borderCanvas"></canvas>
-        <div class="input-box">
-          <div class="input-row">
-            <textarea id="inputField" class="input-field" placeholder="Escribe, sube archivos o usa voz..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-            <div class="action-btns">
-              <label class="icon-btn" title="Subir archivo/imagen" style="cursor:pointer">
-                <input type="file" id="fileInput" style="display:none" multiple accept="*/*" onchange="handleFiles(this.files)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-              </label>
-              <button class="icon-btn" title="Voz" id="voiceBtn" onclick="toggleVoice()">
-                <svg id="voiceIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-              </button>
-              <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+
+    <!-- ── CODE SANDBOX PANEL ── -->
+    <div class="panel" id="panelCode">
+      <div class="code-sandbox">
+        <div class="sandbox-toolbar">
+          <button class="sandbox-tab active" onclick="setSandboxTab('html',this)">HTML</button>
+          <button class="sandbox-tab" onclick="setSandboxTab('css',this)">CSS</button>
+          <button class="sandbox-tab" onclick="setSandboxTab('js',this)">JS</button>
+          <button class="sandbox-run-btn" onclick="runSandbox()">▶ Ejecutar</button>
+        </div>
+        <div class="sandbox-body">
+          <textarea class="sandbox-editor" id="sandboxEditor" spellcheck="false" placeholder="// Escribe tu código aquí...
+// Pide a LOVA que genere código con el campo de abajo"></textarea>
+          <iframe class="sandbox-preview" id="sandboxPreview" sandbox="allow-scripts allow-same-origin"></iframe>
+        </div>
+        <div class="sandbox-ai-bar">
+          <input class="sandbox-ai-input" id="sandboxAIInput" placeholder="Pídele a LOVA que programe algo... ej: crea un juego de snake" onkeydown="if(event.key==='Enter')sandboxAIGenerate()">
+          <button class="sandbox-ai-btn" onclick="sandboxAIGenerate()">✨ Generar con IA</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TRAINING PANEL ── -->
+    <div class="panel" id="panelTraining">
+      <div class="training-panel" id="trainingContent">
+        <div class="training-title">🧠 Entrenar a LOVA</div>
+        <div class="training-block">
+          <div class="training-block-label">Personalidad / Instrucciones base</div>
+          <textarea class="training-textarea" id="trainingPersonality" placeholder="Ej: Responde siempre de forma muy amigable y usa emojis. Eres experta en dropshipping colombiano..."></textarea>
+          <button class="training-save-btn" onclick="saveTraining('personality')">Guardar</button>
+        </div>
+        <div class="training-block">
+          <div class="training-block-label">Conocimiento personalizado</div>
+          <textarea class="training-textarea" id="trainingKnowledge" placeholder="Ej: Mi tienda se llama MiShop. Vendo ropa deportiva. Mis precios van de $50k a $200k COP..."></textarea>
+          <button class="training-save-btn" onclick="saveTraining('knowledge')">Guardar</button>
+        </div>
+        <div class="training-block">
+          <div class="training-block-label">Ejemplos de respuesta (pregunta → respuesta ideal)</div>
+          <div id="examplesContainer"></div>
+          <button class="training-add-btn" onclick="addExample()">+ Agregar ejemplo</button>
+          <button class="training-save-btn" style="margin-left:8px;" onclick="saveTraining('examples')">Guardar ejemplos</button>
+        </div>
+        <div class="training-block">
+          <div class="training-block-label">Tono de comunicación</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <button class="training-add-btn" id="toneProf" onclick="setTone('profesional')">Profesional</button>
+            <button class="training-add-btn" id="toneFriend" onclick="setTone('amigable')">Amigable</button>
+            <button class="training-add-btn" id="toneDirect" onclick="setTone('directo')">Directo</button>
+            <button class="training-add-btn" id="toneFormal" onclick="setTone('formal')">Formal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SOCIAL PANEL ── -->
+    <div class="panel" id="panelSocial">
+      <div class="social-panel">
+        <div class="social-sidebar">
+          <div class="social-sidebar-top">
+            <div class="social-tabs">
+              <button class="social-tab active" onclick="setSocialTab('chats',this)">Chats</button>
+              <button class="social-tab" onclick="setSocialTab('search',this)">Buscar</button>
+              <button class="social-tab" onclick="setSocialTab('requests',this)" id="reqTab">Solicitudes</button>
+            </div>
+            <div id="socialTabContent">
+              <!-- filled by JS -->
+            </div>
+          </div>
+          <div class="contacts-list" id="contactsList"></div>
+        </div>
+        <div class="social-chat-area" id="socialChatArea">
+          <div class="social-empty" id="socialEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Selecciona un chat para comenzar
+          </div>
+          <div id="socialActiveChatWrapper" style="display:none;flex:1;flex-direction:column;overflow:hidden;display:none;">
+            <div class="social-chat-header">
+              <div class="contact-avatar" id="scAvatar">?</div>
+              <div>
+                <div class="social-chat-title" id="scTitle">—</div>
+                <div class="social-chat-sub" id="scSub">en línea</div>
+              </div>
+            </div>
+            <div class="social-messages" id="socialMessages"></div>
+            <div class="social-input-row">
+              <input class="social-input" id="socialInput" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter')sendSocialMsg()">
+              <button class="social-send-btn" onclick="sendSocialMsg()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
               </button>
             </div>
@@ -291,7 +482,8 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
         </div>
       </div>
     </div>
-  </div>
+
+  </div><!-- /main-area -->
 </div>
 
 <script>
@@ -344,6 +536,8 @@ sb.auth.onAuthStateChange(async(event,session)=>{
     document.getElementById('userAvatar').textContent=email[0]?.toUpperCase()||'U';
     await loadChatList();
     if(!currentChatId) await newChat();
+    await ensureProfile();
+    await loadTraining();
   } else {
     currentUser=null;
     document.getElementById('authScreen').style.display='flex';
@@ -369,6 +563,17 @@ async function loadChatList(){
 
 async function newChat(){
   if(!currentUser)return;
+  // If current chat is already empty (no messages), just reset UI — don't create a new DB record
+  if(currentChatId&&messageHistory.length===0){
+    document.getElementById('messages').innerHTML='';
+    document.getElementById('hero').style.display='flex';
+    document.getElementById('hero').style.opacity='1';
+    document.getElementById('navTitle').textContent='Nueva conversación';
+    // Flash the button to confirm action
+    const btn=document.getElementById('newChatBtn');
+    if(btn){btn.style.background='rgba(0,191,165,0.35)';setTimeout(()=>{btn.style.background='';},300);}
+    return;
+  }
   // Disable button temporarily
   const btn=document.getElementById('newChatBtn');
   if(btn)btn.disabled=true;
@@ -536,7 +741,22 @@ async function handleFiles(files){
         content=await file.text();
         if(content.length>8000)content=content.slice(0,8000)+'...[truncado]';
       } else if(ext==='pdf'){
-        content=`[PDF: ${name} — ${(file.size/1024).toFixed(1)}KB]`;
+        try{
+          pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+          const arrayBuffer=await file.arrayBuffer();
+          const pdf=await pdfjsLib.getDocument({data:arrayBuffer}).promise;
+          let pdfText='';
+          const maxPages=Math.min(pdf.numPages,10);
+          for(let p=1;p<=maxPages;p++){
+            const page=await pdf.getPage(p);
+            const tc=await page.getTextContent();
+            pdfText+=tc.items.map(i=>i.str).join(' ')+'\n';
+          }
+          content=pdfText.trim().slice(0,8000)+(pdfText.length>8000?'...[truncado]':'');
+          if(!content)content=`[PDF: ${name} — sin texto extraíble, ${(file.size/1024).toFixed(1)}KB]`;
+        }catch(pdfErr){
+          content=`[PDF: ${name} — error al leer, ${(file.size/1024).toFixed(1)}KB]`;
+        }
       } else {
         content=`[Archivo: ${name}, ${(file.size/1024).toFixed(1)}KB]`;
       }
@@ -774,6 +994,408 @@ function drawBorder(){
 }
 drawBorder();window.addEventListener('resize',resizeCanvas);
 if(synth)synth.getVoices();
+
+// ══════════════════════════════════════════
+// ── VIEW SWITCHER ──
+// ══════════════════════════════════════════
+let currentView='ai';
+function switchView(view){
+  currentView=view;
+  ['ai','code','training','social'].forEach(v=>{
+    document.getElementById('panel'+v.charAt(0).toUpperCase()+v.slice(1))?.classList.toggle('active',v===view);
+    document.getElementById('nav'+({ai:'AI',code:'Code',training:'Train',social:'Social'}[v]))?.classList.toggle('active',v===view);
+  });
+  if(view==='ai') document.getElementById('navTitle').textContent='Asistente IA';
+  if(view==='code'){document.getElementById('navTitle').textContent='Sandbox · Programar';runSandbox();}
+  if(view==='training'){document.getElementById('navTitle').textContent='Entrenar LOVA';loadTraining();}
+  if(view==='social'){document.getElementById('navTitle').textContent='Red Social';loadContacts();}
+}
+
+// ══════════════════════════════════════════
+// ── IMAGE GENERATION ──
+// ══════════════════════════════════════════
+const IMG_TRIGGERS=/\b(genera|crea|diseña|haz|dibuja|muestra|imagina)\b.*\b(imagen|foto|ilustración|dibujo|logo|banner|poster|arte|diseño)\b|\b(imagen de|foto de|genera un|crea un|diseña un)\b/i;
+
+async function generateImage(prompt){
+  const msgDiv=document.createElement('div');
+  msgDiv.className='msg bot';
+  const loadDiv=document.createElement('div');
+  loadDiv.className='img-gen-loading msg-bubble';
+  loadDiv.textContent='Generando imagen...';
+  msgDiv.innerHTML='<div class="msg-label">LOVA</div>';
+  msgDiv.appendChild(loadDiv);
+  document.getElementById('messages').appendChild(msgDiv);
+  scrollChat();
+  // Clean prompt for image gen
+  const cleanPrompt=prompt.replace(/genera|crea|diseña|haz|dibuja|muestra|imagina|imagen|foto|ilustración|de|un|una|el|la/gi,'').trim()||prompt;
+  const encoded=encodeURIComponent(cleanPrompt+', high quality, detailed');
+  const imgUrl=`https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&nologo=true&seed=${Date.now()}`;
+  try{
+    await new Promise((res,rej)=>{
+      const img=new Image();
+      img.onload=res;img.onerror=rej;
+      img.src=imgUrl;
+    });
+    loadDiv.remove();
+    const img=document.createElement('img');
+    img.src=imgUrl;
+    img.style.cssText='max-width:300px;border-radius:14px;border:1px solid rgba(0,191,165,0.3);display:block;margin-top:4px;';
+    const dl=document.createElement('a');
+    dl.href=imgUrl;dl.target='_blank';
+    dl.style.cssText='font-size:0.68rem;color:var(--green);font-family:"Space Mono",monospace;margin-top:6px;display:block;';
+    dl.textContent='↗ Ver / Descargar';
+    const bubble=document.createElement('div');
+    bubble.className='msg-bubble';
+    bubble.style.padding='8px';
+    bubble.appendChild(img);
+    bubble.appendChild(dl);
+    msgDiv.appendChild(bubble);
+    scrollChat();
+    return imgUrl;
+  }catch{
+    loadDiv.textContent='No se pudo generar la imagen. Intenta con otra descripción.';
+    return null;
+  }
+}
+
+// ══════════════════════════════════════════
+// ── PATCH sendMessage to intercept image gen ──
+// ══════════════════════════════════════════
+const _origSend=sendMessage;
+// We'll override inline in the existing sendMessage after system prompt build
+// Instead patch: detect image trigger before calling LOVA
+const origSendMessage=sendMessage;
+window.sendMessage=async function(){
+  const text=document.getElementById('inputField').value.trim();
+  if(text && IMG_TRIGGERS.test(text) && !pendingFiles.length){
+    if(isLoading)return;
+    isLoading=true;
+    document.getElementById('sendBtn').disabled=true;
+    document.getElementById('inputField').value='';
+    document.getElementById('inputField').style.height='auto';
+    hideHero();
+    appendMsg('user',text);
+    await saveMsg('user',text);
+    if(messageHistory.length===0)updateTitle(text.slice(0,45));
+    messageHistory.push({role:'user',content:text});
+    spawnParticles();
+    await generateImage(text);
+    const reply='Imagen generada. ¿Quieres alguna variación o un estilo diferente?';
+    await saveMsg('assistant',reply);
+    messageHistory.push({role:'assistant',content:reply});
+    isLoading=false;
+    document.getElementById('sendBtn').disabled=false;
+    document.getElementById('inputField').focus();
+    return;
+  }
+  return origSendMessage();
+};
+
+// ══════════════════════════════════════════
+// ── CODE SANDBOX ──
+// ══════════════════════════════════════════
+let sandboxTabs={html:'<!-- Escribe HTML aquí -->\n<h1 style="font-family:sans-serif;color:#00bfa5">¡Hola desde LOVA!</h1>',css:'',js:''};
+let currentSandboxTab='html';
+function setSandboxTab(tab,btn){
+  sandboxTabs[currentSandboxTab]=document.getElementById('sandboxEditor').value;
+  currentSandboxTab=tab;
+  document.getElementById('sandboxEditor').value=sandboxTabs[tab];
+  document.querySelectorAll('.sandbox-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function runSandbox(){
+  sandboxTabs[currentSandboxTab]=document.getElementById('sandboxEditor').value;
+  const html=`<!DOCTYPE html><html><head><style>${sandboxTabs.css}</style></head><body>${sandboxTabs.html}<script>${sandboxTabs.js}<\/script></body></html>`;
+  const fr=document.getElementById('sandboxPreview');
+  fr.srcdoc=html;
+}
+async function sandboxAIGenerate(){
+  const prompt=document.getElementById('sandboxAIInput').value.trim();
+  if(!prompt)return;
+  const btn=document.querySelector('.sandbox-ai-btn');
+  btn.textContent='Generando...';btn.disabled=true;
+  try{
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      system:'Eres un experto programador web. El usuario pedirá una app/juego/utilidad. Responde SOLO con el código HTML completo (con CSS y JS embebidos en una sola página). Sin explicaciones. Sin markdown. Solo el código HTML puro empezando con <!DOCTYPE html>',
+      messages:[{role:'user',content:prompt}],max_tokens:2048,mode:'normal'
+    })});
+    const data=await res.json();
+    let code=data?.content?.[0]?.text||'';
+    code=code.replace(/```html|```/g,'').trim();
+    if(code.includes('<!DOCTYPE')||code.includes('<html')){
+      // Full page: extract body and style
+      const bodyMatch=code.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+      const styleMatch=code.match(/<style[^>]*>([\s\S]*)<\/style>/i);
+      const scriptMatch=code.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+      sandboxTabs.html=bodyMatch?bodyMatch[1].trim():code;
+      sandboxTabs.css=styleMatch?styleMatch[1].trim():'';
+      sandboxTabs.js=scriptMatch?scriptMatch[1].trim():'';
+    } else {
+      sandboxTabs.html=code;
+      sandboxTabs.css='';sandboxTabs.js='';
+    }
+    currentSandboxTab='html';
+    document.getElementById('sandboxEditor').value=sandboxTabs.html;
+    document.querySelectorAll('.sandbox-tab').forEach((b,i)=>{b.classList.toggle('active',i===0);});
+    runSandbox();
+    document.getElementById('sandboxAIInput').value='';
+  }catch(e){console.error(e);}
+  btn.textContent='✨ Generar con IA';btn.disabled=false;
+}
+
+// ══════════════════════════════════════════
+// ── TRAINING ──
+// ══════════════════════════════════════════
+let trainingData={personality:'',knowledge:'',examples:[],tone:'amigable'};
+async function loadTraining(){
+  if(!currentUser)return;
+  const{data}=await sb.from('training').select('*').eq('user_id',currentUser.id).single();
+  if(data){
+    trainingData=JSON.parse(data.content||'{}');
+    document.getElementById('trainingPersonality').value=trainingData.personality||'';
+    document.getElementById('trainingKnowledge').value=trainingData.knowledge||'';
+    renderExamples();
+    highlightTone(trainingData.tone||'amigable');
+  }
+}
+async function saveTraining(field){
+  if(!currentUser)return;
+  if(field==='personality')trainingData.personality=document.getElementById('trainingPersonality').value;
+  if(field==='knowledge')trainingData.knowledge=document.getElementById('trainingKnowledge').value;
+  if(field==='examples')trainingData.examples=collectExamples();
+  const{error}=await sb.from('training').upsert({user_id:currentUser.id,content:JSON.stringify(trainingData)},{onConflict:'user_id'});
+  if(!error){
+    const btns=document.querySelectorAll('.training-save-btn');
+    btns.forEach(b=>{b.textContent='✅ Guardado';b.classList.add('saved');setTimeout(()=>{b.textContent='Guardar';b.classList.remove('saved');},1800);});
+  }
+}
+function addExample(){
+  trainingData.examples=trainingData.examples||[];
+  trainingData.examples.push({q:'',a:''});
+  renderExamples();
+}
+function renderExamples(){
+  const c=document.getElementById('examplesContainer');
+  c.innerHTML=(trainingData.examples||[]).map((ex,i)=>`
+    <div class="training-example-row" id="ex-${i}">
+      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+        <input placeholder="Pregunta" value="${(ex.q||'').replace(/"/g,'&quot;')}" oninput="trainingData.examples[${i}].q=this.value">
+        <input placeholder="Respuesta ideal" value="${(ex.a||'').replace(/"/g,'&quot;')}" oninput="trainingData.examples[${i}].a=this.value">
+      </div>
+      <button class="training-del-btn" onclick="delExample(${i})">✕</button>
+    </div>`).join('');
+}
+function delExample(i){trainingData.examples.splice(i,1);renderExamples();}
+function collectExamples(){
+  return (trainingData.examples||[]).map((ex,i)=>{
+    const rows=document.querySelectorAll(`#ex-${i} input`);
+    return{q:rows[0]?.value||ex.q,a:rows[1]?.value||ex.a};
+  });
+}
+function setTone(tone){trainingData.tone=tone;highlightTone(tone);saveTraining('tone');}
+function highlightTone(tone){
+  ['profesional','amigable','directo','formal'].forEach(t=>{
+    const el=document.getElementById('tone'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(el)el.style.background=t===tone?'var(--green)':'';
+    if(el)el.style.color=t===tone?'#fff':'';
+    if(el)el.style.border=t===tone?'none':'';
+  });
+}
+// Inject training into AI system prompt
+const origFetchWorker=window.fetch;
+// Patch the sendMessage system prompt to include training data
+const _buildSystem=()=>{
+  let sys=`Eres LOVA, agente de IA especializado en negocios, dropshipping, Dropi, ventas, marketing digital, Facebook Ads, TikTok Ads, e-commerce y finanzas en Colombia y Latinoamérica. Responde siempre en español. Usa formato limpio sin asteriscos ni markdown. Sé claro, directo y práctico.`;
+  if(trainingData.personality)sys+=`\n\nPersonalidad: ${trainingData.personality}`;
+  if(trainingData.knowledge)sys+=`\n\nConocimiento extra: ${trainingData.knowledge}`;
+  if(trainingData.tone)sys+=`\n\nTono de comunicación: ${trainingData.tone}`;
+  if(trainingData.examples?.length){
+    sys+=`\n\nEjemplos de cómo responder:\n`;
+    trainingData.examples.forEach(ex=>{if(ex.q&&ex.a)sys+=`P: ${ex.q}\nR: ${ex.a}\n`;});
+  }
+  sys+=`\nCuando te pidan un gráfico, responde con JSON en este formato exacto: {"chart":true,"type":"bar|line|pie","labels":["a","b"],"data":[1,2],"title":"titulo"}`;
+  return sys;
+};
+// Monkey-patch the system prompt in sendMessage calls by overriding fetch selectively
+const _nativeFetch=window.fetch.bind(window);
+window.fetch=async function(url,...args){
+  if(typeof url==='string'&&url===WORKER&&args[0]?.body){
+    try{
+      const body=JSON.parse(args[0].body);
+      if(body.system!==undefined){
+        body.system=_buildSystem();
+        args[0]={...args[0],body:JSON.stringify(body)};
+      }
+    }catch{}
+  }
+  return _nativeFetch(url,...args);
+};
+
+// ══════════════════════════════════════════
+// ── SOCIAL / CHAT ENTRE USUARIOS ──
+// ══════════════════════════════════════════
+let socialContacts=[],currentChatPartner=null,socialChannel=null,socialTab='chats',pendingRequests=[];
+
+function setSocialTab(tab,btn){
+  socialTab=tab;
+  document.querySelectorAll('.social-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSocialTabContent();
+  if(tab==='chats')loadContacts();
+  if(tab==='requests')loadRequests();
+}
+
+function renderSocialTabContent(){
+  const c=document.getElementById('socialTabContent');
+  if(socialTab==='search'){
+    c.innerHTML=`<input class="social-search-input" id="searchEmailInput" type="email" placeholder="Email del usuario...">
+    <button class="social-search-btn" onclick="searchUser()">🔍 Buscar y enviar solicitud</button>
+    <div id="searchResult" style="margin-top:8px;font-size:0.75rem;color:var(--text-dim);font-family:'Space Mono',monospace;"></div>`;
+  } else {
+    c.innerHTML='';
+  }
+}
+
+async function loadContacts(){
+  if(!currentUser)return;
+  // Load accepted follows where I follow them or they follow me
+  const{data:follows}=await sb.from('follows').select('*').or(`follower_id.eq.${currentUser.id},following_id.eq.${currentUser.id}`).eq('status','accepted');
+  const ids=[...new Set((follows||[]).map(f=>f.follower_id===currentUser.id?f.following_id:f.follower_id))];
+  if(!ids.length){document.getElementById('contactsList').innerHTML='<div style="padding:12px 8px;font-size:0.74rem;color:var(--text-dim);text-align:center;">Sin contactos aún.<br>Usa Buscar para agregar.</div>';return;}
+  const{data:profiles}=await sb.from('profiles').select('*').in('id',ids);
+  socialContacts=profiles||[];
+  renderContacts();
+}
+
+function renderContacts(){
+  const list=document.getElementById('contactsList');
+  list.innerHTML=socialContacts.map(p=>`
+    <div class="contact-item${currentChatPartner?.id===p.id?' active':''}" onclick="openSocialChat('${p.id}','${(p.email||'').replace(/'/g,"\\'")}')">
+      <div class="contact-avatar">${(p.email||'?')[0].toUpperCase()}</div>
+      <div class="contact-info">
+        <div class="contact-name">${p.email||p.id}</div>
+        <div class="contact-last">Toca para chatear</div>
+      </div>
+    </div>`).join('');
+}
+
+async function openSocialChat(partnerId, partnerEmail){
+  currentChatPartner={id:partnerId,email:partnerEmail};
+  document.getElementById('socialEmpty').style.display='none';
+  const w=document.getElementById('socialActiveChatWrapper');
+  w.style.display='flex';w.style.flexDirection='column';
+  document.getElementById('scAvatar').textContent=(partnerEmail||'?')[0].toUpperCase();
+  document.getElementById('scTitle').textContent=partnerEmail||partnerId;
+  document.getElementById('scSub').textContent='';
+  renderContacts();
+  // Load messages
+  const roomId=[currentUser.id,partnerId].sort().join('_');
+  const{data:msgs}=await sb.from('social_messages').select('*').eq('room_id',roomId).order('created_at',{ascending:true}).limit(80);
+  const box=document.getElementById('socialMessages');
+  box.innerHTML='';
+  (msgs||[]).forEach(m=>appendSocialMsg(m.sender_id===currentUser.id?'me':'them',m.content,m.created_at));
+  box.scrollTop=box.scrollHeight;
+  // Realtime subscription
+  if(socialChannel)sb.removeChannel(socialChannel);
+  socialChannel=sb.channel('social_'+roomId)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'social_messages',filter:`room_id=eq.${roomId}`},payload=>{
+      const m=payload.new;
+      if(m.sender_id!==currentUser.id)appendSocialMsg('them',m.content,m.created_at);
+      box.scrollTop=box.scrollHeight;
+    })
+    .subscribe();
+}
+
+function appendSocialMsg(side,text,ts){
+  const div=document.createElement('div');
+  div.className='social-msg '+side;
+  const time=ts?new Date(ts).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}):'';
+  div.innerHTML=`<div class="social-bubble">${text}</div><div class="social-msg-time">${time}</div>`;
+  document.getElementById('socialMessages').appendChild(div);
+}
+
+async function sendSocialMsg(){
+  const input=document.getElementById('socialInput');
+  const text=input.value.trim();
+  if(!text||!currentChatPartner)return;
+  input.value='';
+  const roomId=[currentUser.id,currentChatPartner.id].sort().join('_');
+  appendSocialMsg('me',text,new Date().toISOString());
+  document.getElementById('socialMessages').scrollTop=9999;
+  await sb.from('social_messages').insert([{room_id:roomId,sender_id:currentUser.id,receiver_id:currentChatPartner.id,content:text}]);
+}
+
+async function searchUser(){
+  const email=document.getElementById('searchEmailInput')?.value.trim();
+  const res=document.getElementById('searchResult');
+  if(!email){res.textContent='Escribe un email';return;}
+  if(email===currentUser.email){res.textContent='Ese eres tú 😄';return;}
+  res.textContent='Buscando...';
+  // Look in profiles table
+  const{data:profile}=await sb.from('profiles').select('*').eq('email',email).single();
+  if(!profile){res.style.color='#ff6b6b';res.textContent='Usuario no encontrado';return;}
+  // Check if already following
+  const{data:existing}=await sb.from('follows').select('*').eq('follower_id',currentUser.id).eq('following_id',profile.id).single();
+  if(existing){
+    res.style.color='var(--green)';
+    res.textContent=existing.status==='accepted'?'Ya son contactos ✓':'Solicitud enviada ⏳';
+    return;
+  }
+  // Send follow request
+  const{error}=await sb.from('follows').insert([{follower_id:currentUser.id,following_id:profile.id,status:'pending'}]);
+  if(!error){res.style.color='var(--green)';res.textContent='✅ Solicitud enviada a '+email;}
+  else{res.style.color='#ff6b6b';res.textContent='Error al enviar solicitud';}
+}
+
+async function loadRequests(){
+  if(!currentUser)return;
+  const{data}=await sb.from('follows').select('*,profiles!follows_follower_id_fkey(email)').eq('following_id',currentUser.id).eq('status','pending');
+  pendingRequests=data||[];
+  renderRequests();
+  const dot=document.getElementById('socialNotifDot');
+  if(dot)dot.style.display=pendingRequests.length?'block':'none';
+}
+
+function renderRequests(){
+  const list=document.getElementById('contactsList');
+  if(!pendingRequests.length){list.innerHTML='<div style="padding:12px 8px;font-size:0.74rem;color:var(--text-dim);text-align:center;">Sin solicitudes pendientes</div>';return;}
+  list.innerHTML=pendingRequests.map(r=>`
+    <div class="request-item">
+      <div class="contact-avatar">${(r.profiles?.email||'?')[0].toUpperCase()}</div>
+      <div class="contact-info"><div class="contact-name">${r.profiles?.email||r.follower_id}</div><div class="contact-last">quiere conectar</div></div>
+      <button class="req-btn accept" onclick="respondRequest('${r.id}','accepted','${r.follower_id}')">✓</button>
+      <button class="req-btn reject" onclick="respondRequest('${r.id}','rejected','')">✕</button>
+    </div>`).join('');
+}
+
+async function respondRequest(id,status,followerId){
+  await sb.from('follows').update({status}).eq('id',id);
+  if(status==='accepted'&&followerId){
+    // Also ensure profiles exist
+  }
+  loadRequests();
+  if(status==='accepted')loadContacts();
+}
+
+// Realtime: watch for incoming requests
+function startSocialRealtime(){
+  if(!currentUser)return;
+  sb.channel('notif_'+currentUser.id)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'follows',filter:`following_id=eq.${currentUser.id}`},()=>{
+      const dot=document.getElementById('socialNotifDot');
+      if(dot)dot.style.display='block';
+    })
+    .subscribe();
+}
+
+// Make sure profile exists in profiles table on login
+async function ensureProfile(){
+  if(!currentUser)return;
+  await sb.from('profiles').upsert({id:currentUser.id,email:currentUser.email},{onConflict:'id'});
+  startSocialRealtime();
+}
+
 </script>
 </body>
 </html>
+
