@@ -169,6 +169,11 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   .sidebar.open{transform:translateX(0);width:var(--sidebar);}
   .sidebar.collapsed{transform:translateX(-100%);}
 }
+/* NAV MODE BUTTONS */
+.nav-mode-btn{width:100%;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;margin-bottom:2px;background:none;border:1px solid transparent;text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--text-mid);}
+.nav-mode-btn:hover{background:var(--surface2);color:var(--text);}
+.nav-mode-btn.active{background:var(--green-dim);border-color:var(--green-border);color:var(--green);}
+
 /* ── NEW MODE PANELS ── */
 .panel{display:none;flex:1;flex-direction:column;overflow:hidden;}
 .panel.active{display:flex;}
@@ -201,7 +206,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .sandbox-run-btn:hover{filter:brightness(1.15);}
 .sandbox-body{display:flex;flex:1;overflow:hidden;}
 .sandbox-editor{flex:1;background:var(--surface2);border:none;outline:none;color:#a8ff78;font-family:"Space Mono",monospace;font-size:0.82rem;padding:16px;resize:none;border-right:1px solid rgba(255,255,255,0.04);line-height:1.7;tab-size:2;}
-.sandbox-preview{flex:1;border:none;background:#fff;}
+.sandbox-preview{flex:1;border:none;background:var(--surface2);}
 .sandbox-ai-bar{display:flex;gap:8px;padding:8px 14px;background:var(--surface);border-top:1px solid rgba(255,255,255,0.04);flex-shrink:0;}
 .sandbox-ai-input{flex:1;background:var(--surface2);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px 12px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:0.85rem;outline:none;}
 .sandbox-ai-input:focus{border-color:var(--green-border);}
@@ -317,10 +322,10 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
     </div>
     <div class="sidebar-section">Modos</div>
     <div style="padding:0 8px 6px;display:flex;flex-direction:column;gap:3px;">
-      <button onclick="switchView('ai')" id="navAI" class="chat-item active" style="border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;">🤖 &nbsp;Asistente IA</button>
-      <button onclick="switchView('code')" id="navCode" class="chat-item" style="border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;">💻 &nbsp;Programar</button>
-      <button onclick="switchView('training')" id="navTrain" class="chat-item" style="border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;">🧠 &nbsp;Entrenar LOVA</button>
-      <button onclick="switchView('social')" id="navSocial" class="chat-item" style="border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;position:relative;">💬 &nbsp;Red Social <span class="notif-dot" id="socialNotifDot"></span></button>
+      <button onclick="switchView('ai')" id="navAI" class="nav-mode-btn active">🤖 &nbsp;Asistente IA</button>
+      <button onclick="switchView('code')" id="navCode" class="nav-mode-btn">💻 &nbsp;Programar</button>
+      <button onclick="switchView('training')" id="navTrain" class="nav-mode-btn">🧠 &nbsp;Entrenar LOVA</button>
+      <button onclick="switchView('social')" id="navSocial" class="nav-mode-btn" style="position:relative;">💬 &nbsp;Red Social <span class="notif-dot" id="socialNotifDot"></span></button>
     </div>
     <div class="sidebar-section">Conversaciones</div>
     <div class="chat-list" id="chatList"></div>
@@ -1000,6 +1005,8 @@ if(synth)synth.getVoices();
 // ══════════════════════════════════════════
 let currentView='ai';
 function switchView(view){
+  // Si haces click en el modo que ya está activo (excepto 'ai'), vuelve a IA
+  if(currentView===view && view!=='ai'){view='ai';}
   currentView=view;
   ['ai','code','training','social'].forEach(v=>{
     document.getElementById('panel'+v.charAt(0).toUpperCase()+v.slice(1))?.classList.toggle('active',v===view);
@@ -1398,4 +1405,5 @@ async function ensureProfile(){
 </script>
 </body>
 </html>
+
 
