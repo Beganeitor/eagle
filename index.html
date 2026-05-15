@@ -313,11 +313,6 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
       <div class="auth-error" id="registerError"></div>
       <input class="auth-input" id="regEmail" type="email" placeholder="Correo electrónico">
       <input class="auth-input" id="regPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)">
-      <div style="position:relative;">
-        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--green);font-family:'Space Mono',monospace;font-size:0.9rem;pointer-events:none;">@</span>
-        <input class="auth-input" id="regUsername" type="text" placeholder="nombre de usuario" style="padding-left:28px;margin-bottom:0;" oninput="this.value=this.value.replace(/[^a-z0-9_.]/gi,'').toLowerCase()">
-      </div>
-      <div style="font-size:0.68rem;color:var(--text-dim);margin-bottom:12px;margin-top:5px;padding-left:2px;">Solo letras, números, puntos y guiones bajos</div>
       <button class="auth-btn" onclick="doRegisterEmail()">Crear cuenta</button>
       <div class="auth-divider">o</div>
       <button class="auth-btn secondary" onclick="doLoginGoogle()">🌐 &nbsp;Continuar con Google</button>
@@ -554,8 +549,21 @@ const synth=window.speechSynthesis;
 // ── AUTH ──
 function showRegister(){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='block';}
 function showLogin(){document.getElementById('registerForm').style.display='none';document.getElementById('loginForm').style.display='block';}
-function showErr(id,msg){const el=document.getElementById(id);el.textContent=msg;el.style.display='block';}
+function showErr(id,msg){const el=document.getElementById(id);el.textContent=msg;el.style.color='#ff6b6b';el.style.background='rgba(255,50,50,0.09)';el.style.border='1px solid rgba(255,50,50,0.25)';el.style.display='block';}
+function showSuccess(id,msg){const el=document.getElementById(id);el.textContent=msg;el.style.color='var(--green)';el.style.background='rgba(0,191,165,0.08)';el.style.border='1px solid rgba(0,191,165,0.25)';el.style.display='block';}
 function hideErr(id){document.getElementById(id).style.display='none';}
+function translateSupabaseError(msg){
+  if(!msg)return'Error desconocido. Intenta de nuevo.';
+  if(msg.includes('already registered')||msg.includes('User already registered'))return'Este correo ya está registrado. Inicia sesión.';
+  if(msg.includes('invalid email')||msg.includes('Invalid email'))return'El correo electrónico no es válido.';
+  if(msg.includes('Password should be at least'))return'La contraseña debe tener al menos 6 caracteres.';
+  if(msg.includes('weak password')||msg.includes('should be stronger'))return'La contraseña es muy débil. Usa letras, números y símbolos.';
+  if(msg.includes('Email rate limit'))return'Demasiados intentos. Espera unos minutos.';
+  if(msg.includes('Invalid login credentials'))return'Correo o contraseña incorrectos.';
+  if(msg.includes('Email not confirmed'))return'Debes confirmar tu correo antes de entrar.';
+  if(msg.includes('Too many requests'))return'Demasiados intentos. Espera un momento.';
+  return msg;
+}
 
 async function doLoginEmail(){
   hideErr('loginError');
@@ -563,26 +571,17 @@ async function doLoginEmail(){
   const pass=document.getElementById('loginPassword').value;
   if(!email||!pass){showErr('loginError','Completa todos los campos');return;}
   const{error}=await sb.auth.signInWithPassword({email,password:pass});
-  if(error)showErr('loginError',error.message);
+  if(error)showErr('loginError',translateSupabaseError(error.message));
 }
 async function doRegisterEmail(){
   hideErr('registerError');
   const email=document.getElementById('regEmail').value.trim();
   const pass=document.getElementById('regPassword').value;
-  const username=document.getElementById('regUsername').value.trim().toLowerCase();
   if(!email||!pass){showErr('registerError','Completa todos los campos');return;}
-  if(!username||username.length<3){showErr('registerError','El usuario debe tener al menos 3 caracteres');return;}
-  if(!/^[a-z0-9_.]+$/.test(username)){showErr('registerError','Solo letras, números, puntos y guiones bajos');return;}
-  // Check username availability
-  const{data:taken}=await sb.from('profiles').select('id').eq('username',username).maybeSingle();
-  if(taken){showErr('registerError','Ese @usuario ya está en uso, elige otro');return;}
-  const{error}=await sb.auth.signUp({email,password:pass,options:{data:{username}}});
-  if(error)showErr('registerError',error.message);
-  else{
-    // Pre-create profile with username so it's ready
-    // It will be finalized in ensureProfile once auth confirms
-    showErr('registerError','✅ Revisa tu correo para confirmar tu cuenta');
-  }
+  if(pass.length<6){showErr('registerError','La contraseña debe tener al menos 6 caracteres');return;}
+  const{error}=await sb.auth.signUp({email,password:pass});
+  if(error){showErr('registerError',translateSupabaseError(error.message));return;}
+  showSuccess('registerError','✅ Revisa tu correo para confirmar tu cuenta. Luego podrás elegir tu @usuario.');
 }
 async function doLoginGoogle(){
   await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
@@ -1363,7 +1362,7 @@ function renderSocialTabContent(){
       <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--green);font-family:'Space Mono',monospace;font-size:0.85rem;pointer-events:none;">@</span>
       <input class="social-search-input" id="searchUsernameInput" type="text" placeholder="nombre_usuario" style="padding-left:26px;margin-bottom:0;" oninput="this.value=this.value.replace(/[^a-z0-9_.]/gi,'').toLowerCase()" onkeydown="if(event.key==='Enter')searchUser()">
     </div>
-    <button class="social-search-btn" onclick="searchUser()">🔍 Buscar y enviar solicitud</button>
+    <button class="social-search-btn" onclick="searchUser()">🔍 Buscar</button>
     <div id="searchResult" style="margin-top:8px;font-size:0.75rem;color:var(--text-dim);font-family:'Space Mono',monospace;min-height:18px;"></div>`;
   } else {
     c.innerHTML='';
@@ -1449,30 +1448,62 @@ async function sendSocialMsg(){
 }
 
 async function searchUser(){
-  const username=document.getElementById('searchUsernameInput')?.value.trim().toLowerCase();
+  const inputEl=document.getElementById('searchUsernameInput');
   const res=document.getElementById('searchResult');
-  if(!res)return;
+  const btn=document.querySelector('.social-search-btn');
+  if(!inputEl||!res)return;
+  const username=inputEl.value.trim().toLowerCase();
   if(!username){res.style.color='var(--text-dim)';res.textContent='Escribe un @usuario';return;}
   if(username===(currentProfile?.username||'')){res.style.color='var(--text-dim)';res.textContent='Ese eres tú 😄';return;}
+
+  // Loading state
   res.style.color='var(--text-dim)';
   res.textContent='Buscando @'+username+'...';
+  if(btn){btn.disabled=true;btn.textContent='Buscando...';}
+
   try{
     const{data:profile,error:profErr}=await sb.from('profiles').select('*').eq('username',username).maybeSingle();
     if(profErr){res.style.color='#ff6b6b';res.textContent='Error: '+profErr.message;return;}
     if(!profile){res.style.color='#ff6b6b';res.textContent='@'+username+' no encontrado';return;}
+
+    // Check existing follow
     const{data:existing}=await sb.from('follows').select('*').eq('follower_id',currentUser.id).eq('following_id',profile.id).maybeSingle();
     if(existing){
       res.style.color='var(--green)';
       res.textContent=existing.status==='accepted'?'Ya son contactos ✓':'Solicitud enviada ⏳';
       return;
     }
-    const{error:insertErr}=await sb.from('follows').insert([{follower_id:currentUser.id,following_id:profile.id,status:'pending'}]);
-    if(!insertErr){res.style.color='var(--green)';res.textContent='✅ Solicitud enviada a @'+profile.username;}
-    else{res.style.color='#ff6b6b';res.textContent='Error: '+insertErr.message;}
+
+    // Show profile card with confirm button — don't auto-send
+    const displayName=profile.username?('@'+profile.username):(profile.email||profile.id);
+    const avatar=(profile.username||'?')[0].toUpperCase();
+    res.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--green-border);border-radius:10px;padding:10px 12px;margin-top:4px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green-border);display:flex;align-items:center;justify-content:center;font-size:0.85rem;color:var(--green);font-weight:600;flex-shrink:0;">${avatar}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.82rem;color:var(--text);font-weight:500;">${displayName}</div>
+          <div style="font-size:0.65rem;color:var(--text-dim);">Usuario encontrado</div>
+        </div>
+        <button onclick="sendFollowRequest('${profile.id}','${(profile.username||'').replace(/'/g,"\\'")}',this)" style="padding:5px 12px;background:var(--green);border:none;border-radius:8px;color:#fff;font-size:0.72rem;font-family:'Space Mono',monospace;cursor:pointer;white-space:nowrap;">+ Agregar</button>
+      </div>`;
   }catch(e){
     res.style.color='#ff6b6b';
     res.textContent='Error inesperado. Intenta de nuevo.';
     console.error('searchUser error:',e);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='🔍 Buscar';}
+  }
+}
+
+async function sendFollowRequest(profileId, profileUsername, btnEl){
+  if(btnEl){btnEl.disabled=true;btnEl.textContent='Enviando...';}
+  const{error:insertErr}=await sb.from('follows').insert([{follower_id:currentUser.id,following_id:profileId,status:'pending'}]);
+  const res=document.getElementById('searchResult');
+  if(!insertErr){
+    if(res)res.innerHTML=`<div style="color:var(--green);font-family:'Space Mono',monospace;font-size:0.75rem;padding:6px 0;">✅ Solicitud enviada a @${profileUsername}</div>`;
+  } else {
+    if(btnEl){btnEl.disabled=false;btnEl.textContent='+ Agregar';}
+    if(res){const errDiv=res.querySelector('div[style*="border-radius:10px"]');if(errDiv){const e=document.createElement('div');e.style.cssText='color:#ff6b6b;font-size:0.7rem;margin-top:5px;';e.textContent='Error: '+insertErr.message;errDiv.appendChild(e);}}
   }
 }
 
@@ -1523,34 +1554,21 @@ function startSocialRealtime(){
 // Make sure profile exists in profiles table on login
 async function ensureProfile(){
   if(!currentUser)return;
-  // Try to fetch existing profile
   const{data:profile}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
-  // Determine username: from profile, or from auth metadata (set at register)
-  const metaUsername=currentUser.user_metadata?.username||'';
   if(profile){
     currentProfile=profile;
-    // If profile exists but has no username, check metadata or prompt setup
     if(!profile.username){
-      if(metaUsername){
-        await sb.from('profiles').update({username:metaUsername}).eq('id',currentUser.id);
-        currentProfile={...profile,username:metaUsername};
-      } else {
-        // Show username setup screen
-        document.getElementById('usernameSetupScreen').style.display='flex';
-        return; // Don't continue until username is set
-      }
-    }
-  } else {
-    // New profile
-    if(metaUsername){
-      await sb.from('profiles').insert([{id:currentUser.id,email:currentUser.email,username:metaUsername}]);
-      currentProfile={id:currentUser.id,email:currentUser.email,username:metaUsername};
-    } else {
-      await sb.from('profiles').insert([{id:currentUser.id,email:currentUser.email}]);
-      currentProfile={id:currentUser.id,email:currentUser.email};
+      // No username yet — show setup screen and block app
       document.getElementById('usernameSetupScreen').style.display='flex';
       return;
     }
+  } else {
+    // First login — create base profile, then ask for username
+    const{error:insertErr}=await sb.from('profiles').insert([{id:currentUser.id,email:currentUser.email}]);
+    if(insertErr){console.error('ensureProfile insert error:',insertErr.message);}
+    currentProfile={id:currentUser.id,email:currentUser.email};
+    document.getElementById('usernameSetupScreen').style.display='flex';
+    return;
   }
   updateSidebarUser();
   startSocialRealtime();
@@ -1558,8 +1576,9 @@ async function ensureProfile(){
 
 function updateSidebarUser(){
   if(!currentProfile)return;
-  const display=currentProfile.username?('@'+currentProfile.username):(currentUser.email||'');
-  const avatar=(currentProfile.username||currentUser.email||'?')[0].toUpperCase();
+  const emailPrefix=(currentUser.email||'').split('@')[0];
+  const display=currentProfile.username?('@'+currentProfile.username):emailPrefix||'usuario';
+  const avatar=(currentProfile.username||emailPrefix||'?')[0].toUpperCase();
   document.getElementById('userEmail').textContent=display;
   document.getElementById('userAvatar').textContent=avatar;
 }
