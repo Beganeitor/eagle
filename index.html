@@ -170,9 +170,9 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   .sidebar.collapsed{transform:translateX(-100%);}
 }
 /* NAV MODE BUTTONS */
-.nav-mode-btn{width:100%;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;margin-bottom:2px;background:none;border:1px solid transparent;text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--text-mid);}
-.nav-mode-btn:hover{background:var(--surface2);color:var(--text);}
-.nav-mode-btn.active{background:var(--green-dim);border-color:var(--green-border);color:var(--green);}
+.nav-mode-btn{width:100%;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:8px;margin-bottom:3px;background:var(--surface2);border:1px solid rgba(255,255,255,0.05);text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--text-mid);}
+.nav-mode-btn:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.09);color:var(--text);}
+.nav-mode-btn.active{background:var(--green-dim);border-color:var(--green-border);color:var(--green);box-shadow:0 0 10px rgba(0,191,165,0.1);}
 
 /* ── NEW MODE PANELS ── */
 .panel{display:none;flex:1;flex-direction:column;overflow:hidden;}
@@ -259,6 +259,25 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .img-gen-loading{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--text-dim);font-family:"Space Mono",monospace;padding:8px 0;}
 .img-gen-loading::before{content:"";width:11px;height:11px;border:2px solid var(--green-border);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* MARKDOWN STYLES */
+.md-bubble{white-space:normal !important;}
+.md-bubble .md-p{margin:0 0 0.6em 0;line-height:1.75;}
+.md-bubble .md-p:last-child{margin-bottom:0;}
+.md-bubble strong{color:var(--text);font-weight:600;}
+.md-bubble em{opacity:0.85;font-style:italic;}
+.md-bubble .md-h1{font-size:1.05rem;font-weight:600;color:var(--text);margin:0.8em 0 0.4em;line-height:1.3;}
+.md-bubble .md-h2{font-size:0.97rem;font-weight:600;color:var(--text);margin:0.7em 0 0.35em;}
+.md-bubble .md-h3{font-size:0.9rem;font-weight:600;color:var(--green);margin:0.6em 0 0.3em;font-family:'Space Mono',monospace;letter-spacing:0.5px;}
+.md-bubble .md-ul{list-style:none;padding:0;margin:0.4em 0;}
+.md-bubble .md-li{padding:2px 0 2px 1.1em;position:relative;line-height:1.65;}
+.md-bubble .md-li::before{content:'▸';position:absolute;left:0;color:var(--green);font-size:0.7em;top:0.3em;}
+.md-bubble .md-pre{background:var(--surface2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 14px;margin:0.6em 0;overflow-x:auto;}
+.md-bubble .md-code{font-family:'Space Mono',monospace;font-size:0.8rem;color:#a8ff78;line-height:1.6;white-space:pre;}
+.md-bubble .md-inline{font-family:'Space Mono',monospace;font-size:0.82em;color:#69f0ae;background:rgba(105,240,174,0.1);border:1px solid rgba(105,240,174,0.2);padding:1px 5px;border-radius:4px;}
+.md-bubble .md-hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:0.8em 0;}
+.stream-cursor{display:inline-block;width:2px;height:1em;background:var(--green);margin-left:2px;vertical-align:text-bottom;animation:cursorBlink 0.7s steps(1) infinite;}
+@keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
 </style>
 </head>
 <body>
@@ -294,11 +313,40 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
       <div class="auth-error" id="registerError"></div>
       <input class="auth-input" id="regEmail" type="email" placeholder="Correo electrónico">
       <input class="auth-input" id="regPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)">
+      <div style="position:relative;">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--green);font-family:'Space Mono',monospace;font-size:0.9rem;pointer-events:none;">@</span>
+        <input class="auth-input" id="regUsername" type="text" placeholder="nombre de usuario" style="padding-left:28px;margin-bottom:0;" oninput="this.value=this.value.replace(/[^a-z0-9_.]/gi,'').toLowerCase()">
+      </div>
+      <div style="font-size:0.68rem;color:var(--text-dim);margin-bottom:12px;margin-top:5px;padding-left:2px;">Solo letras, números, puntos y guiones bajos</div>
       <button class="auth-btn" onclick="doRegisterEmail()">Crear cuenta</button>
       <div class="auth-divider">o</div>
       <button class="auth-btn secondary" onclick="doLoginGoogle()">🌐 &nbsp;Continuar con Google</button>
       <div class="auth-switch">¿Ya tienes cuenta? <a onclick="showLogin()">Inicia sesión</a></div>
     </div>
+  </div>
+</div>
+
+<!-- USERNAME SETUP (for users without username) -->
+<div class="auth-screen" id="usernameSetupScreen" style="display:none;z-index:999;">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <svg width="36" height="22" viewBox="0 0 48 30" fill="none">
+        <circle cx="15" cy="15" r="13" fill="white"/>
+        <rect x="13.5" y="2" width="3" height="26" fill="#080808"/>
+        <path d="M46 4 A13 13 0 1 0 46 26" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+        <rect x="37" y="12.5" width="9" height="5" fill="#080808"/>
+      </svg>
+      <span class="auth-logo-name">LOVA</span>
+    </div>
+    <div class="auth-title">Elige tu @usuario</div>
+    <div class="auth-sub">Es como te verán en la red social de LOVA</div>
+    <div class="auth-error" id="usernameSetupError"></div>
+    <div style="position:relative;margin-bottom:6px;">
+      <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--green);font-family:'Space Mono',monospace;font-size:0.9rem;pointer-events:none;">@</span>
+      <input class="auth-input" id="setupUsernameInput" type="text" placeholder="tu_usuario" style="padding-left:28px;margin-bottom:0;" oninput="this.value=this.value.replace(/[^a-z0-9_.]/gi,'').toLowerCase()">
+    </div>
+    <div style="font-size:0.68rem;color:var(--text-dim);margin-bottom:16px;padding-left:2px;">Solo letras minúsculas, números, puntos y guiones bajos</div>
+    <button class="auth-btn" onclick="saveSetupUsername()">Confirmar usuario</button>
   </div>
 </div>
 
@@ -521,32 +569,43 @@ async function doRegisterEmail(){
   hideErr('registerError');
   const email=document.getElementById('regEmail').value.trim();
   const pass=document.getElementById('regPassword').value;
+  const username=document.getElementById('regUsername').value.trim().toLowerCase();
   if(!email||!pass){showErr('registerError','Completa todos los campos');return;}
-  const{error}=await sb.auth.signUp({email,password:pass});
+  if(!username||username.length<3){showErr('registerError','El usuario debe tener al menos 3 caracteres');return;}
+  if(!/^[a-z0-9_.]+$/.test(username)){showErr('registerError','Solo letras, números, puntos y guiones bajos');return;}
+  // Check username availability
+  const{data:taken}=await sb.from('profiles').select('id').eq('username',username).maybeSingle();
+  if(taken){showErr('registerError','Ese @usuario ya está en uso, elige otro');return;}
+  const{error}=await sb.auth.signUp({email,password:pass,options:{data:{username}}});
   if(error)showErr('registerError',error.message);
-  else showErr('registerError','✅ Revisa tu correo para confirmar');
+  else{
+    // Pre-create profile with username so it's ready
+    // It will be finalized in ensureProfile once auth confirms
+    showErr('registerError','✅ Revisa tu correo para confirmar tu cuenta');
+  }
 }
 async function doLoginGoogle(){
   await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
 }
 async function doLogout(){await sb.auth.signOut();}
 
+let currentProfile=null;
+
 sb.auth.onAuthStateChange(async(event,session)=>{
   if(session?.user){
     currentUser=session.user;
     document.getElementById('authScreen').style.display='none';
     document.getElementById('appScreen').style.display='flex';
-    const email=currentUser.email||'';
-    document.getElementById('userEmail').textContent=email;
-    document.getElementById('userAvatar').textContent=email[0]?.toUpperCase()||'U';
     await loadChatList();
     if(!currentChatId) await newChat();
     await ensureProfile();
     await loadTraining();
   } else {
     currentUser=null;
+    currentProfile=null;
     document.getElementById('authScreen').style.display='flex';
     document.getElementById('appScreen').style.display='none';
+    document.getElementById('usernameSetupScreen').style.display='none';
   }
 });
 
@@ -839,7 +898,7 @@ async function sendMessage(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        system:`Eres LOVA, agente de IA especializado en negocios, dropshipping, Dropi, ventas, marketing digital, Facebook Ads, TikTok Ads, e-commerce y finanzas en Colombia y Latinoamérica. Responde siempre en español. Usa formato limpio sin asteriscos ni markdown. Sé claro, directo y práctico. Cuando te pidan un gráfico, responde con JSON en este formato exacto: {"chart":true,"type":"bar|line|pie","labels":["a","b"],"data":[1,2],"title":"titulo"}`,
+        system:`Eres LOVA, agente de IA especializado en negocios, dropshipping, Dropi, ventas, marketing digital, Facebook Ads, TikTok Ads, e-commerce y finanzas en Colombia y Latinoamérica. Responde siempre en español. Usa markdown cuando sea útil: **negrita** para términos clave, listas con - para enumerar puntos, ### para subtítulos. Sé claro, directo y práctico. Cuando te pidan un gráfico, responde con JSON en este formato exacto: {"chart":true,"type":"bar|line|pie","labels":["a","b"],"data":[1,2],"title":"titulo"}`,
         messages:apiMessages,
         max_tokens:2048,
         mode:chatMode,
@@ -880,12 +939,49 @@ async function sendMessage(){
   document.getElementById('inputField').focus();
 }
 
-// Streaming simulation
+// Markdown renderer (ChatGPT-style)
+function renderMarkdown(text){
+  // Escape HTML first
+  let t=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Code blocks
+  t=t.replace(/```([\w]*)\n?([\s\S]*?)```/g,(_,lang,code)=>`<pre class="md-pre"><code class="md-code">${code.trim()}</code></pre>`);
+  // Inline code
+  t=t.replace(/`([^`]+)`/g,'<code class="md-inline">$1</code>');
+  // Bold
+  t=t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  t=t.replace(/__(.*?)__/g,'<strong>$1</strong>');
+  // Italic
+  t=t.replace(/\*(.*?)\*/g,'<em>$1</em>');
+  // Strikethrough
+  t=t.replace(/~~(.*?)~~/g,'<del>$1</del>');
+  // Headers
+  t=t.replace(/^### (.+)$/gm,'<h4 class="md-h3">$1</h4>');
+  t=t.replace(/^## (.+)$/gm,'<h3 class="md-h2">$1</h3>');
+  t=t.replace(/^# (.+)$/gm,'<h2 class="md-h1">$1</h2>');
+  // Unordered lists
+  t=t.replace(/^[\-\*] (.+)$/gm,'<li class="md-li">$1</li>');
+  t=t.replace(/(<li class="md-li">.*<\/li>(\n)?)+/g,m=>`<ul class="md-ul">${m}</ul>`);
+  // Ordered lists
+  t=t.replace(/^\d+\. (.+)$/gm,'<li class="md-li">$1</li>');
+  // Horizontal rule
+  t=t.replace(/^---$/gm,'<hr class="md-hr">');
+  // Line breaks (preserve paragraphs)
+  t=t.replace(/\n\n+/g,'</p><p class="md-p">');
+  t=t.replace(/\n/g,'<br>');
+  t=`<p class="md-p">${t}</p>`;
+  // Clean up empty paragraphs
+  t=t.replace(/<p class="md-p"><\/p>/g,'');
+  t=t.replace(/<p class="md-p">(<(?:ul|ol|pre|h[1-4]|hr))/g,'$1');
+  t=t.replace(/(<\/(?:ul|ol|pre|h[1-4]|hr)>)<\/p>/g,'$1');
+  return t;
+}
+
+// Streaming simulation - ChatGPT style with markdown
 async function appendStreamText(text,searched){
   const div=document.createElement('div');
   div.className='msg bot';
   const bubble=document.createElement('div');
-  bubble.className='msg-bubble';
+  bubble.className='msg-bubble md-bubble';
   div.innerHTML='<div class="msg-label">LOVA</div>';
   div.appendChild(bubble);
   if(searched){
@@ -896,15 +992,22 @@ async function appendStreamText(text,searched){
   }
   document.getElementById('messages').appendChild(div);
 
-  // Stream character by character
+  // Stream word by word with faster speed
   const words=text.split(' ');
   let current='';
+  // Add blinking cursor
+  bubble.innerHTML='<span class="stream-cursor"></span>';
   for(let i=0;i<words.length;i++){
     current+=(i>0?' ':'')+words[i];
-    bubble.textContent=current;
+    bubble.innerHTML=renderMarkdown(current)+'<span class="stream-cursor"></span>';
     scrollChat();
-    await new Promise(r=>setTimeout(r,18));
+    // Variable speed: fast for short words, slightly slower for longer ones
+    const delay=words[i].length>8?14:8;
+    await new Promise(r=>setTimeout(r,delay));
   }
+  // Final render without cursor
+  bubble.innerHTML=renderMarkdown(text);
+  scrollChat();
 }
 
 function renderChart(chartData){
@@ -1212,7 +1315,7 @@ function highlightTone(tone){
 const origFetchWorker=window.fetch;
 // Patch the sendMessage system prompt to include training data
 const _buildSystem=()=>{
-  let sys=`Eres LOVA, agente de IA especializado en negocios, dropshipping, Dropi, ventas, marketing digital, Facebook Ads, TikTok Ads, e-commerce y finanzas en Colombia y Latinoamérica. Responde siempre en español. Usa formato limpio sin asteriscos ni markdown. Sé claro, directo y práctico.`;
+  let sys=`Eres LOVA, agente de IA especializado en negocios, dropshipping, Dropi, ventas, marketing digital, Facebook Ads, TikTok Ads, e-commerce y finanzas en Colombia y Latinoamérica. Responde siempre en español. Usa markdown cuando sea útil: **negrita** para términos importantes, listas con - para enumerar, ### para subtítulos de sección, y \`código\` para valores técnicos. Sé claro, directo y práctico.`;
   if(trainingData.personality)sys+=`\n\nPersonalidad: ${trainingData.personality}`;
   if(trainingData.knowledge)sys+=`\n\nConocimiento extra: ${trainingData.knowledge}`;
   if(trainingData.tone)sys+=`\n\nTono de comunicación: ${trainingData.tone}`;
@@ -1255,9 +1358,13 @@ function setSocialTab(tab,btn){
 function renderSocialTabContent(){
   const c=document.getElementById('socialTabContent');
   if(socialTab==='search'){
-    c.innerHTML=`<input class="social-search-input" id="searchEmailInput" type="email" placeholder="Email del usuario...">
+    c.innerHTML=`
+    <div style="position:relative;margin-bottom:7px;">
+      <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--green);font-family:'Space Mono',monospace;font-size:0.85rem;pointer-events:none;">@</span>
+      <input class="social-search-input" id="searchUsernameInput" type="text" placeholder="nombre_usuario" style="padding-left:26px;margin-bottom:0;" oninput="this.value=this.value.replace(/[^a-z0-9_.]/gi,'').toLowerCase()" onkeydown="if(event.key==='Enter')searchUser()">
+    </div>
     <button class="social-search-btn" onclick="searchUser()">🔍 Buscar y enviar solicitud</button>
-    <div id="searchResult" style="margin-top:8px;font-size:0.75rem;color:var(--text-dim);font-family:'Space Mono',monospace;"></div>`;
+    <div id="searchResult" style="margin-top:8px;font-size:0.75rem;color:var(--text-dim);font-family:'Space Mono',monospace;min-height:18px;"></div>`;
   } else {
     c.innerHTML='';
   }
@@ -1276,23 +1383,32 @@ async function loadContacts(){
 
 function renderContacts(){
   const list=document.getElementById('contactsList');
-  list.innerHTML=socialContacts.map(p=>`
-    <div class="contact-item${currentChatPartner?.id===p.id?' active':''}" onclick="openSocialChat('${p.id}','${(p.email||'').replace(/'/g,"\\'")}')">
-      <div class="contact-avatar">${(p.email||'?')[0].toUpperCase()}</div>
+  if(!socialContacts.length){
+    list.innerHTML='<div style="padding:12px 8px;font-size:0.74rem;color:var(--text-dim);text-align:center;">Sin contactos aún.<br>Usa Buscar para agregar.</div>';
+    return;
+  }
+  list.innerHTML=socialContacts.map(p=>{
+    const displayName=p.username?('@'+p.username):(p.email||p.id);
+    const avatar=(p.username||p.email||'?')[0].toUpperCase();
+    return`<div class="contact-item${currentChatPartner?.id===p.id?' active':''}" onclick="openSocialChat('${p.id}','${(p.username||'').replace(/'/g,"\\'")}','${(p.email||'').replace(/'/g,"\\'")}')">
+      <div class="contact-avatar">${avatar}</div>
       <div class="contact-info">
-        <div class="contact-name">${p.email||p.id}</div>
+        <div class="contact-name">${displayName}</div>
         <div class="contact-last">Toca para chatear</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-async function openSocialChat(partnerId, partnerEmail){
-  currentChatPartner={id:partnerId,email:partnerEmail};
+async function openSocialChat(partnerId, partnerUsername, partnerEmail){
+  currentChatPartner={id:partnerId,username:partnerUsername,email:partnerEmail};
   document.getElementById('socialEmpty').style.display='none';
   const w=document.getElementById('socialActiveChatWrapper');
   w.style.display='flex';w.style.flexDirection='column';
-  document.getElementById('scAvatar').textContent=(partnerEmail||'?')[0].toUpperCase();
-  document.getElementById('scTitle').textContent=partnerEmail||partnerId;
+  const displayName=partnerUsername?('@'+partnerUsername):partnerEmail||partnerId;
+  const avatar=(partnerUsername||partnerEmail||'?')[0].toUpperCase();
+  document.getElementById('scAvatar').textContent=avatar;
+  document.getElementById('scTitle').textContent=displayName;
   document.getElementById('scSub').textContent='';
   renderContacts();
   // Load messages
@@ -1333,30 +1449,36 @@ async function sendSocialMsg(){
 }
 
 async function searchUser(){
-  const email=document.getElementById('searchEmailInput')?.value.trim();
+  const username=document.getElementById('searchUsernameInput')?.value.trim().toLowerCase();
   const res=document.getElementById('searchResult');
-  if(!email){res.textContent='Escribe un email';return;}
-  if(email===currentUser.email){res.textContent='Ese eres tú 😄';return;}
-  res.textContent='Buscando...';
-  // Look in profiles table
-  const{data:profile}=await sb.from('profiles').select('*').eq('email',email).single();
-  if(!profile){res.style.color='#ff6b6b';res.textContent='Usuario no encontrado';return;}
-  // Check if already following
-  const{data:existing}=await sb.from('follows').select('*').eq('follower_id',currentUser.id).eq('following_id',profile.id).single();
-  if(existing){
-    res.style.color='var(--green)';
-    res.textContent=existing.status==='accepted'?'Ya son contactos ✓':'Solicitud enviada ⏳';
-    return;
+  if(!res)return;
+  if(!username){res.style.color='var(--text-dim)';res.textContent='Escribe un @usuario';return;}
+  if(username===(currentProfile?.username||'')){res.style.color='var(--text-dim)';res.textContent='Ese eres tú 😄';return;}
+  res.style.color='var(--text-dim)';
+  res.textContent='Buscando @'+username+'...';
+  try{
+    const{data:profile,error:profErr}=await sb.from('profiles').select('*').eq('username',username).maybeSingle();
+    if(profErr){res.style.color='#ff6b6b';res.textContent='Error: '+profErr.message;return;}
+    if(!profile){res.style.color='#ff6b6b';res.textContent='@'+username+' no encontrado';return;}
+    const{data:existing}=await sb.from('follows').select('*').eq('follower_id',currentUser.id).eq('following_id',profile.id).maybeSingle();
+    if(existing){
+      res.style.color='var(--green)';
+      res.textContent=existing.status==='accepted'?'Ya son contactos ✓':'Solicitud enviada ⏳';
+      return;
+    }
+    const{error:insertErr}=await sb.from('follows').insert([{follower_id:currentUser.id,following_id:profile.id,status:'pending'}]);
+    if(!insertErr){res.style.color='var(--green)';res.textContent='✅ Solicitud enviada a @'+profile.username;}
+    else{res.style.color='#ff6b6b';res.textContent='Error: '+insertErr.message;}
+  }catch(e){
+    res.style.color='#ff6b6b';
+    res.textContent='Error inesperado. Intenta de nuevo.';
+    console.error('searchUser error:',e);
   }
-  // Send follow request
-  const{error}=await sb.from('follows').insert([{follower_id:currentUser.id,following_id:profile.id,status:'pending'}]);
-  if(!error){res.style.color='var(--green)';res.textContent='✅ Solicitud enviada a '+email;}
-  else{res.style.color='#ff6b6b';res.textContent='Error al enviar solicitud';}
 }
 
 async function loadRequests(){
   if(!currentUser)return;
-  const{data}=await sb.from('follows').select('*,profiles!follows_follower_id_fkey(email)').eq('following_id',currentUser.id).eq('status','pending');
+  const{data}=await sb.from('follows').select('*,profiles!follows_follower_id_fkey(username,email)').eq('following_id',currentUser.id).eq('status','pending');
   pendingRequests=data||[];
   renderRequests();
   const dot=document.getElementById('socialNotifDot');
@@ -1366,13 +1488,16 @@ async function loadRequests(){
 function renderRequests(){
   const list=document.getElementById('contactsList');
   if(!pendingRequests.length){list.innerHTML='<div style="padding:12px 8px;font-size:0.74rem;color:var(--text-dim);text-align:center;">Sin solicitudes pendientes</div>';return;}
-  list.innerHTML=pendingRequests.map(r=>`
-    <div class="request-item">
-      <div class="contact-avatar">${(r.profiles?.email||'?')[0].toUpperCase()}</div>
-      <div class="contact-info"><div class="contact-name">${r.profiles?.email||r.follower_id}</div><div class="contact-last">quiere conectar</div></div>
+  list.innerHTML=pendingRequests.map(r=>{
+    const displayName=r.profiles?.username?('@'+r.profiles.username):(r.profiles?.email||r.follower_id);
+    const avatar=(r.profiles?.username||r.profiles?.email||'?')[0].toUpperCase();
+    return`<div class="request-item">
+      <div class="contact-avatar">${avatar}</div>
+      <div class="contact-info"><div class="contact-name">${displayName}</div><div class="contact-last">quiere conectar</div></div>
       <button class="req-btn accept" onclick="respondRequest('${r.id}','accepted','${r.follower_id}')">✓</button>
       <button class="req-btn reject" onclick="respondRequest('${r.id}','rejected','')">✕</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function respondRequest(id,status,followerId){
@@ -1398,12 +1523,69 @@ function startSocialRealtime(){
 // Make sure profile exists in profiles table on login
 async function ensureProfile(){
   if(!currentUser)return;
-  await sb.from('profiles').upsert({id:currentUser.id,email:currentUser.email},{onConflict:'id'});
+  // Try to fetch existing profile
+  const{data:profile}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+  // Determine username: from profile, or from auth metadata (set at register)
+  const metaUsername=currentUser.user_metadata?.username||'';
+  if(profile){
+    currentProfile=profile;
+    // If profile exists but has no username, check metadata or prompt setup
+    if(!profile.username){
+      if(metaUsername){
+        await sb.from('profiles').update({username:metaUsername}).eq('id',currentUser.id);
+        currentProfile={...profile,username:metaUsername};
+      } else {
+        // Show username setup screen
+        document.getElementById('usernameSetupScreen').style.display='flex';
+        return; // Don't continue until username is set
+      }
+    }
+  } else {
+    // New profile
+    if(metaUsername){
+      await sb.from('profiles').insert([{id:currentUser.id,email:currentUser.email,username:metaUsername}]);
+      currentProfile={id:currentUser.id,email:currentUser.email,username:metaUsername};
+    } else {
+      await sb.from('profiles').insert([{id:currentUser.id,email:currentUser.email}]);
+      currentProfile={id:currentUser.id,email:currentUser.email};
+      document.getElementById('usernameSetupScreen').style.display='flex';
+      return;
+    }
+  }
+  updateSidebarUser();
+  startSocialRealtime();
+}
+
+function updateSidebarUser(){
+  if(!currentProfile)return;
+  const display=currentProfile.username?('@'+currentProfile.username):(currentUser.email||'');
+  const avatar=(currentProfile.username||currentUser.email||'?')[0].toUpperCase();
+  document.getElementById('userEmail').textContent=display;
+  document.getElementById('userAvatar').textContent=avatar;
+}
+
+async function saveSetupUsername(){
+  const input=document.getElementById('setupUsernameInput');
+  const username=input.value.trim().toLowerCase();
+  const errEl=document.getElementById('usernameSetupError');
+  errEl.style.display='none';
+  if(!username||username.length<3){errEl.textContent='Mínimo 3 caracteres';errEl.style.display='block';return;}
+  if(!/^[a-z0-9_.]+$/.test(username)){errEl.textContent='Solo letras, números, puntos y guiones bajos';errEl.style.display='block';return;}
+  // Check availability
+  const{data:taken}=await sb.from('profiles').select('id').eq('username',username).maybeSingle();
+  if(taken&&taken.id!==currentUser.id){errEl.textContent='Ese @usuario ya está en uso';errEl.style.display='block';return;}
+  // Save
+  const{error}=await sb.from('profiles').upsert({id:currentUser.id,email:currentUser.email,username},{onConflict:'id'});
+  if(error){errEl.textContent='Error al guardar: '+error.message;errEl.style.display='block';return;}
+  currentProfile={...(currentProfile||{}),id:currentUser.id,email:currentUser.email,username};
+  document.getElementById('usernameSetupScreen').style.display='none';
+  updateSidebarUser();
   startSocialRealtime();
 }
 
 </script>
 </body>
 </html>
+
 
 
