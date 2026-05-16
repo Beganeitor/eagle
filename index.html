@@ -586,17 +586,47 @@ async function doRegisterEmail(){
 async function doLoginGoogle(){
   await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
 }
-async function doLogout(){await sb.auth.signOut();}
+async function doLogout(){
+  // Limpiar todo el estado local antes de salir
+  currentUser=null;
+  currentProfile=null;
+  currentChatId=null;
+  messageHistory=[];
+  pendingFiles=[];
+  socialContacts=[];
+  pendingRequests=[];
+  currentChatPartner=null;
+  if(socialChannel){sb.removeChannel(socialChannel);socialChannel=null;}
+  if(notifChannel){sb.removeChannel(notifChannel);notifChannel=null;}
+  sessionStorage.removeItem('lova_chat_id');
+  await sb.auth.signOut();
+}
 
 let currentProfile=null;
+let notifChannel=null;
+
+// Detectar confirmación de email por hash en URL
+(async()=>{
+  if(window.location.hash.includes('access_token')){
+    await sb.auth.getSession();
+    window.history.replaceState(null,'',window.location.pathname);
+  }
+})();
 
 sb.auth.onAuthStateChange(async(event,session)=>{
+  // Solo reaccionar a estos eventos — ignorar TOKEN_REFRESHED y otros
+  if(!['SIGNED_IN','INITIAL_SESSION','SIGNED_OUT'].includes(event))return;
   if(session?.user){
+    // Evitar reinicializar si ya es el mismo usuario (refresco de token)
+    if(currentUser?.id===session.user.id)return;
     currentUser=session.user;
+    // Restaurar chatId de sesión si existe
+    const savedChatId=sessionStorage.getItem('lova_chat_id');
+    if(savedChatId)currentChatId=savedChatId;
     document.getElementById('authScreen').style.display='none';
     document.getElementById('appScreen').style.display='flex';
     await loadChatList();
-    if(!currentChatId) await newChat();
+    if(!currentChatId)await newChat();
     await ensureProfile();
     await loadTraining();
   } else {
@@ -642,9 +672,15 @@ async function newChat(){
   if(btn)btn.disabled=true;
   const{data,error}=await sb.from('conversations').insert([{user_id:currentUser.id,title:'Nueva conversación'}]).select().single();
   if(btn)btn.disabled=false;
-  if(error){console.error('newChat error',error);return;}
+  if(error){
+    console.error('newChat error',error);
+    const btn2=document.getElementById('newChatBtn');
+    if(btn2){btn2.textContent='Error, reintenta';btn2.style.color='#ff6b6b';setTimeout(()=>{btn2.textContent='';btn2.style.color='';},2500);}
+    return;
+  }
   if(data){
     currentChatId=data.id;
+    sessionStorage.setItem('lova_chat_id',currentChatId);
     messageHistory=[];
     document.getElementById('messages').innerHTML='';
     document.getElementById('hero').style.display='flex';
@@ -1509,8 +1545,17 @@ async function sendFollowRequest(profileId, profileUsername, btnEl){
 
 async function loadRequests(){
   if(!currentUser)return;
-  const{data}=await sb.from('follows').select('*,profiles!follows_follower_id_fkey(username,email)').eq('following_id',currentUser.id).eq('status','pending');
-  pendingRequests=data||[];
+  // Paso 1: traer follows pendientes sin join frágil
+  const{data:followsData,error:followsErr}=await sb.from('follows').select('*').eq('following_id',currentUser.id).eq('status','pending');
+  if(followsErr){console.error('loadRequests error:',followsErr.message);return;}
+  if(!followsData||!followsData.length){pendingRequests=[];renderRequests();return;}
+  // Paso 2: traer perfiles de los solicitantes
+  const followerIds=[...new Set(followsData.map(f=>f.follower_id))];
+  const{data:profilesData}=await sb.from('profiles').select('id,username,email').in('id',followerIds);
+  const profileMap={};
+  (profilesData||[]).forEach(p=>{profileMap[p.id]=p;});
+  // Combinar
+  pendingRequests=followsData.map(f=>({...f,profile:profileMap[f.follower_id]||null}));
   renderRequests();
   const dot=document.getElementById('socialNotifDot');
   if(dot)dot.style.display=pendingRequests.length?'block':'none';
@@ -1520,8 +1565,9 @@ function renderRequests(){
   const list=document.getElementById('contactsList');
   if(!pendingRequests.length){list.innerHTML='<div style="padding:12px 8px;font-size:0.74rem;color:var(--text-dim);text-align:center;">Sin solicitudes pendientes</div>';return;}
   list.innerHTML=pendingRequests.map(r=>{
-    const displayName=r.profiles?.username?('@'+r.profiles.username):(r.profiles?.email||r.follower_id);
-    const avatar=(r.profiles?.username||r.profiles?.email||'?')[0].toUpperCase();
+    const p=r.profile;
+    const displayName=p?.username?('@'+p.username):(p?.email||r.follower_id);
+    const avatar=(p?.username||p?.email||'?')[0].toUpperCase();
     return`<div class="request-item">
       <div class="contact-avatar">${avatar}</div>
       <div class="contact-info"><div class="contact-name">${displayName}</div><div class="contact-last">quiere conectar</div></div>
@@ -1543,12 +1589,20 @@ async function respondRequest(id,status,followerId){
 // Realtime: watch for incoming requests
 function startSocialRealtime(){
   if(!currentUser)return;
-  sb.channel('notif_'+currentUser.id)
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'follows',filter:`following_id=eq.${currentUser.id}`},()=>{
+  // Limpiar canal anterior si existe
+  if(notifChannel){sb.removeChannel(notifChannel);notifChannel=null;}
+  notifChannel=sb.channel('notif_'+currentUser.id)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'follows'},payload=>{
+      // Filtrar en el callback — el filtro en el canal falla con UUIDs en algunos entornos
+      if(payload.new?.following_id!==currentUser.id)return;
       const dot=document.getElementById('socialNotifDot');
       if(dot)dot.style.display='block';
+      // Refrescar lista si el tab de solicitudes está activo
+      if(socialTab==='requests')loadRequests();
     })
-    .subscribe();
+    .subscribe(status=>{
+      console.log('Realtime notif status:',status);
+    });
 }
 
 // Make sure profile exists in profiles table on login
