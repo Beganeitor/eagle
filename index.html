@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>LOVA</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -165,9 +165,28 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 
 /* MOBILE */
 @media(max-width:640px){
-  .sidebar{position:fixed;height:100%;left:0;top:0;width:var(--sidebar);transform:translateX(-100%);}
-  .sidebar.open{transform:translateX(0);width:var(--sidebar);}
+  body{height:100dvh;overflow:hidden;}
+  .sidebar{position:fixed;height:100dvh;left:0;top:0;width:80vw;max-width:300px;transform:translateX(-100%);z-index:200;transition:transform 0.25s ease;}
+  .sidebar.open{transform:translateX(0);}
   .sidebar.collapsed{transform:translateX(-100%);}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:199;}
+  .sidebar-overlay.visible{display:block;}
+  .main-area{width:100%;min-width:0;}
+  .navbar{padding:8px 12px;}
+  .nav-title{font-size:0.7rem;}
+  .agent-badge{display:none;}
+  .mode-bar{overflow-x:auto;padding:6px 12px;gap:6px;-webkit-overflow-scrolling:touch;}
+  .mode-bar::-webkit-scrollbar{display:none;}
+  .mode-btn{white-space:nowrap;flex-shrink:0;font-size:0.62rem;padding:4px 12px;}
+  .chat-area{padding:12px 10px 8px;}
+  .input-area{padding:8px 10px;padding-bottom:max(12px,env(safe-area-inset-bottom));position:sticky;bottom:0;background:var(--black);z-index:10;}
+  .msg-bubble{max-width:92%;}
+  .social-panel{flex-direction:column;}
+  .social-sidebar{width:100%;height:auto;border-right:none;border-bottom:1px solid rgba(255,255,255,0.04);flex-shrink:0;}
+  .social-chat-area{flex:1;min-height:0;}
+  .chips{gap:6px;}
+  .chip{font-size:0.68rem;padding:6px 10px;}
+  .hero-title{font-size:1.4rem;}
 }
 /* NAV MODE BUTTONS */
 .nav-mode-btn{width:100%;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:8px;margin-bottom:3px;background:var(--surface2);border:1px solid rgba(255,255,255,0.05);text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--text-mid);}
@@ -300,7 +319,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
       <div class="auth-title">Bienvenido</div>
       <div class="auth-sub">Inicia sesión para continuar</div>
       <div class="auth-error" id="loginError"></div>
-      <input class="auth-input" id="loginEmail" type="email" placeholder="Correo electrónico">
+      <input class="auth-input" id="loginEmail" type="text" placeholder="Correo o @usuario" autocomplete="username">
       <input class="auth-input" id="loginPassword" type="password" placeholder="Contraseña">
       <button class="auth-btn" onclick="doLoginEmail()">Entrar</button>
       <div class="auth-divider">o</div>
@@ -348,6 +367,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 
 <!-- APP -->
 <div class="app" id="appScreen" style="display:none">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebarMobile()"></div>
   <div class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <div class="sidebar-logo">
@@ -404,11 +424,11 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
           <h1 class="hero-title">Hola. ¿En qué puedo <strong>ayudarte</strong>?</h1>
           <p class="hero-sub">Tu asistente con IA, búsqueda web, voz, imágenes y más.</p>
           <div class="chips">
-            <div class="chip" onclick="sendChip('¿Cómo escalo mi negocio de dropshipping?')">📦 Dropshipping</div>
-            <div class="chip" onclick="sendChip('Tendencias de productos en Dropi hoy')">📊 Tendencias Dropi</div>
-            <div class="chip" onclick="sendChip('Estrategias ganadoras de Facebook Ads')">📱 Facebook Ads</div>
-            <div class="chip" onclick="sendChip('Dame ideas de productos ganadores para vender online')">💡 Productos</div>
-            <div class="chip" onclick="sendChip('genera imagen de un logo moderno para una tienda online')">🎨 Generar imagen</div>
+            <div class="chip" onclick="sendChip('¿Cómo puedo hacer crecer mi negocio?')">🚀 Hacer crecer mi negocio</div>
+            <div class="chip" onclick="sendChip('Dame ideas para generar ingresos online')">💡 Ideas para generar ingresos</div>
+            <div class="chip" onclick="sendChip('Estrategias de marketing digital para mi marca')">📱 Marketing digital</div>
+            <div class="chip" onclick="sendChip('¿Cómo mejorar mi productividad diaria?')">⚡ Productividad</div>
+            <div class="chip" onclick="sendChip('genera imagen de un logo moderno y minimalista')">🎨 Generar imagen</div>
           </div>
         </div>
         <div class="messages" id="messages"></div>
@@ -568,10 +588,21 @@ function translateSupabaseError(msg){
 
 async function doLoginEmail(){
   hideErr('loginError');
-  const email=document.getElementById('loginEmail').value.trim();
+  const emailOrUser=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPassword').value;
-  if(!email||!pass){showErr('loginError','Completa todos los campos');return;}
-  const{error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(!emailOrUser||!pass){showErr('loginError','Completa todos los campos');return;}
+
+  let emailToUse=emailOrUser;
+
+  // Si no tiene @ es un username — buscar el email en profiles
+  if(!emailOrUser.includes('@')){
+    const username=emailOrUser.toLowerCase().replace(/^@/,'');
+    const{data:profile,error:profErr}=await sb.from('profiles').select('email').eq('username',username).maybeSingle();
+    if(profErr||!profile){showErr('loginError','Usuario @'+username+' no encontrado');return;}
+    emailToUse=profile.email;
+  }
+
+  const{error}=await sb.auth.signInWithPassword({email:emailToUse,password:pass});
   if(error)showErr('loginError',translateSupabaseError(error.message));
 }
 async function doRegisterEmail(){
@@ -767,9 +798,21 @@ async function updateTitle(title){
 // ── UI ──
 function toggleSidebar(){
   const s=document.getElementById('sidebar');
+  const ov=document.getElementById('sidebarOverlay');
   sidebarOpen=!sidebarOpen;
-  if(window.innerWidth<=640){s.classList.toggle('open');}
-  else{s.classList.toggle('collapsed');}
+  if(window.innerWidth<=640){
+    s.classList.toggle('open',sidebarOpen);
+    if(ov)ov.classList.toggle('visible',sidebarOpen);
+  } else {
+    s.classList.toggle('collapsed',!sidebarOpen);
+  }
+}
+function closeSidebarMobile(){
+  const s=document.getElementById('sidebar');
+  const ov=document.getElementById('sidebarOverlay');
+  sidebarOpen=false;
+  s.classList.remove('open');
+  if(ov)ov.classList.remove('visible');
 }
 function setMode(m){
   chatMode=m;
@@ -949,7 +992,7 @@ async function sendMessage(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        system:`Eres LOVA, agente de IA especializado en negocios, dropshipping, Dropi, ventas, marketing digital, Facebook Ads, TikTok Ads, e-commerce y finanzas en Colombia y Latinoamérica. Responde siempre en español. Usa markdown cuando sea útil: **negrita** para términos clave, listas con - para enumerar puntos, ### para subtítulos. Sé claro, directo y práctico. Cuando te pidan un gráfico, responde con JSON en este formato exacto: {"chart":true,"type":"bar|line|pie","labels":["a","b"],"data":[1,2],"title":"titulo"}`,
+        system:`Eres LOVA, agente de IA para negocios, emprendimiento, marketing digital, e-commerce y finanzas en Colombia y Latinoamérica. Responde siempre en español. Usa markdown cuando sea útil: **negrita** para términos clave, listas con - para enumerar puntos, ### para subtítulos. Sé claro, directo y práctico. Solo habla de dropshipping, Dropi o temas relacionados si el usuario los menciona explícitamente. Cuando te pidan un gráfico, responde con JSON en este formato exacto: {"chart":true,"type":"bar|line|pie","labels":["a","b"],"data":[1,2],"title":"titulo"}`,
         messages:apiMessages,
         max_tokens:2048,
         mode:chatMode,
@@ -1366,7 +1409,7 @@ function highlightTone(tone){
 const origFetchWorker=window.fetch;
 // Patch the sendMessage system prompt to include training data
 const _buildSystem=()=>{
-  let sys=`Eres LOVA, agente de IA especializado en negocios, dropshipping, Dropi, ventas, marketing digital, Facebook Ads, TikTok Ads, e-commerce y finanzas en Colombia y Latinoamérica. Responde siempre en español. Usa markdown cuando sea útil: **negrita** para términos importantes, listas con - para enumerar, ### para subtítulos de sección, y \`código\` para valores técnicos. Sé claro, directo y práctico.`;
+  let sys=`Eres LOVA, agente de IA para negocios, emprendimiento, marketing digital, e-commerce y finanzas en Colombia y Latinoamérica. Responde siempre en español. Usa markdown cuando sea útil: **negrita** para términos importantes, listas con - para enumerar, ### para subtítulos de sección, y \`código\` para valores técnicos. Sé claro, directo y práctico. Solo menciona dropshipping, Dropi o temas relacionados si el usuario los pregunta explícitamente.`;
   if(trainingData.personality)sys+=`\n\nPersonalidad: ${trainingData.personality}`;
   if(trainingData.knowledge)sys+=`\n\nConocimiento extra: ${trainingData.knowledge}`;
   if(trainingData.tone)sys+=`\n\nTono de comunicación: ${trainingData.tone}`;
