@@ -579,9 +579,26 @@ async function doRegisterEmail(){
   const pass=document.getElementById('regPassword').value;
   if(!email||!pass){showErr('registerError','Completa todos los campos');return;}
   if(pass.length<6){showErr('registerError','La contraseña debe tener al menos 6 caracteres');return;}
-  const{error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:'https://beganeitor.github.io/eagle/lova_v6b.html'}});
+  const{error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:'https://beganeitor.github.io/eagle/index.html'}});
   if(error){showErr('registerError',translateSupabaseError(error.message));return;}
   showSuccess('registerError','✅ Revisa tu correo para confirmar tu cuenta. Luego podrás elegir tu @usuario.');
+  // Mostrar botón de reenvío por si el correo no llega
+  const existingBtn=document.getElementById('resendEmailBtn');
+  if(!existingBtn){
+    const btn=document.createElement('button');
+    btn.id='resendEmailBtn';
+    btn.className='auth-btn';
+    btn.style.cssText='margin-top:8px;background:transparent;border:1px solid var(--green-border);color:var(--green);font-size:0.75rem;';
+    btn.textContent='¿No llegó el correo? Reenviar';
+    btn.onclick=async()=>{
+      btn.disabled=true;btn.textContent='Enviando...';
+      const{error:resendErr}=await sb.auth.resend({type:'signup',email,options:{emailRedirectTo:'https://beganeitor.github.io/eagle/index.html'}});
+      if(resendErr){btn.textContent='Error: '+translateSupabaseError(resendErr.message);btn.style.color='#ff6b6b';}
+      else{btn.textContent='✅ Correo reenviado';setTimeout(()=>{btn.disabled=false;btn.textContent='¿No llegó el correo? Reenviar';},30000);}
+    };
+    document.getElementById('resendEmailBtn')?.remove();
+    document.getElementById('registerError').insertAdjacentElement('afterend',btn);
+  }
 }
 async function doLoginGoogle(){
   await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
@@ -1659,4 +1676,3 @@ async function saveSetupUsername(){
 </script>
 </body>
 </html>
-
