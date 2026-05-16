@@ -314,6 +314,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
       <input class="auth-input" id="regEmail" type="email" placeholder="Correo electrónico">
       <input class="auth-input" id="regPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)">
       <button class="auth-btn" onclick="doRegisterEmail()">Crear cuenta</button>
+      <button id="resendEmailBtn" class="auth-btn secondary" style="display:none;font-size:0.78rem;" onclick="doResendEmail()">¿No llegó el correo? Reenviar</button>
       <div class="auth-divider">o</div>
       <button class="auth-btn secondary" onclick="doLoginGoogle()">🌐 &nbsp;Continuar con Google</button>
       <div class="auth-switch">¿Ya tienes cuenta? <a onclick="showLogin()">Inicia sesión</a></div>
@@ -582,22 +583,20 @@ async function doRegisterEmail(){
   const{error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:'https://beganeitor.github.io/eagle/index.html'}});
   if(error){showErr('registerError',translateSupabaseError(error.message));return;}
   showSuccess('registerError','✅ Revisa tu correo para confirmar tu cuenta. Luego podrás elegir tu @usuario.');
-  // Mostrar botón de reenvío por si el correo no llega
-  const existingBtn=document.getElementById('resendEmailBtn');
-  if(!existingBtn){
-    const btn=document.createElement('button');
-    btn.id='resendEmailBtn';
-    btn.className='auth-btn';
-    btn.style.cssText='margin-top:8px;background:transparent;border:1px solid var(--green-border);color:var(--green);font-size:0.75rem;';
-    btn.textContent='¿No llegó el correo? Reenviar';
-    btn.onclick=async()=>{
-      btn.disabled=true;btn.textContent='Enviando...';
-      const{error:resendErr}=await sb.auth.resend({type:'signup',email,options:{emailRedirectTo:'https://beganeitor.github.io/eagle/index.html'}});
-      if(resendErr){btn.textContent='Error: '+translateSupabaseError(resendErr.message);btn.style.color='#ff6b6b';}
-      else{btn.textContent='✅ Correo reenviado';setTimeout(()=>{btn.disabled=false;btn.textContent='¿No llegó el correo? Reenviar';},30000);}
-    };
-    document.getElementById('resendEmailBtn')?.remove();
-    document.getElementById('registerError').insertAdjacentElement('afterend',btn);
+  document.getElementById('resendEmailBtn').style.display='block';
+}
+
+async function doResendEmail(){
+  const email=document.getElementById('regEmail').value.trim();
+  const btn=document.getElementById('resendEmailBtn');
+  if(!email){showErr('registerError','Escribe tu correo primero');return;}
+  btn.disabled=true;btn.textContent='Enviando...';
+  const{error}=await sb.auth.resend({type:'signup',email,options:{emailRedirectTo:'https://beganeitor.github.io/eagle/index.html'}});
+  if(error){btn.textContent='¿No llegó el correo? Reenviar';btn.disabled=false;showErr('registerError',translateSupabaseError(error.message));}
+  else{
+    showSuccess('registerError','✅ Correo reenviado, revisa tu bandeja.');
+    btn.textContent='Reenviado ✓';
+    setTimeout(()=>{btn.disabled=false;btn.textContent='¿No llegó el correo? Reenviar';},30000);
   }
 }
 async function doLoginGoogle(){
