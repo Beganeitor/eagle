@@ -343,12 +343,45 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .social-msg-wrap{position:relative;display:flex;flex-direction:column;}
 .social-msg.me .social-msg-wrap{align-items:flex-end;}
 .social-msg.them .social-msg-wrap{align-items:flex-start;}
-.msg-reply-btn{position:absolute;top:50%;transform:translateY(-50%);background:var(--surface2);border:1px solid rgba(255,255,255,0.08);border-radius:50%;width:26px;height:26px;display:none;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;z-index:2;}
-.social-msg:hover .msg-reply-btn{display:flex;}
-.social-msg.me .msg-reply-btn{left:-34px;}
-.social-msg.them .msg-reply-btn{right:-34px;}
-.msg-reply-btn:hover{background:var(--green-dim);border-color:var(--green-border);color:var(--green);}
-.msg-reply-btn svg{width:12px;height:12px;color:var(--text-dim);}
+/* Reply btn - shown via JS proximity, not CSS hover */
+.msg-reply-btn{
+  position:absolute;top:50%;
+  background:var(--surface2);border:1px solid rgba(255,255,255,0.1);
+  border-radius:50%;width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:5;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.15s, transform 0.15s, background 0.15s;
+  transform:translateY(-50%) scale(0.8);
+}
+.msg-reply-btn.visible{opacity:1;pointer-events:auto;transform:translateY(-50%) scale(1);}
+.social-msg.me .msg-reply-btn{left:-36px;}
+.social-msg.them .msg-reply-btn{right:-36px;}
+.msg-reply-btn:hover{background:var(--green-dim);border-color:var(--green-border);}
+.msg-reply-btn svg{width:13px;height:13px;color:var(--text-mid);}
+.msg-reply-btn:hover svg{color:var(--green);}
+/* Swipe/slide reply reveal */
+.social-msg-wrap .swipe-layer{
+  position:relative;
+  transition:transform 0.2s cubic-bezier(0.25,0.46,0.45,0.94);
+  will-change:transform;
+}
+.social-msg.me .swipe-layer{transform-origin:right center;}
+.social-msg.them .swipe-layer{transform-origin:left center;}
+/* Arrow that appears during swipe */
+.swipe-reply-arrow{
+  position:absolute;top:50%;
+  width:28px;height:28px;border-radius:50%;
+  background:var(--green-dim);border:1.5px solid var(--green-border);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(-50%) scale(0.5);
+  transition:opacity 0.15s, transform 0.15s;
+  pointer-events:none;z-index:4;
+}
+.social-msg.me .swipe-reply-arrow{right:-36px;}
+.social-msg.them .swipe-reply-arrow{left:-36px;}
+.swipe-reply-arrow.show{opacity:1;transform:translateY(-50%) scale(1);}
+.swipe-reply-arrow svg{width:13px;height:13px;color:var(--green);}
 .md-bubble{white-space:normal !important;}
 .md-bubble .md-p{margin:0 0 0.6em 0;line-height:1.75;}
 .md-bubble .md-p:last-child{margin-bottom:0;}
@@ -1710,6 +1743,7 @@ async function openSocialChat(partnerId, partnerUsername, partnerEmail){
   const{data:msgs}=await sb.from('social_messages').select('*').eq('room_id',roomId).order('created_at',{ascending:true}).limit(80);
   const box=document.getElementById('socialMessages');
   box.innerHTML='';
+  initProximityReply();
   (msgs||[]).forEach(m=>{
     const{text,replyTo}=parseMsgContent(m.content);
     appendSocialMsg(m.sender_id===currentUser.id?'me':'them',text,m.created_at,m.seen||false,replyTo,m.id);
@@ -1818,19 +1852,147 @@ function appendSocialMsg(side,text,ts,seen=false,replyTo=null,msgId=null){
   }
   const seenMark=side==='me'?`<span class="social-seen">${seen?'✓✓':'✓'}</span>`:'';
 
-  // Reply button SVG
-  const replyBtnHtml=`<button class="msg-reply-btn" title="Responder" onclick="setReply('${msgId||''}','${side}','${(text||'').replace(/'/g,"\\'")}','${side==='me'?'Tú':(currentChatPartner?.username?'@'+currentChatPartner.username:(currentChatPartner?.email||'Ellos'))}')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
-  </button>`;
+  // Reply arrow SVG (shared between desktop btn and swipe arrow)
+  const arrowSvg=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>`;
 
-  div.innerHTML=`<div class="social-msg-wrap">${replyBtnHtml}${replyQuoteHtml}${bubble}</div><div class="social-msg-time">${time}${seenMark}</div>`;
+  div.innerHTML=`
+    <div class="social-msg-wrap">
+      <button class="msg-reply-btn" title="Responder">${arrowSvg}</button>
+      <div class="swipe-reply-arrow">${arrowSvg}</div>
+      <div class="swipe-layer">${replyQuoteHtml}${bubble}</div>
+    </div>
+    <div class="social-msg-time">${time}${seenMark}</div>`;
+
+  // Store reply data on element for JS access
+  const replyAuthor=side==='me'?'Tú':(currentChatPartner?.username?'@'+currentChatPartner.username:(currentChatPartner?.email||'Ellos'));
+  div.dataset.replyText=text||'';
+  div.dataset.replyAuthor=replyAuthor;
+  div.dataset.replyId=msgId||'';
+
   document.getElementById('socialMessages').appendChild(div);
+  attachSwipeReply(div, side);
 }
 
 function scrollToMsg(id){
   if(!id)return;
   const el=document.querySelector(`[data-msg-id="${id}"]`);
   if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.transition='background 0.3s';el.style.background='rgba(0,191,165,0.12)';setTimeout(()=>el.style.background='',1200);}
+}
+
+// ── PROXIMITY REPLY BUTTON (desktop) ──
+let _proximityTarget=null;
+function initProximityReply(){
+  const box=document.getElementById('socialMessages');
+  if(!box)return;
+  box.addEventListener('mousemove',e=>{
+    const msgs=[...box.querySelectorAll('.social-msg')];
+    let closest=null,minDist=80; // px threshold
+    msgs.forEach(msg=>{
+      const rect=msg.getBoundingClientRect();
+      // Distance from cursor to nearest edge of message rect
+      const cx=Math.max(rect.left,Math.min(e.clientX,rect.right));
+      const cy=Math.max(rect.top,Math.min(e.clientY,rect.bottom));
+      const dist=Math.sqrt((e.clientX-cx)**2+(e.clientY-cy)**2);
+      if(dist<minDist){minDist=dist;closest=msg;}
+    });
+    if(closest!==_proximityTarget){
+      // Hide previous
+      if(_proximityTarget){
+        const btn=_proximityTarget.querySelector('.msg-reply-btn');
+        if(btn)btn.classList.remove('visible');
+      }
+      _proximityTarget=closest;
+      if(closest){
+        const btn=closest.querySelector('.msg-reply-btn');
+        if(btn){
+          btn.classList.add('visible');
+          // Wire up the click with current data
+          btn.onclick=()=>{
+            setReply(closest.dataset.replyId,closest.classList.contains('me')?'me':'them',closest.dataset.replyText,closest.dataset.replyAuthor);
+          };
+        }
+      }
+    }
+  });
+  box.addEventListener('mouseleave',()=>{
+    if(_proximityTarget){
+      const btn=_proximityTarget.querySelector('.msg-reply-btn');
+      if(btn)btn.classList.remove('visible');
+      _proximityTarget=null;
+    }
+  });
+}
+
+// ── SWIPE TO REPLY (mobile + desktop drag) ──
+function attachSwipeReply(msgEl, side){
+  const wrap=msgEl.querySelector('.swipe-layer');
+  const arrow=msgEl.querySelector('.swipe-reply-arrow');
+  if(!wrap||!arrow)return;
+
+  const MAX_SWIPE=60; // max px to drag
+  const TRIGGER=46;  // px to trigger reply
+  let startX=0,startY=0,curX=0,dragging=false,triggered=false;
+
+  function onStart(e){
+    const t=e.touches?e.touches[0]:e;
+    startX=t.clientX;startY=t.clientY;curX=0;dragging=true;triggered=false;
+    wrap.style.transition='none';
+  }
+  function onMove(e){
+    if(!dragging)return;
+    const t=e.touches?e.touches[0]:e;
+    const dx=t.clientX-startX;
+    const dy=Math.abs(t.clientY-startY);
+    // Cancel if more vertical than horizontal
+    if(dy>Math.abs(dx)*1.4){dragging=false;snapBack();return;}
+    // For 'me' messages swipe left (negative), for 'them' swipe right (positive)
+    const dir=side==='me'?-1:1;
+    const raw=dx*dir;
+    if(raw<0){dragging=false;snapBack();return;}
+    curX=Math.min(raw,MAX_SWIPE);
+    const translateX=side==='me'?-curX:curX;
+    wrap.style.transform=`translateX(${translateX}px)`;
+    // Show arrow proportionally
+    const ratio=curX/TRIGGER;
+    arrow.style.opacity=Math.min(ratio,1);
+    arrow.style.transform=`translateY(-50%) scale(${0.5+0.5*Math.min(ratio,1)})`;
+    if(curX>=TRIGGER&&!triggered){
+      triggered=true;
+      arrow.classList.add('show');
+      // Haptic if available
+      if(navigator.vibrate)navigator.vibrate(8);
+    }
+    if(e.cancelable)e.preventDefault();
+  }
+  function onEnd(){
+    if(!dragging)return;
+    dragging=false;
+    if(triggered){
+      setReply(msgEl.dataset.replyId,side,msgEl.dataset.replyText,msgEl.dataset.replyAuthor);
+    }
+    snapBack();
+  }
+  function snapBack(){
+    wrap.style.transition='transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94)';
+    wrap.style.transform='translateX(0)';
+    arrow.classList.remove('show');
+    arrow.style.opacity='0';
+    arrow.style.transform='translateY(-50%) scale(0.5)';
+    triggered=false;
+  }
+
+  // Touch events (mobile)
+  wrap.addEventListener('touchstart',onStart,{passive:true});
+  wrap.addEventListener('touchmove',onMove,{passive:false});
+  wrap.addEventListener('touchend',onEnd,{passive:true});
+
+  // Mouse drag (desktop alternative)
+  wrap.addEventListener('mousedown',e=>{if(e.button!==0)return;onStart(e);
+    const mm=ev=>onMove(ev);
+    const mu=()=>{onEnd();window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);};
+    window.addEventListener('mousemove',mm);
+    window.addEventListener('mouseup',mu);
+  });
 }
 
 async function sendSocialMsg(){
