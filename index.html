@@ -95,7 +95,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .web-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
 
 /* CHAT */
-.chat-area{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;scroll-behavior:smooth;}
+.chat-area{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;scroll-behavior:smooth;min-height:0;}
 .chat-area::-webkit-scrollbar{width:3px;}.chat-area::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.07);border-radius:3px;}
 
 /* HERO */
@@ -196,13 +196,15 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .nav-mode-btn.active{background:var(--green-dim);border-color:var(--green-border);color:var(--green);box-shadow:0 0 10px rgba(0,191,165,0.1);}
 .nav-mode-btn.active svg{opacity:1;}
 
-/* ── NEW MODE PANELS ── */
-.panels-container{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
-.panel{display:none;flex:1;flex-direction:column;overflow:hidden;width:100%;min-width:0;position:absolute;inset:0;}
-.panel.active{display:flex;position:relative;}
+
+/* ── PANELS ── */
+.panels-container{flex:1;display:block;overflow:hidden;min-height:0;position:relative;}
+.panel{display:none;position:absolute;inset:0;flex-direction:column;overflow:hidden;}
+.panel.active{display:flex;}
+
 
 /* TRAINING */
-.training-panel{padding:24px 20px;overflow-y:auto;flex:1;}
+.training-panel{padding:24px 20px;overflow-y:auto;flex:1;height:100%;}
 .training-panel::-webkit-scrollbar{width:3px;}.training-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.07);}
 .training-title{font-family:"Space Mono",monospace;font-size:0.7rem;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:18px;}
 .training-block{background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;margin-bottom:14px;}
@@ -221,7 +223,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .training-example-row input:focus{border-color:var(--green-border);}
 
 /* CODE SANDBOX */
-.code-sandbox{display:flex;flex:1;overflow:hidden;flex-direction:column;}
+.code-sandbox{display:flex;flex:1;overflow:hidden;flex-direction:column;height:100%;}
 .sandbox-toolbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border-bottom:1px solid rgba(255,255,255,0.04);flex-shrink:0;}
 .sandbox-tab{padding:5px 14px;border-radius:8px;font-size:0.72rem;font-family:"Space Mono",monospace;cursor:pointer;border:1px solid rgba(255,255,255,0.07);background:none;color:var(--text-dim);transition:all 0.2s;letter-spacing:1px;}
 .sandbox-tab.active{background:var(--green-dim);border-color:var(--green-border);color:var(--green);}
@@ -248,7 +250,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .icon-nav-avatar:hover{border-color:var(--green);}
 
 /* SETTINGS PANEL */
-.settings-panel{flex:1;overflow-y:auto;padding:28px 32px;}
+.settings-panel{flex:1;overflow-y:auto;padding:28px 32px;height:100%;}
 .settings-panel::-webkit-scrollbar{width:3px;}
 .settings-title{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:20px;}
 .settings-block{background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:18px;margin-bottom:14px;}
@@ -265,8 +267,8 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .color-swatch.active,.color-swatch:hover{border-color:#fff;transform:scale(1.15);}
 
 /* SOCIAL PANEL */
-.social-panel{display:flex;flex:1;overflow:hidden;width:100%;}
-.social-sidebar{width:300px;min-width:260px;background:var(--surface);border-right:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;flex-shrink:0;}
+.social-panel{display:flex;flex:1;overflow:hidden;width:100%;height:100%;}
+.social-sidebar{width:300px;min-width:260px;background:var(--surface);border-right:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;flex-shrink:0;height:100%;}
 .social-sidebar-top{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,0.04);}
 .social-tabs{display:flex;gap:4px;margin-bottom:10px;}
 .social-tab{flex:1;padding:6px 4px;border-radius:8px;font-size:0.62rem;font-family:"Space Mono",monospace;cursor:pointer;border:1px solid rgba(255,255,255,0.07);background:none;color:var(--text-dim);transition:all 0.2s;text-align:center;}
@@ -292,7 +294,74 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .contact-info{flex:1;min-width:0;}
 .contact-name{font-size:0.8rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .contact-last{font-size:0.67rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.social-chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+/* ── MEDIA DRAWER ── */
+.social-chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+.media-drawer{position:absolute;top:0;right:0;bottom:0;width:260px;background:var(--surface);border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;z-index:20;transform:translateX(100%);transition:transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94);}
+.media-drawer.open{transform:translateX(0);}
+.media-drawer-header{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px;border-bottom:1px solid rgba(255,255,255,0.05);flex-shrink:0;font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;}
+.media-drawer-close{background:none;border:none;color:var(--text-dim);cursor:pointer;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all 0.15s;}
+.media-drawer-close:hover{background:var(--surface2);color:var(--text);}
+.media-drawer-close svg{width:14px;height:14px;}
+.media-drawer-tabs{display:flex;gap:4px;padding:10px 10px 6px;flex-shrink:0;}
+.media-tab{flex:1;padding:5px 4px;border-radius:7px;font-size:0.58rem;font-family:'Space Mono',monospace;cursor:pointer;border:1px solid rgba(255,255,255,0.07);background:none;color:var(--text-dim);transition:all 0.15s;text-align:center;}
+.media-tab.active{background:var(--green-dim);border-color:var(--green-border);color:var(--green);}
+.media-drawer-body{flex:1;overflow-y:auto;padding:8px 10px;}
+.media-drawer-body::-webkit-scrollbar{width:2px;}
+.media-drawer-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.07);}
+/* Image grid */
+.media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;}
+.media-grid-item{aspect-ratio:1;border-radius:6px;overflow:hidden;cursor:pointer;position:relative;background:var(--surface2);}
+.media-grid-item img{width:100%;height:100%;object-fit:cover;transition:transform 0.2s;}
+.media-grid-item:hover img{transform:scale(1.05);}
+.media-grid-item .media-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);transition:background 0.2s;display:flex;align-items:center;justify-content:center;}
+.media-grid-item:hover .media-overlay{background:rgba(0,0,0,0.3);}
+.media-grid-item .media-overlay svg{opacity:0;width:18px;height:18px;color:#fff;transition:opacity 0.2s;}
+.media-grid-item:hover .media-overlay svg{opacity:1;}
+/* Doc list */
+.media-doc-item{display:flex;align-items:center;gap:8px;padding:8px 9px;background:var(--surface2);border:1px solid rgba(255,255,255,0.05);border-radius:9px;margin-bottom:5px;cursor:pointer;text-decoration:none;transition:border-color 0.15s;}
+.media-doc-item:hover{border-color:var(--green-border);}
+.media-doc-icon{width:30px;height:30px;border-radius:7px;background:var(--green-dim);border:1px solid var(--green-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.media-doc-icon svg{width:14px;height:14px;color:var(--green);}
+.media-doc-info{flex:1;min-width:0;}
+.media-doc-name{font-size:0.74rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.media-doc-meta{font-size:0.6rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-top:2px;}
+.media-doc-dl{width:24px;height:24px;border-radius:6px;background:none;border:none;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color 0.15s;}
+.media-doc-dl:hover{color:var(--green);}
+.media-doc-dl svg{width:13px;height:13px;}
+.media-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px;color:var(--text-dim);font-size:0.74rem;gap:8px;text-align:center;}
+.media-empty svg{width:28px;height:28px;opacity:0.3;}
+.media-section-label{font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;padding:8px 2px 5px;display:block;}
+.media-loading{display:flex;gap:5px;align-items:center;justify-content:center;padding:24px;}
+.media-loading span{width:6px;height:6px;border-radius:50%;background:var(--green-border);animation:socialBounce 1.3s infinite ease-in-out;}
+.media-loading span:nth-child(2){animation-delay:0.18s;}
+.media-loading span:nth-child(3){animation-delay:0.36s;}
+/* Video / Audio bubbles */
+.social-video-bubble{max-width:260px;border-radius:12px;overflow:hidden;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);}
+.social-audio-bubble{padding:8px 10px;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);border-radius:12px;max-width:260px;}
+.social-media-caption{display:flex;align-items:center;gap:5px;padding:5px 8px 6px;font-size:0.68rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* Style native video/audio controls */
+.social-video-bubble video,.social-audio-bubble audio{outline:none;}
+.social-video-bubble video::-webkit-media-controls-panel{background:var(--surface3);}
+
+/* Image bubble */
+.social-img-bubble{max-width:220px;border-radius:12px;overflow:hidden;cursor:pointer;border:1px solid rgba(255,255,255,0.08);display:block;transition:transform 0.15s;}
+.social-img-bubble:hover{transform:scale(1.02);}
+.social-img-bubble img{width:100%;display:block;max-height:260px;object-fit:cover;}
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:none;align-items:center;justify-content:center;}
+.lightbox.open{display:flex;}
+.lightbox-content{position:relative;max-width:90vw;max-height:88vh;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.lightbox-content img{max-width:90vw;max-height:80vh;border-radius:10px;object-fit:contain;box-shadow:0 0 60px rgba(0,0,0,0.6);}
+.lightbox-caption{font-size:0.75rem;color:rgba(255,255,255,0.5);font-family:'Space Mono',monospace;}
+.lightbox-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.1);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;z-index:2;}
+.lightbox-close:hover{background:rgba(255,255,255,0.22);}
+.lightbox-close svg{width:16px;height:16px;}
+.lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.08);border:none;color:#fff;width:42px;height:42px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;z-index:2;}
+.lightbox-nav:hover{background:rgba(255,255,255,0.2);}
+.lightbox-nav.prev{left:16px;}
+.lightbox-nav.next{right:16px;}
+.lightbox-nav svg{width:18px;height:18px;}
+.lightbox-nav:disabled{opacity:0.25;cursor:default;}
 .social-chat-header{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .social-chat-title{font-size:0.9rem;font-weight:500;}
 .social-chat-sub{font-size:0.68rem;color:var(--text-dim);}
@@ -323,7 +392,18 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .img-gen-loading::before{content:"";width:11px;height:11px;border:2px solid var(--green-border);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* REPLY TO MESSAGE */
+/* OFFLINE / CONNECTION STATUS */
+.conn-bar{display:none;align-items:center;gap:7px;padding:5px 14px;font-size:0.7rem;font-family:'Space Mono',monospace;flex-shrink:0;}
+.conn-bar.offline{display:flex;background:rgba(255,80,80,0.12);border-bottom:1px solid rgba(255,80,80,0.2);color:#ff6b6b;}
+.conn-bar.reconnecting{display:flex;background:rgba(255,180,0,0.1);border-bottom:1px solid rgba(255,180,0,0.2);color:#ffb300;}
+.conn-bar.restored{display:flex;background:rgba(0,191,165,0.1);border-bottom:1px solid var(--green-border);color:var(--green);}
+.conn-bar svg{width:12px;height:12px;flex-shrink:0;}
+.social-msg.pending .social-bubble,.social-msg.pending .social-file-bubble{opacity:0.55;}
+.social-msg.pending .social-seen::after{content:' enviando…';font-size:0.55rem;color:var(--text-dim);}
+.social-msg.failed .social-bubble{border-color:rgba(255,80,80,0.4);}
+.social-msg.failed .social-seen{color:#ff6b6b;}
+.retry-btn{background:none;border:none;color:#ff6b6b;font-size:0.6rem;font-family:'Space Mono',monospace;cursor:pointer;text-decoration:underline;padding:0 2px;}
+.retry-btn:hover{color:#ff9999;}
 .reply-preview{background:var(--surface3);border-left:3px solid var(--green);border-radius:8px;padding:6px 10px;margin-bottom:6px;font-size:0.73rem;color:var(--text-dim);cursor:pointer;position:relative;overflow:hidden;max-width:100%;}
 .reply-preview .reply-author{font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--green);margin-bottom:2px;letter-spacing:0.5px;}
 .reply-preview .reply-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;}
@@ -656,10 +736,54 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
           <div id="socialActiveChatWrapper" style="display:none;flex:1;flex-direction:column;overflow:hidden;display:none;">
             <div class="social-chat-header">
               <div class="contact-avatar" id="scAvatar" style="position:relative;">?</div>
-              <div>
+              <div style="flex:1;min-width:0;">
                 <div class="social-chat-title" id="scTitle">—</div>
                 <div class="social-chat-sub" id="scSub">en línea</div>
               </div>
+              <button class="icon-btn" id="mediaDrawerBtn" onclick="toggleMediaDrawer()" title="Archivos compartidos" style="flex-shrink:0;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </button>
+            </div>
+
+            <!-- ── MEDIA DRAWER ── -->
+            <div class="media-drawer" id="mediaDrawer">
+              <div class="media-drawer-header">
+                <span>Archivos compartidos</span>
+                <button class="media-drawer-close" onclick="toggleMediaDrawer()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+              <div class="media-drawer-tabs">
+                <button class="media-tab active" id="mediaTabAll" onclick="setMediaTab('all',this)">Todo</button>
+                <button class="media-tab" id="mediaTabImg" onclick="setMediaTab('img',this)">Imágenes</button>
+                <button class="media-tab" id="mediaTabDocs" onclick="setMediaTab('docs',this)">Archivos</button>
+              </div>
+              <div class="media-drawer-body" id="mediaDrawerBody">
+                <div class="media-loading" id="mediaLoading">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── LIGHTBOX ── -->
+            <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+              <button class="lightbox-close" onclick="closeLightbox()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+              <button class="lightbox-nav prev" id="lightboxPrev" onclick="lightboxNav(-1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <div class="lightbox-content">
+                <img id="lightboxImg" src="" alt="">
+                <div class="lightbox-caption" id="lightboxCaption"></div>
+              </div>
+              <button class="lightbox-nav next" id="lightboxNext" onclick="lightboxNav(1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+            <div class="conn-bar" id="socialConnBar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+              <span id="socialConnMsg">Sin conexión — los mensajes se enviarán al reconectar</span>
             </div>
             <div class="social-messages" id="socialMessages"></div>
             <div class="reply-bar" id="replyBar">
@@ -671,7 +795,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
               <button class="reply-bar-close" onclick="cancelReply()">✕</button>
             </div>
             <div class="social-input-row">
-              <input type="file" id="socialFileInput" style="display:none" onchange="sendSocialFile(this)">
+              <input type="file" id="socialFileInput" style="display:none" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" onchange="sendSocialFile(this)">
               <button class="icon-btn" onclick="document.getElementById('socialFileInput').click()" title="Enviar archivo" style="flex-shrink:0;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
               </button>
@@ -768,17 +892,21 @@ function translateSupabaseError(msg){
 
 async function doLoginEmail(){
   hideErr('loginError');
-  const emailOrUser=document.getElementById('loginEmail').value.trim();
+  const raw=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPassword').value;
-  if(!emailOrUser||!pass){showErr('loginError','Completa todos los campos');return;}
+  if(!raw||!pass){showErr('loginError','Completa todos los campos');return;}
 
-  let emailToUse=emailOrUser;
+  // Detectar si es email real (tiene @ seguido de dominio con punto)
+  // o es un @usuario / nombre de usuario sin @
+  const isEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw);
+  let emailToUse=raw;
 
-  // Si no tiene @ es un username — buscar el email en profiles
-  if(!emailOrUser.includes('@')){
-    const username=emailOrUser.toLowerCase().replace(/^@/,'');
+  if(!isEmail){
+    // Es un @usuario — quitar @ si lo pusieron
+    const username=raw.replace(/^@/,'').toLowerCase();
     const{data:profile,error:profErr}=await sb.from('profiles').select('email').eq('username',username).maybeSingle();
     if(profErr||!profile){showErr('loginError','Usuario @'+username+' no encontrado');return;}
+    if(!profile.email){showErr('loginError','Ese usuario no tiene email registrado');return;}
     emailToUse=profile.email;
   }
 
@@ -853,6 +981,7 @@ async function initApp(user){
   await ensureProfile();
   await loadTraining();
   loadSettingsPanel();
+  initConnectionWatch();
 }
 
 // Al cargar la página: obtener sesión activa inmediatamente (no esperar eventos)
@@ -1718,6 +1847,8 @@ function renderContacts(){
 
 async function openSocialChat(partnerId, partnerUsername, partnerEmail){
   currentChatPartner={id:partnerId,username:partnerUsername,email:partnerEmail};
+  // Close media drawer if open
+  document.getElementById('mediaDrawer')?.classList.remove('open');
   document.getElementById('socialEmpty').style.display='none';
   const w=document.getElementById('socialActiveChatWrapper');
   w.style.display='flex';w.style.flexDirection='column';
@@ -1766,7 +1897,17 @@ async function openSocialChat(partnerId, partnerUsername, partnerEmail){
         showSocialTyping();
       }
     })
-    .subscribe();
+    .subscribe(status=>{
+      _realtimeOk=(status==='SUBSCRIBED');
+      if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+        _realtimeOk=false;
+        // Auto retry after 4s
+        clearTimeout(_reconnectTimer);
+        _reconnectTimer=setTimeout(()=>{
+          if(_isOnline)reconnectSocialChannel();
+        },4000);
+      }
+    });
 }
 
 function showSocialTyping(){
@@ -1838,15 +1979,42 @@ function appendSocialMsg(side,text,ts,seen=false,replyTo=null,msgId=null){
     </div>`;
   }
 
-  // Main bubble
+  // Main bubble — use shared MEDIA_* constants
   let bubble='';
   if(text&&text.startsWith('__FILE__')){
     const parts=text.replace('__FILE__','').split('||');
     const fname=parts[0]||'Archivo';
     const url=parts[1]||'#';
-    bubble=`<a class="social-file-bubble" href="${url}" target="_blank" rel="noopener">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      ${fname}</a>`;
+    if(MEDIA_IMG.test(fname)||MEDIA_IMG.test(url)){
+      bubble=`<div class="social-img-bubble" onclick="openLightboxFromMsg('${url.replace(/'/g,"\\'")}','${fname.replace(/'/g,"\\'")}')">
+        <img src="${url}" alt="${fname}" loading="lazy" onerror="this.parentElement.outerHTML='<a class=\\"social-file-bubble\\" href=\\"${url}\\" target=\\"_blank\\" rel=\\"noopener\\"><svg viewBox=\\"0 0 24 24\\" fill=\\"none\\" stroke=\\"currentColor\\" stroke-width=\\"2\\" stroke-linecap=\\"round\\"><path d=\\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\\"/><polyline points=\\"14 2 14 8 20 8\\"/></svg>${fname}</a>'">
+      </div>`;
+    } else if(MEDIA_VID.test(fname)||MEDIA_VID.test(url)){
+      bubble=`<div class="social-video-bubble">
+        <video controls preload="metadata" style="max-width:100%;max-height:220px;border-radius:10px;display:block;background:#000;">
+          <source src="${url}">
+          Tu navegador no soporta este video.
+        </video>
+        <div class="social-media-caption">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          ${fname}
+        </div>
+      </div>`;
+    } else if(MEDIA_AUD.test(fname)||MEDIA_AUD.test(url)){
+      bubble=`<div class="social-audio-bubble">
+        <audio controls preload="metadata" style="width:100%;max-width:240px;">
+          <source src="${url}">
+        </audio>
+        <div class="social-media-caption">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          ${fname}
+        </div>
+      </div>`;
+    } else {
+      bubble=`<a class="social-file-bubble" href="${url}" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        ${fname}</a>`;
+    }
   } else {
     bubble=`<div class="social-bubble">${text}</div>`;
   }
@@ -1995,6 +2163,154 @@ function attachSwipeReply(msgEl, side){
   });
 }
 
+// ══════════════════════════════════════════
+// ── OFFLINE QUEUE + RECONNECTION ──
+// ══════════════════════════════════════════
+const QUEUE_KEY='lova_msg_queue';
+
+function getQueue(){try{return JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]');}catch{return[];}}
+function saveQueue(q){localStorage.setItem(QUEUE_KEY,JSON.stringify(q));}
+
+function addToQueue(item){
+  const q=getQueue();
+  q.push(item);
+  saveQueue(q);
+}
+
+function removeFromQueue(tempId){
+  saveQueue(getQueue().filter(m=>m.tempId!==tempId));
+}
+
+// Connection state
+let _isOnline=navigator.onLine;
+let _realtimeOk=false;
+let _reconnectTimer=null;
+
+function setConnBar(state,msg){
+  const bar=document.getElementById('socialConnBar');
+  const txt=document.getElementById('socialConnMsg');
+  if(!bar)return;
+  bar.className='conn-bar '+state;
+  if(txt)txt.textContent=msg||'';
+  // Auto-hide "restored" after 3s
+  if(state==='restored'){
+    clearTimeout(bar._hideTimer);
+    bar._hideTimer=setTimeout(()=>bar.className='conn-bar',3000);
+  }
+}
+
+function initConnectionWatch(){
+  window.addEventListener('online',async()=>{
+    _isOnline=true;
+    setConnBar('reconnecting','Reconectando...');
+    await reconnectSocialChannel();
+    await flushQueue();
+  });
+  window.addEventListener('offline',()=>{
+    _isOnline=false;
+    _realtimeOk=false;
+    setConnBar('offline','Sin conexión — los mensajes se enviarán al reconectar');
+  });
+}
+
+async function reconnectSocialChannel(){
+  if(!currentChatPartner||!currentUser)return;
+  const roomId=[currentUser.id,currentChatPartner.id].sort().join('_');
+  // Remove stale channel
+  if(socialChannel){try{sb.removeChannel(socialChannel);}catch{} socialChannel=null;}
+  _realtimeOk=false;
+
+  // Re-subscribe
+  socialChannel=sb.channel('social_'+roomId)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'social_messages',filter:`room_id=eq.${roomId}`},payload=>{
+      const m=payload.new;
+      if(m.sender_id!==currentUser.id){
+        removeSocialTyping();
+        const{text,replyTo}=parseMsgContent(m.content);
+        appendSocialMsg('them',text,m.created_at,false,replyTo,m.id);
+        document.getElementById('socialMessages').scrollTop=9999;
+      }
+    })
+    .on('broadcast',{event:'typing'},payload=>{
+      if(payload.payload?.user_id===currentChatPartner?.id)showSocialTyping();
+    })
+    .subscribe(status=>{
+      if(status==='SUBSCRIBED'){
+        _realtimeOk=true;
+        // Resync: load messages that arrived while offline
+        resyncMissedMessages(roomId);
+      }
+    });
+}
+
+// Fetch messages we might have missed while offline
+async function resyncMissedMessages(roomId){
+  const box=document.getElementById('socialMessages');
+  if(!box)return;
+  // Get the timestamp of the last displayed message
+  const existing=[...box.querySelectorAll('.social-msg[data-msg-id]')];
+  const lastEl=existing[existing.length-1];
+  if(!lastEl)return;
+  const lastId=lastEl.dataset.msgId;
+  if(!lastId||lastId.startsWith('tmp_'))return;
+
+  // Fetch messages newer than last known
+  const{data:msgs}=await sb.from('social_messages')
+    .select('*').eq('room_id',roomId)
+    .gt('id',lastId) // UUIDs are ordered by creation in Supabase
+    .order('created_at',{ascending:true}).limit(50);
+
+  if(!msgs||!msgs.length)return;
+
+  let newCount=0;
+  msgs.forEach(m=>{
+    // Skip if already rendered
+    if(box.querySelector(`[data-msg-id="${m.id}"]`))return;
+    const{text,replyTo}=parseMsgContent(m.content);
+    appendSocialMsg(m.sender_id===currentUser.id?'me':'them',text,m.created_at,m.seen||false,replyTo,m.id);
+    newCount++;
+  });
+  if(newCount>0){
+    box.scrollTop=box.scrollHeight;
+    setConnBar('restored',`Reconectado — ${newCount} mensaje${newCount>1?'s':''} nuevo${newCount>1?'s':''}`);
+  } else {
+    setConnBar('restored','Reconectado');
+  }
+}
+
+// Flush pending queue when connection restored
+async function flushQueue(){
+  const q=getQueue();
+  if(!q.length)return;
+  for(const item of q){
+    try{
+      // Update the pending bubble to show it's being sent
+      const el=document.querySelector(`[data-msg-id="${item.tempId}"]`);
+      if(el)el.classList.replace('failed','pending');
+
+      const{error}=await sb.from('social_messages').insert([{
+        room_id:item.roomId,
+        sender_id:item.senderId,
+        receiver_id:item.receiverId,
+        content:item.content
+      }]);
+      if(!error){
+        removeFromQueue(item.tempId);
+        // Mark bubble as sent
+        if(el){
+          el.classList.remove('pending');
+          const seen=el.querySelector('.social-seen');
+          if(seen)seen.textContent='✓';
+          const retry=el.querySelector('.retry-btn');
+          if(retry)retry.remove();
+        }
+      }
+    }catch(e){
+      console.error('flush error',e);
+    }
+  }
+}
+
 async function sendSocialMsg(){
   const input=document.getElementById('socialInput');
   const text=input.value.trim();
@@ -2002,7 +2318,6 @@ async function sendSocialMsg(){
   input.value='';
   const roomId=[currentUser.id,currentChatPartner.id].sort().join('_');
 
-  // Build content with optional reply prefix
   let content=text;
   let replyMeta=null;
   if(replyingTo){
@@ -2013,12 +2328,237 @@ async function sendSocialMsg(){
 
   const tempId='tmp_'+Date.now();
   appendSocialMsg('me',text,new Date().toISOString(),false,replyMeta,tempId);
-  document.getElementById('socialMessages').scrollTop=9999;
+  const box=document.getElementById('socialMessages');
+  box.scrollTop=9999;
   clearTimeout(typingTimeout);
-  await sb.from('social_messages').insert([{room_id:roomId,sender_id:currentUser.id,receiver_id:currentChatPartner.id,content}]);
+
+  const msgEl=box.querySelector(`[data-msg-id="${tempId}"]`);
+
+  // If offline, queue it
+  if(!_isOnline||!navigator.onLine){
+    if(msgEl)msgEl.classList.add('pending');
+    addToQueue({tempId,roomId,senderId:currentUser.id,receiverId:currentChatPartner.id,content});
+    setConnBar('offline','Sin conexión — el mensaje se enviará al reconectar');
+    return;
+  }
+
+  // Online: try to send
+  if(msgEl)msgEl.classList.add('pending');
+  try{
+    const{error}=await sb.from('social_messages').insert([{
+      room_id:roomId,sender_id:currentUser.id,receiver_id:currentChatPartner.id,content
+    }]);
+    if(error){throw error;}
+    if(msgEl){
+      msgEl.classList.remove('pending');
+      const seen=msgEl.querySelector('.social-seen');
+      if(seen)seen.textContent='✓';
+    }
+  }catch(e){
+    console.error('send error:',e.message);
+    if(msgEl){
+      msgEl.classList.remove('pending');
+      msgEl.classList.add('failed');
+      // Add retry button
+      const timeDiv=msgEl.querySelector('.social-msg-time');
+      if(timeDiv&&!timeDiv.querySelector('.retry-btn')){
+        const btn=document.createElement('button');
+        btn.className='retry-btn';
+        btn.textContent='reintentar';
+        btn.onclick=()=>retrySend(tempId,roomId,content,msgEl);
+        timeDiv.appendChild(btn);
+      }
+    }
+    // Also add to queue for auto-retry when reconnect
+    addToQueue({tempId,roomId,senderId:currentUser.id,receiverId:currentChatPartner.id,content});
+  }
 }
 
-function broadcastTyping(){
+async function retrySend(tempId,roomId,content,msgEl){
+  if(msgEl){msgEl.classList.remove('failed');msgEl.classList.add('pending');}
+  try{
+    const{error}=await sb.from('social_messages').insert([{
+      room_id:roomId,sender_id:currentUser.id,receiver_id:currentChatPartner.id,content
+    }]);
+    if(!error){
+      removeFromQueue(tempId);
+      if(msgEl){
+        msgEl.classList.remove('pending','failed');
+        const seen=msgEl.querySelector('.social-seen');
+        if(seen)seen.textContent='✓';
+        const btn=msgEl.querySelector('.retry-btn');
+        if(btn)btn.remove();
+      }
+    }else throw error;
+  }catch{
+    if(msgEl){msgEl.classList.remove('pending');msgEl.classList.add('failed');}
+  }
+}
+
+// ══════════════════════════════════════════
+// ── MEDIA DRAWER ──
+// ══════════════════════════════════════════
+// ── MEDIA TYPE HELPERS ──
+const MEDIA_IMG=/\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?|$)/i;
+const MEDIA_VID=/\.(mp4|webm|mov|ogg|mkv)(\?|$)/i;
+const MEDIA_AUD=/\.(mp3|wav|ogg|m4a|aac|flac)(\?|$)/i;
+const IMG_EXTS_RE=MEDIA_IMG; // alias for drawer code
+let _mediaTab='all';
+let _lightboxImages=[]; // [{url,name}]
+let _lightboxIdx=0;
+
+function toggleMediaDrawer(){
+  const drawer=document.getElementById('mediaDrawer');
+  const isOpen=drawer.classList.toggle('open');
+  if(isOpen)loadMediaDrawer();
+}
+
+function setMediaTab(tab,btn){
+  _mediaTab=tab;
+  document.querySelectorAll('.media-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadMediaDrawer();
+}
+
+async function loadMediaDrawer(){
+  if(!currentChatPartner||!currentUser)return;
+  const body=document.getElementById('mediaDrawerBody');
+  body.innerHTML='<div class="media-loading"><span></span><span></span><span></span></div>';
+
+  const roomId=[currentUser.id,currentChatPartner.id].sort().join('_');
+  // Fetch all file messages in this conversation
+  const{data:msgs}=await sb.from('social_messages')
+    .select('content,sender_id,created_at')
+    .eq('room_id',roomId)
+    .like('content','__FILE__%')
+    .order('created_at',{ascending:false})
+    .limit(200);
+
+  if(!msgs||!msgs.length){
+    body.innerHTML=`<div class="media-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>Sin archivos compartidos</div>`;
+    return;
+  }
+
+  // Parse each file message
+  const files=msgs.map(m=>{
+    const parts=m.content.replace('__FILE__','').split('||');
+    const name=parts[0]||'Archivo';
+    const url=parts[1]||'#';
+    const isImg=MEDIA_IMG.test(name)||MEDIA_IMG.test(url);
+    const isVid=MEDIA_VID.test(name)||MEDIA_VID.test(url);
+    const isAud=MEDIA_AUD.test(name)||MEDIA_AUD.test(url);
+    const isMedia=isImg||isVid;
+    const isMe=m.sender_id===currentUser.id;
+    const date=m.created_at?new Date(m.created_at).toLocaleDateString('es-CO',{day:'2-digit',month:'short'}):'';
+    return{name,url,isImg,isVid,isAud,isMedia,isMe,date};
+  });
+
+  const media=files.filter(f=>f.isMedia); // images + videos
+  const docs=files.filter(f=>!f.isMedia); // everything else
+
+  // Lightbox images only (not video)
+  _lightboxImages=files.filter(f=>f.isImg);
+
+  body.innerHTML='';
+
+  if(_mediaTab==='all'||_mediaTab==='img'){
+    if(media.length){
+      if(_mediaTab==='all')body.insertAdjacentHTML('beforeend','<span class="media-section-label">Multimedia · '+media.length+'</span>');
+      const grid=document.createElement('div');
+      grid.className='media-grid';
+      media.forEach((f,i)=>{
+        const item=document.createElement('div');
+        item.className='media-grid-item';
+        if(f.isImg){
+          item.innerHTML=`<img src="${f.url}" alt="${f.name}" loading="lazy">
+            <div class="media-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>`;
+          const imgIdx=_lightboxImages.findIndex(x=>x.url===f.url);
+          item.onclick=()=>openLightbox(imgIdx>=0?imgIdx:0);
+        } else {
+          // Video — show play icon over dark bg
+          item.style.background='#111';
+          item.innerHTML=`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22" style="color:var(--green);opacity:0.8"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span style="font-size:0.5rem;color:var(--text-dim);font-family:'Space Mono',monospace;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;max-width:90%;">${f.name}</span>
+          </div>`;
+          item.onclick=()=>window.open(f.url,'_blank');
+        }
+        grid.appendChild(item);
+      });
+      body.appendChild(grid);
+    } else if(_mediaTab==='img'){
+      body.innerHTML=`<div class="media-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Sin multimedia compartida</div>`;
+      return;
+    }
+  }
+
+  if(_mediaTab==='all'||_mediaTab==='docs'){
+    if(docs.length){
+      if(_mediaTab==='all')body.insertAdjacentHTML('beforeend','<span class="media-section-label" style="margin-top:10px;">Archivos · '+docs.length+'</span>');
+      docs.forEach(f=>{
+        const ext=(f.name.split('.').pop()||'file').toUpperCase().slice(0,4);
+        const iconSvg=f.isAud
+          ?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`
+          :`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 9 20 9"/></svg>`;
+        const item=document.createElement('a');
+        item.className='media-doc-item';
+        item.href=f.url;item.target='_blank';item.rel='noopener';
+        item.innerHTML=`<div class="media-doc-icon">${iconSvg}</div>
+          <div class="media-doc-info"><div class="media-doc-name">${f.name}</div><div class="media-doc-meta">${ext} · ${f.date} · ${f.isMe?'Tú':'Ellos'}</div></div>
+          <button class="media-doc-dl" onclick="event.preventDefault();window.open('${f.url}','_blank')" title="Descargar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`;
+        body.appendChild(item);
+      });
+    } else if(_mediaTab==='docs'){
+      body.innerHTML=`<div class="media-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>Sin documentos compartidos</div>`;
+      return;
+    }
+  }
+
+  if(!media.length&&!docs.length){
+    body.innerHTML=`<div class="media-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>Sin archivos compartidos</div>`;
+  }
+}
+
+// ── LIGHTBOX ──
+function openLightbox(idx){
+  _lightboxIdx=idx;
+  const f=_lightboxImages[idx];
+  if(!f)return;
+  const lb=document.getElementById('lightbox');
+  document.getElementById('lightboxImg').src=f.url;
+  document.getElementById('lightboxCaption').textContent=f.name+(f.date?' · '+f.date:'');
+  document.getElementById('lightboxPrev').disabled=idx===0;
+  document.getElementById('lightboxNext').disabled=idx===_lightboxImages.length-1;
+  lb.classList.add('open');
+  document.addEventListener('keydown',lightboxKeyHandler);
+}
+
+function openLightboxFromMsg(url,name){
+  // Find index in _lightboxImages or create temp entry
+  const idx=_lightboxImages.findIndex(f=>f.url===url);
+  if(idx>=0){openLightbox(idx);return;}
+  // Not in drawer yet — show directly
+  _lightboxImages=[{url,name}];
+  openLightbox(0);
+}
+
+function closeLightbox(e){
+  if(e&&e.target!==document.getElementById('lightbox')&&!e.target.closest('.lightbox-close'))return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.removeEventListener('keydown',lightboxKeyHandler);
+}
+
+function lightboxNav(dir){
+  const next=_lightboxIdx+dir;
+  if(next<0||next>=_lightboxImages.length)return;
+  openLightbox(next);
+}
+
+function lightboxKeyHandler(e){
+  if(e.key==='ArrowLeft')lightboxNav(-1);
+  if(e.key==='ArrowRight')lightboxNav(1);
+  if(e.key==='Escape')document.getElementById('lightbox').classList.remove('open');
+}
   if(!socialChannel||!currentChatPartner)return;
   socialChannel.send({type:'broadcast',event:'typing',payload:{user_id:currentUser.id}});
   clearTimeout(typingTimeout);
