@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>LOVA</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 30'%3E%3Ccircle cx='15' cy='15' r='13' fill='white'/%3E%3Crect x='13.5' y='2' width='3' height='26' fill='%23080808'/%3E%3Cpath d='M46 4 A13 13 0 1 0 46 26' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3Crect x='37' y='12.5' width='9' height='5' fill='%23080808'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -479,6 +480,12 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .md-bubble .md-hr{border:none;border-top:1px solid rgba(255,255,255,0.08);margin:0.8em 0;}
 .stream-cursor{display:inline-block;width:2px;height:1em;background:var(--green);margin-left:2px;vertical-align:text-bottom;animation:cursorBlink 0.7s steps(1) infinite;}
 @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+/* Social audio recording */
+#socialAudioBtn.recording{color:#ff5252;}
+#socialAudioBtn.recording::before{opacity:1;background:conic-gradient(from var(--a,0deg),transparent 30%,#ff5252 60%,transparent 100%);}
+.social-audio-timer{font-family:'Space Mono',monospace;font-size:0.65rem;color:#ff5252;display:none;align-items:center;gap:4px;flex-shrink:0;}
+.social-audio-timer.show{display:flex;}
+.rec-dot{width:6px;height:6px;border-radius:50%;background:#ff5252;animation:pulse 0.8s infinite;}
 </style>
 </head>
 <body>
@@ -799,6 +806,10 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
               <button class="icon-btn" onclick="document.getElementById('socialFileInput').click()" title="Enviar archivo" style="flex-shrink:0;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
               </button>
+              <button class="icon-btn" id="socialAudioBtn" onclick="toggleSocialAudio()" title="Grabar audio" style="flex-shrink:0;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+              </button>
+              <div class="social-audio-timer" id="socialRecTimer"><span class="rec-dot"></span><span class="rec-time">0:00</span></div>
               <input class="social-input" id="socialInput" placeholder="Escribe un mensaje..." oninput="broadcastTyping()" onkeydown="if(event.key==='Enter')sendSocialMsg()">
               <button class="social-send-btn" onclick="sendSocialMsg()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -2559,6 +2570,7 @@ function lightboxKeyHandler(e){
   if(e.key==='ArrowRight')lightboxNav(1);
   if(e.key==='Escape')document.getElementById('lightbox').classList.remove('open');
 }
+function broadcastTyping(){
   if(!socialChannel||!currentChatPartner)return;
   socialChannel.send({type:'broadcast',event:'typing',payload:{user_id:currentUser.id}});
   clearTimeout(typingTimeout);
@@ -2858,6 +2870,62 @@ async function saveSetupUsername(){
   document.getElementById('usernameSetupScreen').style.display='none';
   updateSidebarUser();
   startSocialRealtime();
+}
+
+// ── AUDIO SOCIAL ──
+let _socialMediaRec=null,_socialAudioChunks=[],_socialRecTimer=null,_socialRecSecs=0;
+async function toggleSocialAudio(){
+  const btn=document.getElementById('socialAudioBtn');
+  if(_socialMediaRec&&_socialMediaRec.state==='recording'){_socialMediaRec.stop();return;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    _socialAudioChunks=[];
+    _socialMediaRec=new MediaRecorder(stream);
+    _socialMediaRec.ondataavailable=e=>{if(e.data.size>0)_socialAudioChunks.push(e.data);};
+    _socialMediaRec.onstop=async()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      clearInterval(_socialRecTimer);
+      btn.classList.remove('recording');
+      btn.title='Grabar audio';
+      const timerEl=document.getElementById('socialRecTimer');
+      if(timerEl)timerEl.classList.remove('show');
+      const blob=new Blob(_socialAudioChunks,{type:'audio/webm'});
+      const file=new File([blob],`audio_${Date.now()}.webm`,{type:'audio/webm'});
+      await _uploadSocialAudio(file);
+    };
+    _socialMediaRec.start();
+    btn.classList.add('recording');
+    btn.title='Detener grabación (toca de nuevo)';
+    _socialRecSecs=0;
+    const timerEl=document.getElementById('socialRecTimer');
+    if(timerEl){timerEl.classList.add('show');timerEl.querySelector('.rec-time').textContent='0:00';}
+    _socialRecTimer=setInterval(()=>{
+      _socialRecSecs++;
+      const m=Math.floor(_socialRecSecs/60),s=_socialRecSecs%60;
+      if(timerEl)timerEl.querySelector('.rec-time').textContent=`${m}:${String(s).padStart(2,'0')}`;
+      if(_socialRecSecs>=120)_socialMediaRec.stop();
+    },1000);
+  }catch(e){alert('No se pudo acceder al micrófono. Verifica los permisos.');console.error(e);}
+}
+async function _uploadSocialAudio(file){
+  if(!currentChatPartner||!currentUser)return;
+  const box=document.getElementById('socialMessages');
+  const tmp=document.createElement('div');
+  tmp.className='social-msg me';
+  tmp.innerHTML=`<div class="social-bubble" style="opacity:0.6;font-size:0.78rem;font-family:'Space Mono',monospace;color:var(--green);">🎙 Enviando audio...</div>`;
+  box.appendChild(tmp);box.scrollTop=box.scrollHeight;
+  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+  const path=`social/${currentUser.id}/${Date.now()}_${safeName}`;
+  const{data:upload,error:upErr}=await sb.storage.from('social-files').upload(path,file,{cacheControl:'3600',upsert:false});
+  tmp.remove();
+  if(upErr){console.error('audio upload error:',upErr.message);return;}
+  const{data:urlData}=sb.storage.from('social-files').getPublicUrl(path);
+  const publicUrl=urlData?.publicUrl||'';
+  const content=`__FILE__${file.name}||${publicUrl}`;
+  const roomId=[currentUser.id,currentChatPartner.id].sort().join('_');
+  appendSocialMsg('me',content,new Date().toISOString());
+  box.scrollTop=box.scrollHeight;
+  await sb.from('social_messages').insert([{room_id:roomId,sender_id:currentUser.id,receiver_id:currentChatPartner.id,content}]);
 }
 
 </script>
