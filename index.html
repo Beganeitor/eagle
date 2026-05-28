@@ -199,9 +199,9 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 
 
 /* ── PANELS ── */
-.panels-container{flex:1;display:block;overflow:hidden;min-height:0;position:relative;}
-.panel{display:none;position:absolute;inset:0;flex-direction:column;overflow:hidden;}
-.panel.active{display:flex;}
+.panels-container{flex:1;overflow:hidden;min-height:0;position:relative;}
+.panel{display:none;position:absolute;inset:0;flex-direction:column;overflow:hidden;z-index:0;background:var(--black);}
+.panel.active{display:flex;z-index:1;}
 
 
 /* TRAINING */
@@ -974,12 +974,11 @@ let currentProfile=null;
 let notifChannel=null;
 
 // ── AUTH STATE ──
-// Un flag para evitar doble inicialización
 let _appInitialized=false;
+let _sessionChecked=false; // evita que onAuthStateChange re-inicie cuando ya lo hizo getSession
 
 async function initApp(user){
   if(!user)return;
-  // Si ya está inicializado con el mismo usuario Y ya tiene perfil, skip
   if(_appInitialized && currentUser?.id===user.id && currentProfile)return;
   _appInitialized=true;
   currentUser=user;
@@ -995,15 +994,14 @@ async function initApp(user){
   initConnectionWatch();
 }
 
-// Al cargar la página: obtener sesión activa inmediatamente (no esperar eventos)
+// Restaurar sesión al cargar — getSession es síncrono con el token local
 (async()=>{
-  // Manejar confirmación de email por hash en URL
   if(window.location.hash.includes('access_token')){
     await sb.auth.getSession();
     window.history.replaceState(null,'',window.location.pathname);
   }
-  // Intentar restaurar sesión guardada
   const{data:{session}}=await sb.auth.getSession();
+  _sessionChecked=true;
   if(session?.user){
     await initApp(session.user);
   } else {
@@ -1012,12 +1010,15 @@ async function initApp(user){
   }
 })();
 
-// onAuthStateChange: solo para login/logout/cambios posteriores
+// onAuthStateChange: solo actúa en eventos reales post-carga
 sb.auth.onAuthStateChange(async(event,session)=>{
+  // INITIAL_SESSION llega al cargar — lo ignoramos si getSession ya actuó
+  if(event==='INITIAL_SESSION')return;
   if(event==='SIGNED_IN' && session?.user){
     await initApp(session.user);
   } else if(event==='SIGNED_OUT'){
     _appInitialized=false;
+    _sessionChecked=false;
     currentUser=null;
     currentProfile=null;
     document.getElementById('authScreen').style.display='flex';
@@ -1559,11 +1560,7 @@ function switchView(view){
   if(view==='settings'){document.getElementById('navTitle').textContent='Ajustes';loadSettingsPanel();}
 }
 
-// ══════════════════════════════════════════
 // ── IMAGE GENERATION ──
-// ══════════════════════════════════════════
-const IMG_TRIGGERS=/\b(genera|crea|diseña|haz|dibuja|muestra|imagina)\b.*\b(imagen|foto|ilustración|dibujo|logo|banner|poster|arte|diseño)\b|\b(imagen de|foto de|genera un|crea un|diseña un)\b/i;
-
 async function generateImage(prompt){
   const msgDiv=document.createElement('div');
   msgDiv.className='msg bot';
@@ -1607,15 +1604,12 @@ async function generateImage(prompt){
 }
 
 // ══════════════════════════════════════════
-// ── PATCH sendMessage to intercept image gen ──
-// ══════════════════════════════════════════
-const _origSend=sendMessage;
-// We'll override inline in the existing sendMessage after system prompt build
-// Instead patch: detect image trigger before calling LOVA
-const origSendMessage=sendMessage;
+// ── IMAGE GENERATION INTERCEPT ──
+const IMG_TRIGGERS=/\b(genera|crea|diseña|haz|dibuja|muestra|imagina)\b.*\b(imagen|foto|ilustración|dibujo|logo|banner|poster|arte|diseño)\b|\b(imagen de|foto de|genera un|crea un|diseña un)\b/i;
+const _origSendMessage=sendMessage;
 window.sendMessage=async function(){
   const text=document.getElementById('inputField').value.trim();
-  if(text && IMG_TRIGGERS.test(text) && !pendingFiles.length){
+  if(text&&IMG_TRIGGERS.test(text)&&!pendingFiles.length){
     if(isLoading)return;
     isLoading=true;
     document.getElementById('sendBtn').disabled=true;
@@ -1636,10 +1630,9 @@ window.sendMessage=async function(){
     document.getElementById('inputField').focus();
     return;
   }
-  return origSendMessage();
+  return _origSendMessage();
 };
 
-// ══════════════════════════════════════════
 // ── CODE SANDBOX ──
 // ══════════════════════════════════════════
 let sandboxTabs={html:'<!-- Escribe HTML aquí -->\n<h1 style="font-family:sans-serif;color:#00bfa5">¡Hola desde LOVA!</h1>',css:'',js:''};
@@ -2222,6 +2215,8 @@ function initConnectionWatch(){
     _realtimeOk=false;
     setConnBar('offline','Sin conexión — los mensajes se enviarán al reconectar');
   });
+  // Al iniciar, vaciar cola si hay mensajes pendientes de sesión anterior
+  if(getQueue().length)flushQueue();
 }
 
 async function reconnectSocialChannel(){
@@ -2248,8 +2243,8 @@ async function reconnectSocialChannel(){
     .subscribe(status=>{
       if(status==='SUBSCRIBED'){
         _realtimeOk=true;
-        // Resync: load messages that arrived while offline
         resyncMissedMessages(roomId);
+        flushQueue(); // entregar mensajes pendientes
       }
     });
 }
