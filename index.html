@@ -167,10 +167,19 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 /* MOBILE */
 @media(max-width:640px){
   body{height:100dvh;overflow:hidden;}
-  .sidebar{position:fixed;height:100dvh;left:0;top:0;width:80vw;max-width:300px;transform:translateX(-100%);z-index:200;transition:transform 0.25s ease;}
+  /* Sidebar always slides in as a drawer on mobile — never collapses to zero-width */
+  .sidebar{position:fixed;height:100dvh;left:0;top:0;width:82vw;max-width:300px;transform:translateX(-110%);z-index:300;transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);}
   .sidebar.open{transform:translateX(0);}
-  .sidebar.collapsed{transform:translateX(-100%);}
-  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:199;}
+  /* collapsed class does the same as default on mobile */
+  .sidebar.collapsed{transform:translateX(-110%);}
+  /* Overlay sits below sidebar, above everything else */
+  .sidebar-overlay{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.6);
+    z-index:299;
+    /* make sure taps pass through to closeSidebarMobile even on social panel */
+    -webkit-tap-highlight-color:transparent;
+  }
   .sidebar-overlay.visible{display:block;}
   .main-area{width:100%;min-width:0;}
   .navbar{padding:8px 12px;}
@@ -188,6 +197,8 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   .chips{gap:6px;}
   .chip{font-size:0.68rem;padding:6px 10px;}
   .hero-title{font-size:1.4rem;}
+  /* Music player smaller on mobile */
+  #musicPlayer{bottom:12px;right:12px;min-width:200px;max-width:calc(100vw - 24px);}
 }
 /* NAV MODE BUTTONS */
 .nav-mode-btn{width:100%;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:8px;margin-bottom:3px;background:var(--surface2);border:1px solid rgba(255,255,255,0.05);text-align:left;font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--text-mid);}
@@ -570,6 +581,41 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 /* nav button for driving */
 .nav-mode-btn.driving-nav{border-color:rgba(255,165,0,0.2);color:rgba(255,165,0,0.7);}
 .nav-mode-btn.driving-nav.active{background:rgba(255,165,0,0.08);border-color:rgba(255,165,0,0.3);color:#ffa500;}
+
+/* ── WA AUDIO SPEEDS ── */
+.wa-audio-bubble{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--green-border);border-radius:14px;padding:10px 14px;min-width:200px;max-width:280px;}
+.wa-audio-play{width:34px;height:34px;border-radius:50%;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;transition:all 0.2s;}
+.wa-audio-play:hover{filter:brightness(1.2);}
+.wa-audio-play svg{width:14px;height:14px;}
+.wa-audio-waveform{flex:1;display:flex;align-items:center;gap:2px;height:28px;cursor:pointer;position:relative;}
+.wa-waveform-bar{width:3px;border-radius:2px;background:rgba(0,191,165,0.3);transition:background 0.1s;flex-shrink:0;}
+.wa-waveform-bar.played{background:var(--green);}
+.wa-audio-time{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--text-dim);white-space:nowrap;}
+.wa-speed-btn{font-family:'Space Mono',monospace;font-size:0.55rem;color:var(--text-dim);background:var(--surface3);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:2px 5px;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.wa-speed-btn.active{color:var(--green);border-color:var(--green-border);background:var(--green-dim);}
+
+/* ── MODO SIMULACIÓN badge ── */
+.sim-active-badge{display:none;font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:1.5px;color:#ff9800;background:rgba(255,152,0,0.1);border:1px solid rgba(255,152,0,0.3);padding:2px 9px;border-radius:50px;margin-left:8px;vertical-align:middle;}
+.sim-active-badge.show{display:inline-flex;align-items:center;gap:5px;}
+
+/* ── IMAGE CHOICE MODAL ── */
+.img-choice-modal{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:800;display:none;align-items:center;justify-content:center;}
+.img-choice-modal.open{display:flex;}
+.img-choice-box{background:var(--surface);border:1px solid var(--green-border);border-radius:20px;padding:26px 24px;max-width:330px;width:90%;text-align:center;animation:fadeUp 0.2s ease;}
+.img-choice-title{font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:2px;color:var(--green);text-transform:uppercase;margin-bottom:8px;}
+.img-choice-prompt{font-size:0.82rem;color:var(--text-mid);margin-bottom:20px;line-height:1.5;font-style:italic;}
+.img-choice-btns{display:flex;gap:10px;justify-content:center;}
+.img-choice-btn{flex:1;padding:11px 10px;border-radius:12px;border:1px solid var(--green-border);background:var(--green-dim);color:var(--green);font-family:'DM Sans',sans-serif;font-size:0.83rem;font-weight:500;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.img-choice-btn:hover{background:rgba(0,191,165,0.25);}
+
+/* ── TRAINING MEJORADO ── */
+.training-tip{background:var(--green-dim);border:1px solid var(--green-border);border-radius:10px;padding:10px 14px;font-size:0.77rem;color:var(--text-mid);margin-bottom:14px;line-height:1.6;}
+.training-tip strong{color:var(--green);}
+.training-progress-row{display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:12px;padding:12px 14px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.04);}
+.training-pct-big{font-family:'Space Mono',monospace;font-size:1.2rem;color:var(--green);font-weight:700;flex-shrink:0;}
+.training-pbar{flex:1;height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;}
+.training-pbar-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.5s ease;}
+.training-pbar-label{font-size:0.65rem;color:var(--text-dim);font-family:'Space Mono',monospace;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -672,8 +718,8 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
         Entrenar LOVA
       </button>
       <button onclick="switchView('social')" id="navSocial" class="nav-mode-btn" style="position:relative;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        Red Social <span class="notif-dot" id="socialNotifDot"></span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        Comunidad <span class="notif-dot" id="socialNotifDot"></span>
       </button>
       <button onclick="toggleDrivingMode()" id="navDriving" class="nav-mode-btn driving-nav">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
@@ -710,8 +756,9 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
     <!-- ── AI PANEL ── -->
     <div class="panel active" id="panelAI">
       <div class="mode-bar">
-        <button class="mode-btn active" id="modeNormal" onclick="setMode('normal')">📋 Normal</button>
-        <button class="mode-btn" id="modeChat" onclick="setMode('chat')">💬 Chat</button>
+        <button class="mode-btn active" id="modeNormal" onclick="setMode('normal')">Normal</button>
+        <button class="mode-btn" id="modeChat" onclick="setMode('chat')">Chat</button>
+        <button class="mode-btn" id="modeSim" onclick="setMode('sim')" style="display:none;" title="Modo simulación activo — habla con el personaje">Simulando</button>
         <div class="web-indicator"><div class="web-dot"></div>Web activa</div>
       </div>
       <div class="chat-area" id="chatArea">
@@ -779,29 +826,59 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
     <div class="panel" id="panelTraining">
       <div class="training-panel" id="trainingContent">
         <div class="training-title">🧠 Entrenar a LOVA</div>
+        <!-- Progress bar -->
+        <div class="training-progress-row">
+          <div class="training-pct-big" id="trainPct">0%</div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+            <div class="training-pbar"><div class="training-pbar-fill" id="trainPbarFill" style="width:0%"></div></div>
+            <div class="training-pbar-label">entrenamiento completado</div>
+          </div>
+        </div>
+        <div class="training-tip">
+          💡 <strong>¿Cómo funciona?</strong> Todo lo que escribas aquí se aplica en cada conversación con LOVA. Cuanto más específico, mejor te entiende.
+        </div>
         <div class="training-block">
           <div class="training-block-label">Personalidad / Instrucciones base</div>
-          <textarea class="training-textarea" id="trainingPersonality" placeholder="Ej: Responde siempre de forma muy amigable y usa emojis. Eres experta en dropshipping colombiano..."></textarea>
-          <button class="training-save-btn" onclick="saveTraining('personality')">Guardar</button>
+          <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;">¿Cómo debe comportarse LOVA contigo? ¿Rol, nombre, estilo?</div>
+          <textarea class="training-textarea" id="trainingPersonality" placeholder="Ej: Llámame Carlos. Responde siempre con emojis. Eres experta en dropshipping colombiano y hablas como amiga cercana..." oninput="updateTrainProgress()"></textarea>
+          <button class="training-save-btn" onclick="saveTraining('personality')">Guardar personalidad</button>
         </div>
         <div class="training-block">
           <div class="training-block-label">Conocimiento personalizado</div>
-          <textarea class="training-textarea" id="trainingKnowledge" placeholder="Ej: Mi tienda se llama MiShop. Vendo ropa deportiva. Mis precios van de $50k a $200k COP..."></textarea>
-          <button class="training-save-btn" onclick="saveTraining('knowledge')">Guardar</button>
+          <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;">Tu negocio, productos, precios, contexto específico.</div>
+          <textarea class="training-textarea" id="trainingKnowledge" placeholder="Ej: Mi tienda se llama MiShop. Vendo ropa deportiva. Precios entre $50k y $200k COP. Envíos a toda Colombia..." oninput="updateTrainProgress()"></textarea>
+          <button class="training-save-btn" onclick="saveTraining('knowledge')">Guardar conocimiento</button>
         </div>
         <div class="training-block">
-          <div class="training-block-label">Ejemplos de respuesta (pregunta → respuesta ideal)</div>
+          <div class="training-block-label">Ejemplos de respuesta <span style="font-size:0.67rem;color:var(--text-dim);">(pregunta → respuesta ideal)</span></div>
           <div id="examplesContainer"></div>
           <button class="training-add-btn" onclick="addExample()">+ Agregar ejemplo</button>
           <button class="training-save-btn" style="margin-left:8px;" onclick="saveTraining('examples')">Guardar ejemplos</button>
         </div>
         <div class="training-block">
           <div class="training-block-label">Tono de comunicación</div>
+          <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:10px;">¿Con qué tono habla LOVA?</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-            <button class="training-add-btn" id="toneProf" onclick="setTone('profesional')">Profesional</button>
-            <button class="training-add-btn" id="toneFriend" onclick="setTone('amigable')">Amigable</button>
-            <button class="training-add-btn" id="toneDirect" onclick="setTone('directo')">Directo</button>
-            <button class="training-add-btn" id="toneFormal" onclick="setTone('formal')">Formal</button>
+            <button class="training-add-btn" id="toneProf" onclick="setTone('profesional')">👔 Profesional</button>
+            <button class="training-add-btn" id="toneFriend" onclick="setTone('amigable')">😊 Amigable</button>
+            <button class="training-add-btn" id="toneDirect" onclick="setTone('directo')">⚡ Directo</button>
+            <button class="training-add-btn" id="toneFormal" onclick="setTone('formal')">🎩 Formal</button>
+          </div>
+        </div>
+        <!-- MODO SIMULACIÓN -->
+        <div class="training-block">
+          <div class="training-block-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:5px;"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Modo Simulación
+          </div>
+          <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:10px;">LOVA simula ser otro personaje. Ideal para practicar negociaciones, atención al cliente, entrevistas, etc.</div>
+          <textarea class="training-textarea" id="simPersonaText" style="min-height:56px;" placeholder="Ej: Eres un cliente difícil que quiere rebajar el precio. Eres desconfiado y exigente. Habla como colombiano."></textarea>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+            <button class="training-save-btn" id="simActivateBtn" onclick="activateSimMode()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Activar simulación
+            </button>
+            <button class="training-add-btn" id="simDeactivateBtn" onclick="deactivateSimMode()" style="display:none;">Desactivar</button>
           </div>
         </div>
       </div>
@@ -1014,6 +1091,26 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   </div>
   <div class="driving-mic-label" id="drivingMicLabel">Toca Hablar para dar una instrucción a LOVA</div>
 </div>
+
+<!-- ── IMAGE CHOICE MODAL ── -->
+<div class="img-choice-modal" id="imgChoiceModal">
+  <div class="img-choice-box">
+    <div class="img-choice-title">Imagen solicitada</div>
+    <div class="img-choice-prompt" id="imgChoicePrompt">"..."</div>
+    <div class="img-choice-btns">
+      <button class="img-choice-btn" onclick="imgChoiceGenerate()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Generar con IA
+      </button>
+      <button class="img-choice-btn" onclick="imgChoiceSearch()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Buscar en web
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODO SIMULACIÓN BADGE (injected in navbar) ── -->
 
 <script>
 // ── SUPABASE ──
@@ -1291,7 +1388,16 @@ function toggleSidebar(){
   sidebarOpen=!sidebarOpen;
   if(window.innerWidth<=640){
     s.classList.toggle('open',sidebarOpen);
-    if(ov)ov.classList.toggle('visible',sidebarOpen);
+    // Always control overlay — regardless of which panel is active
+    if(ov){
+      if(sidebarOpen){
+        ov.classList.add('visible');
+        // Ensure overlay is above panels but below sidebar
+        ov.style.zIndex='299';
+      } else {
+        ov.classList.remove('visible');
+      }
+    }
   } else {
     s.classList.toggle('collapsed',!sidebarOpen);
   }
@@ -1301,7 +1407,7 @@ function closeSidebarMobile(){
   const ov=document.getElementById('sidebarOverlay');
   sidebarOpen=false;
   s.classList.remove('open');
-  if(ov)ov.classList.remove('visible');
+  if(ov){ov.classList.remove('visible');}
 }
 function setMode(m){
   chatMode=m;
@@ -1703,8 +1809,10 @@ function switchView(view){
   if(view==='ai') document.getElementById('navTitle').textContent='Asistente IA';
   if(view==='code'){document.getElementById('navTitle').textContent='Sandbox · Programar';runSandbox();}
   if(view==='training'){document.getElementById('navTitle').textContent='Entrenar LOVA';loadTraining();}
-  if(view==='social'){document.getElementById('navTitle').textContent='Red Social';loadContacts();}
+  if(view==='social'){document.getElementById('navTitle').textContent='Comunidad';loadContacts();}
   if(view==='settings'){document.getElementById('navTitle').textContent='Ajustes';loadSettingsPanel();}
+  // On mobile: always close sidebar after selecting a view
+  if(window.innerWidth<=640){closeSidebarMobile();}
 }
 
 // ── IMAGE GENERATION ──
@@ -3465,6 +3573,8 @@ function toggleDrivingMode(){
   el.classList.toggle('active',drivingActive);
   const btn=document.getElementById('navDriving');
   btn.classList.toggle('active',drivingActive);
+  // Close sidebar on mobile
+  if(window.innerWidth<=640)closeSidebarMobile();
   if(drivingActive){
     updateDrivingClock();
     drivingClockInterval=setInterval(updateDrivingClock,1000);
@@ -3583,24 +3693,313 @@ function startDrivingWave(){
 function stopDrivingWave(){if(drivingWaveRAF){cancelAnimationFrame(drivingWaveRAF);drivingWaveRAF=null;}}
 
 // ══════════════════════════════════════════
-// ── IMPROVED IMAGE GENERATION (no real person trigger) ──
+// ── IMPROVED IMAGE GENERATION ──
+// ── 1. Choice modal (generar vs buscar)
+// ── 2. No real people fix
+// ── 3. No numbers/watermarks in prompt
 // ══════════════════════════════════════════
-// Patch generateImage to add aesthetic improvements and detect real people
-const _origGenerateImage=generateImage;
-window.generateImage=async function(prompt){
-  // Detect real person references
-  const realPersonRx=/\b(foto real|imagen real|foto de)\s+[A-ZÁÉÍÓÚ][a-záéíóú]+|celebrity|actor\s+real|famoso\s+real/i;
-  if(realPersonRx.test(prompt)){
+let _pendingImgPrompt='';
+let _imgChoicePending=false;
+
+// Override the image intercept to show modal instead of auto-generating
+const _origSendMsgBeforeImgChoice=window.sendMessage;
+window.sendMessage=async function(){
+  const text=document.getElementById('inputField').value.trim();
+  // Already handles music above, so this sits on top
+  const IMG_TRIGGERS_LOCAL=/\b(genera|crea|diseña|haz|dibuja|muestra|imagina)\b.*\b(imagen|foto|ilustración|dibujo|logo|banner|poster|arte|diseño)\b|\b(imagen de|foto de|genera un|crea un|diseña un)\b/i;
+  if(text&&IMG_TRIGGERS_LOCAL.test(text)&&!pendingFiles.length&&!MUSIC_TRIGGERS.test(text)){
+    if(isLoading)return;
+    isLoading=true;
+    document.getElementById('sendBtn').disabled=true;
+    document.getElementById('inputField').value='';
+    document.getElementById('inputField').style.height='auto';
+    hideHero();
+    appendMsg('user',text);
+    await saveMsg('user',text);
+    if(messageHistory.length===0)updateTitle(text.slice(0,45));
+    messageHistory.push({role:'user',content:text});
+    spawnParticles();
+    // Show choice modal
+    _pendingImgPrompt=text;
+    _imgChoicePending=true;
+    document.getElementById('imgChoicePrompt').textContent='"'+text.slice(0,70)+(text.length>70?'…':'')+'"';
+    document.getElementById('imgChoiceModal').classList.add('open');
+    return;
+  }
+  return _origSendMsgBeforeImgChoice();
+};
+
+async function imgChoiceGenerate(){
+  document.getElementById('imgChoiceModal').classList.remove('open');
+  _imgChoicePending=false;
+  const text=_pendingImgPrompt;
+  // Detect real people to block/redirect
+  const realPersonRx=/\b(foto real|imagen real|foto de)\s+[A-ZÁÉÍÓÚ][a-záéíóú]+|\b(maluma|shakira|karol g|j balvin|bad bunny|celebrity|famoso real|actor real)\b/i;
+  if(realPersonRx.test(text)){
     const msgDiv=document.createElement('div');
     msgDiv.className='msg bot';
-    msgDiv.innerHTML='<div class="msg-label">LOVA</div><div class="msg-bubble">⚠️ No puedo generar imágenes de personas reales. Prueba con "retrato artístico estilo anime" o "ilustración de un personaje imaginario".</div>';
+    msgDiv.innerHTML='<div class="msg-label">LOVA</div><div class="msg-bubble md-bubble"><p class="md-p">⚠️ No puedo generar imágenes fotorrealistas de personas reales. Puedo hacer una <strong>ilustración artística</strong> o <strong>versión estilizada</strong>. Intenta: "ilustración artística de un cantante urbano colombiano" o "retrato estilo anime".</p></div>';
     document.getElementById('messages').appendChild(msgDiv);scrollChat();
-    return null;
+    isLoading=false;document.getElementById('sendBtn').disabled=false;
+    return;
   }
-  // Add aesthetic quality to prompt
-  const enhancedPrompt=prompt+' cinematic aesthetic high quality no watermark no text no numbers';
-  return _origGenerateImage(enhancedPrompt);
+  // Clean prompt and add quality tags (no numbers, no watermarks)
+  const cleanPrompt=text.replace(/genera|crea|diseña|haz|dibuja|muestra|imagina|imagen|foto|ilustración|de|un|una|el|la/gi,'').trim()||text;
+  const enhancedPrompt=cleanPrompt+', cinematic aesthetic, high quality, professional, no watermark, no text overlay, no numbers, no labels, detailed illustration';
+  await generateImage(enhancedPrompt);
+  const reply='Imagen generada. ¿Quieres una variación, otro estilo o cambiar algo?';
+  await saveMsg('assistant',reply);
+  messageHistory.push({role:'assistant',content:reply});
+  isLoading=false;document.getElementById('sendBtn').disabled=false;
+  document.getElementById('inputField').focus();
+}
+
+function imgChoiceSearch(){
+  document.getElementById('imgChoiceModal').classList.remove('open');
+  _imgChoicePending=false;
+  const q=_pendingImgPrompt.replace(/genera|crea|diseña|haz|dibuja|imagina|imagen|foto|ilustración|de|un|una|el|la/gi,'').trim()||_pendingImgPrompt;
+  const url=`https://www.google.com/search?q=${encodeURIComponent(q)}&tbm=isch`;
+  const msgDiv=document.createElement('div');
+  msgDiv.className='msg bot';
+  msgDiv.innerHTML=`<div class="msg-label">LOVA</div><div class="msg-bubble md-bubble"><p class="md-p">Aquí tienes la búsqueda de imágenes para <strong>${q}</strong>:</p><a href="${url}" target="_blank" rel="noopener" style="color:var(--green);font-size:0.84rem;display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-family:'Space Mono',monospace;">🔍 Ver imágenes en Google ↗</a></div>`;
+  document.getElementById('messages').appendChild(msgDiv);scrollChat();
+  isLoading=false;document.getElementById('sendBtn').disabled=false;
+}
+
+// ══════════════════════════════════════════
+// ── MODO SIMULACIÓN ──
+// ══════════════════════════════════════════
+let simModeActive=false;
+let simPersona='';
+
+function updateTrainProgress(){
+  const p=document.getElementById('trainingPersonality')?.value||'';
+  const k=document.getElementById('trainingKnowledge')?.value||'';
+  const ex=(trainingData.examples||[]).filter(e=>e.q||e.a).length;
+  const hasTone=trainingData.tone&&trainingData.tone!=='amigable';
+  // Score 0-100
+  let score=0;
+  if(p.length>20)score+=30;
+  else if(p.length>5)score+=15;
+  if(k.length>20)score+=30;
+  else if(k.length>5)score+=15;
+  if(ex>0)score+=20;
+  if(ex>2)score+=10;
+  if(hasTone)score+=10;
+  score=Math.min(score,100);
+  const pct=document.getElementById('trainPct');
+  const fill=document.getElementById('trainPbarFill');
+  if(pct)pct.textContent=score+'%';
+  if(fill)fill.style.width=score+'%';
+}
+
+function activateSimMode(){
+  const persona=document.getElementById('simPersonaText')?.value.trim();
+  if(!persona){
+    alert('Escribe primero el personaje a simular.');
+    return;
+  }
+  simPersona=persona;
+  simModeActive=true;
+  chatMode='sim';
+  // Show sim button in mode bar
+  const simBtn=document.getElementById('modeSim');
+  if(simBtn){simBtn.style.display='';simBtn.classList.add('active');}
+  document.getElementById('modeNormal').classList.remove('active');
+  document.getElementById('modeChat').classList.remove('active');
+  document.getElementById('inputField').placeholder='Modo simulación activo — habla con el personaje...';
+  // Show deactivate button
+  const deact=document.getElementById('simDeactivateBtn');
+  const actBtn=document.getElementById('simActivateBtn');
+  if(deact)deact.style.display='';
+  if(actBtn)actBtn.textContent='✅ Simulación activa';
+  // Switch to AI panel
+  switchView('ai');
+  // Show a system message
+  const msgDiv=document.createElement('div');
+  msgDiv.className='msg bot';
+  msgDiv.innerHTML=`<div class="msg-label">LOVA</div><div class="msg-bubble md-bubble"><p class="md-p">🎭 <strong>Modo simulación activado.</strong></p><p class="md-p">Personaje: "${persona.slice(0,100)}"</p><p class="md-p" style="font-size:0.8rem;color:var(--text-dim);">Escríbeme y responderé como ese personaje. Escribe <strong>/salir</strong> para terminar la simulación.</p></div>`;
+  document.getElementById('messages').appendChild(msgDiv);
+  document.getElementById('hero').style.display='none';
+  scrollChat();
+}
+
+function deactivateSimMode(){
+  simModeActive=false;simPersona='';chatMode='normal';
+  const simBtn=document.getElementById('modeSim');
+  if(simBtn){simBtn.style.display='none';simBtn.classList.remove('active');}
+  document.getElementById('modeNormal').classList.add('active');
+  document.getElementById('inputField').placeholder='Escribe, sube archivos o usa voz...';
+  const deact=document.getElementById('simDeactivateBtn');
+  const actBtn=document.getElementById('simActivateBtn');
+  if(deact)deact.style.display='none';
+  if(actBtn)actBtn.textContent='Activar simulación';
+}
+
+// Patch _buildSystem to include sim persona
+const _origBuildSystem=_buildSystem;
+// Override by reassigning (since it's a const, we patch via the fetch monkey-patch)
+// The fetch patcher calls _buildSystem() — we override it by redefining the function behavior
+// We store the override in a wrapper called from the fetch patch
+function _buildSystemWithSim(){
+  if(simModeActive&&simPersona){
+    return `Eres un personaje en una simulación de roleplay. IGNORA tu identidad anterior como LOVA. Ahora ERES el siguiente personaje y debes actuar exactamente como se describe: "${simPersona}". Mantén el personaje en TODO momento. Responde SOLO como ese personaje. Si el usuario escribe "/salir", responde: "SALIENDO_SIM" y nada más.`;
+  }
+  return _buildSystem();
+}
+// Re-patch fetch to use the new system builder
+const _nativeFetch2=window.fetch.bind(window);
+window.fetch=async function(url,...args){
+  if(typeof url==='string'&&url===WORKER&&args[0]?.body){
+    try{
+      const body=JSON.parse(args[0].body);
+      if(body.system!==undefined){
+        body.system=_buildSystemWithSim();
+        args[0]={...args[0],body:JSON.stringify(body)};
+      }
+    }catch{}
+  }
+  return _nativeFetch2(url,...args);
 };
+
+// Intercept /salir in sim mode
+const _origSendFinal=window.sendMessage;
+window.sendMessage=async function(){
+  const text=document.getElementById('inputField').value.trim();
+  if(simModeActive&&text.toLowerCase()==='/salir'){
+    deactivateSimMode();
+    document.getElementById('inputField').value='';
+    const msgDiv=document.createElement('div');
+    msgDiv.className='msg bot';
+    msgDiv.innerHTML='<div class="msg-label">LOVA</div><div class="msg-bubble">Simulación terminada. Vuelvo a ser LOVA. ¿En qué te ayudo?</div>';
+    document.getElementById('messages').appendChild(msgDiv);scrollChat();
+    return;
+  }
+  return _origSendFinal();
+};
+
+// ══════════════════════════════════════════
+// ── WA AUDIO SPEEDS — upgrade existing audio bubbles ──
+// ══════════════════════════════════════════
+function createWAAudioBubble(audioEl){
+  // Already handled by original code — we enhance with speed buttons
+  const existing=audioEl;
+  if(!existing)return null;
+  // Wrap in a nice bubble with speed controls
+  const wrap=document.createElement('div');
+  wrap.className='wa-audio-bubble';
+  // Play button
+  const playBtn=document.createElement('button');
+  playBtn.className='wa-audio-play';
+  playBtn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+  let waPlaying=false;
+  playBtn.onclick=()=>{
+    if(waPlaying){existing.pause();waPlaying=false;playBtn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';}
+    else{existing.play();waPlaying=true;playBtn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';}
+  };
+  existing.onended=()=>{waPlaying=false;playBtn.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';updateWaveform(0);};
+  // Waveform bars
+  const wavform=document.createElement('div');
+  wavform.className='wa-audio-waveform';
+  const BARS=20;
+  const heights=[3,5,7,10,14,18,14,10,7,5,8,12,16,12,8,5,7,10,6,4];
+  const bars=[];
+  for(let i=0;i<BARS;i++){
+    const b=document.createElement('div');
+    b.className='wa-waveform-bar';
+    b.style.height=(heights[i]||6)+'px';
+    wavform.appendChild(b);bars.push(b);
+  }
+  // Progress on click
+  wavform.onclick=e=>{
+    const rect=wavform.getBoundingClientRect();
+    const ratio=(e.clientX-rect.left)/rect.width;
+    if(existing.duration)existing.currentTime=ratio*existing.duration;
+  };
+  existing.ontimeupdate=()=>{
+    if(existing.duration){
+      const ratio=existing.currentTime/existing.duration;
+      updateWaveform(ratio);
+      const m=Math.floor(existing.currentTime/60),s=Math.floor(existing.currentTime%60);
+      timeEl.textContent=m+':'+String(s).padStart(2,'0');
+    }
+  };
+  function updateWaveform(ratio){
+    bars.forEach((b,i)=>{b.classList.toggle('played',i/BARS<ratio);});
+  }
+  // Time display
+  const timeEl=document.createElement('div');
+  timeEl.className='wa-audio-time';
+  timeEl.textContent='0:00';
+  // Speed buttons
+  const speeds=[1,1.3,1.7,2.4];
+  const speedWrap=document.createElement('div');
+  speedWrap.style.cssText='display:flex;flex-direction:column;gap:3px;';
+  let activeSpeed=1;
+  speeds.forEach(sp=>{
+    const btn=document.createElement('button');
+    btn.className='wa-speed-btn'+(sp===1?' active':'');
+    btn.textContent='x'+sp;
+    btn.onclick=()=>{
+      existing.playbackRate=sp;activeSpeed=sp;
+      speedWrap.querySelectorAll('.wa-speed-btn').forEach(b=>{b.classList.toggle('active',parseFloat(b.textContent.slice(1))===sp);});
+    };
+    speedWrap.appendChild(btn);
+  });
+  wrap.appendChild(playBtn);
+  wrap.appendChild(wavform);
+  wrap.appendChild(timeEl);
+  wrap.appendChild(speedWrap);
+  existing.style.display='none';
+  return wrap;
+}
+
+// Monkey-patch appendSocialMsg to upgrade audio bubbles with WA player
+const _origAppendSocialMsgForWA=window.appendSocialMsg;
+window.appendSocialMsg=function(side,text,ts,seen,replyTo,msgId){
+  // Check if this is an audio file message
+  if(text&&text.startsWith('__FILE__')){
+    const parts=text.replace('__FILE__','').split('||');
+    const fname=parts[0]||'';
+    const url=parts[1]||'';
+    if(/\.(mp3|wav|ogg|m4a|aac|webm|flac)(\?|$)/i.test(fname)||/\.(mp3|wav|ogg|m4a|aac|webm|flac)(\?|$)/i.test(url)){
+      // Build WA-style bubble
+      const div=document.createElement('div');
+      div.className='social-msg '+side;
+      if(msgId)div.dataset.msgId=msgId;
+      const time=ts?new Date(ts).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}):'';
+      const seenMark=side==='me'?`<span class="social-seen">${seen?'✓✓':'✓'}</span>`:'';
+      const audioEl=document.createElement('audio');
+      audioEl.preload='metadata';
+      const src=document.createElement('source');
+      src.src=url;audioEl.appendChild(src);
+      const waBubble=createWAAudioBubble(audioEl)||audioEl;
+      const arrowSvg=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>`;
+      const wrap=document.createElement('div');wrap.className='social-msg-wrap';
+      const rb=document.createElement('button');rb.className='msg-reply-btn';rb.innerHTML=arrowSvg;
+      const sa=document.createElement('div');sa.className='swipe-reply-arrow';sa.innerHTML=arrowSvg;
+      const sl=document.createElement('div');sl.className='swipe-layer';sl.appendChild(waBubble);
+      wrap.appendChild(rb);wrap.appendChild(sa);wrap.appendChild(sl);
+      div.appendChild(wrap);
+      const timeDiv=document.createElement('div');timeDiv.className='social-msg-time';timeDiv.innerHTML=time+seenMark;
+      div.appendChild(timeDiv);
+      div.dataset.replyText='🎙 Audio';
+      div.dataset.replyAuthor=side==='me'?'Tú':(currentChatPartner?.username?'@'+currentChatPartner.username:'Ellos');
+      div.dataset.replyId=msgId||'';
+      document.getElementById('socialMessages').appendChild(div);
+      attachSwipeReply(div,side);
+      return;
+    }
+  }
+  return _origAppendSocialMsgForWA(side,text,ts,seen,replyTo,msgId);
+};
+
+// ── Update training progress on load ──
+const _origLoadTraining=loadTraining;
+async function loadTraining(){
+  await _origLoadTraining();
+  setTimeout(updateTrainProgress,300);
+}
 
 </script>
 </body>
