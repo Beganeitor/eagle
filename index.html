@@ -3327,15 +3327,8 @@ window.sendMessage=async function(){
   
   // Check radio station requests
   if(MUSIC_TRIGGERS.test(text)||RADIO_TRIGGERS.test(text)){
-    // Check if specific radio station
-    const lowerText=text.toLowerCase();
-    let matchedStation=null;
-    for(const st of RADIO_STATIONS){
-      if(lowerText.includes(st.name.toLowerCase())||
-         (st.name.toLowerCase().split(' ').some(w=>w.length>4&&lowerText.includes(w)))){
-        matchedStation=st;break;
-      }
-    }
+    // Check if specific radio station using smart matcher
+    const matchedStation=findStation(text);
     
     if(matchedStation){
       // Play specific radio
@@ -3615,18 +3608,59 @@ let _musicModeTab='emisoras';
 let _musicRecognition=null;
 
 // Emisoras enfocadas en Barranquilla y Colombia Caribe
+// keywords: palabras que el usuario puede decir (voz o texto) para encontrar esta emisora
 const RADIO_STATIONS=[
-  {name:'El Gran Lobo',url:'https://stream.zeno.fm/ymcvmqrp8rhvv',icon:'🐺',genre:'Barranquilla · Vallenato/Pop'},
-  {name:'Tropicana Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_BQSC',icon:'🌴',genre:'Barranquilla · Tropical'},
-  {name:'La Mega Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/LAMEGABQSC',icon:'🔥',genre:'Barranquilla · Urban/Pop'},
-  {name:'Olímpica Stereo Bq',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/OLIMPICA_BQSC',icon:'🏅',genre:'Barranquilla · Vallenato'},
-  {name:'Amor Stereo Bq',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/AMOR_BQSC',icon:'❤️',genre:'Barranquilla · Romántica'},
-  {name:'Radio Uno Bq',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_UNO_BQSC',icon:'1️⃣',genre:'Barranquilla · Variada'},
-  {name:'Vibra Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/VIBRA_BQSC',icon:'⚡',genre:'Barranquilla · Electrónica/Pop'},
-  {name:'Blu Radio Caribe',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/BLU_CARIBESC',icon:'💙',genre:'Barranquilla · Noticias'},
-  {name:'Todelar Vallenata',url:'https://stream.zeno.fm/todelar',icon:'🎸',genre:'Costa · Vallenato'},
-  {name:'La Voz de Barranquilla',url:'https://stream.zeno.fm/lavozde',icon:'📻',genre:'Barranquilla · Clásica'},
+  {name:'El Gran Lobo',url:'https://stream.zeno.fm/ymcvmqrp8rhvv',icon:'🐺',genre:'Barranquilla · Vallenato/Pop',
+   keywords:['gran lobo','lobo','el lobo','gran lobo barranquilla','lobo barranquilla']},
+  {name:'Tropicana Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_BQSC',icon:'🌴',genre:'Barranquilla · Tropical',
+   keywords:['tropicana','tropical','tropicana barranquilla','tropicana colombia']},
+  {name:'La Mega Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/LAMEGABQSC',icon:'🔥',genre:'Barranquilla · Urban/Pop',
+   keywords:['la mega','mega barranquilla','la mega barranquilla','mega']},
+  {name:'Olímpica Stereo',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/OLIMPICA_BQSC',icon:'🏅',genre:'Barranquilla · Vallenato',
+   keywords:['olimpica','olímpica','olimpica stereo','olimpica barranquilla','olimpica bq']},
+  {name:'Amor Stereo',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/AMOR_BQSC',icon:'❤️',genre:'Barranquilla · Romántica',
+   keywords:['amor','amor stereo','amor stereo barranquilla','la del amor']},
+  {name:'Radio Uno',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_UNO_BQSC',icon:'1️⃣',genre:'Barranquilla · Variada',
+   keywords:['radio uno','radio 1','uno barranquilla']},
+  {name:'Vibra Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/VIBRA_BQSC',icon:'⚡',genre:'Barranquilla · Electrónica/Pop',
+   keywords:['vibra','vibra barranquilla','vibra colombia']},
+  {name:'Blu Radio',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/BLU_CARIBESC',icon:'💙',genre:'Barranquilla · Noticias',
+   keywords:['blu','blu radio','blue radio','blú']},
+  {name:'Todelar Vallenata',url:'https://stream.zeno.fm/todelar',icon:'🎸',genre:'Costa · Vallenato',
+   keywords:['todelar','vallenata','vallenato','la vallenata']},
+  {name:'La Voz de Barranquilla',url:'https://stream.zeno.fm/lavozde',icon:'📻',genre:'Barranquilla · Clásica',
+   keywords:['la voz','voz de barranquilla','la voz barranquilla']},
 ];
+
+// Fuzzy station match — returns best match or null
+// Tries exact keyword match first, then word-level overlap scoring
+function findStation(text){
+  const lw=text.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // remove accents
+    .replace(/[^a-z0-9\s]/g,' ').trim();
+  
+  // 1. Exact keyword match (highest priority)
+  for(const s of RADIO_STATIONS){
+    for(const kw of (s.keywords||[])){
+      const kwNorm=kw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      if(lw.includes(kwNorm))return s;
+    }
+  }
+  
+  // 2. Score by meaningful word overlap (skip short words)
+  const words=lw.split(/\s+/).filter(w=>w.length>2);
+  if(!words.length)return null;
+  
+  let best=null,bestScore=0;
+  for(const s of RADIO_STATIONS){
+    const allText=([s.name,...(s.keywords||[])].join(' '))
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    let score=0;
+    for(const w of words){if(allText.includes(w))score++;}
+    if(score>bestScore){bestScore=score;best=s;}
+  }
+  return bestScore>=1?best:null;
+}
 
 // Persistencia local de favoritos y recientes
 function getMusicFavs(){try{return JSON.parse(localStorage.getItem('lova_music_favs')||'[]');}catch{return[];}}
@@ -3697,8 +3731,9 @@ function renderMusicModeContent(){
       const row=document.createElement('div');
       row.className='music-track-row';
       const timeStr=t.ts?new Date(t.ts).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}):'';
+      const isMonochrome=t.genre==='Monochrome'||t.url?.startsWith('https://monochrome');
       row.innerHTML=`<div class="music-track-icon">${t.icon||'🎵'}</div>
-        <div class="music-track-info" onclick="playMusicTrack(null,'recent',${JSON.stringify(t).replace(/"/g,'&quot;')})">
+        <div class="music-track-info" onclick="${isMonochrome?`window.open('${t.url}','_blank')`:`playMusicTrack(null,'recent',${JSON.stringify(t).replace(/"/g,'&quot;')})`}">
           <div class="music-track-name">${t.name}</div>
           <div class="music-track-sub">${t.genre||''} ${timeStr?'· '+timeStr:''}</div>
         </div>
@@ -3767,30 +3802,47 @@ function syncMusicModePlayer(){
   }
 }
 
-// Search music via YouTube embed
+// Search music — opens Monochrome with the search term
 async function searchMusicMode(){
   const input=document.getElementById('musicSearchInput');
   const q=(input?.value||'').trim();
   if(!q)return;
+
+  // First check if the query matches a radio station
+  const stationMatch=findStation(q);
+  if(stationMatch){
+    input.value='';
+    playMusicTrack(RADIO_STATIONS.indexOf(stationMatch),'station');
+    setMusicModeTab('emisoras',document.querySelector('.music-mode-tab'));
+    return;
+  }
+
   input.value='';
   const box=document.getElementById('musicModeContent');
-  box.innerHTML=`<div style="color:var(--text-dim);font-size:0.78rem;font-family:'Space Mono',monospace;margin-bottom:8px;">🔍 Resultados para: <span style="color:var(--green)">${q}</span></div>`;
-  // Embed YouTube search iframe — functional player
-  const ytQ=encodeURIComponent(q+' audio');
-  const frame=document.createElement('iframe');
-  frame.src=`https://www.youtube.com/embed?listType=search&list=${ytQ}&autoplay=1`;
-  frame.allow='accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture';
-  frame.allowFullscreen=true;
-  frame.style.cssText='width:100%;height:200px;border-radius:14px;border:1px solid var(--green-border);';
-  box.appendChild(frame);
-  // Also add as track in recents/queue
-  const searchTrack={name:q,url:'yt:'+q,icon:'▶',genre:'YouTube'};
-  addToRecents(searchTrack);
-  // Add tabs back at bottom with small hint
-  const hint=document.createElement('div');
-  hint.style.cssText='font-family:Space Mono,monospace;font-size:0.6rem;color:var(--text-dim);margin-top:8px;text-align:center;';
-  hint.textContent='Reproduce directamente en el iframe ↑ · El audio del iframe es independiente';
-  box.appendChild(hint);
+
+  // Show a card with the search result + open button
+  const monoUrl=`https://monochrome.tf/?search=${encodeURIComponent(q)}`;
+  box.innerHTML=`
+    <div style="background:var(--surface);border:1px solid var(--green-border);border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;">
+      <div style="font-size:1.8rem;">🎵</div>
+      <div style="font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--green);">BUSCANDO EN MONOCHROME</div>
+      <div style="font-size:0.95rem;color:var(--text);font-weight:500;">"${q}"</div>
+      <div style="font-size:0.72rem;color:var(--text-dim);line-height:1.6;">Monochrome tiene millones de canciones en Hi-Res lossless gratis.<br>Se abrirá en una nueva pestaña lista para reproducir.</div>
+      <button onclick="window.open('${monoUrl}','_blank')" style="width:100%;padding:12px;background:var(--green);border:none;border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;">
+        ▶ Abrir en Monochrome
+      </button>
+      <div style="display:flex;gap:8px;width:100%;">
+        <button onclick="window.open('https://monochrome.tf/','_blank')" style="flex:1;padding:9px;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.6rem;cursor:pointer;">
+          🌐 Ir a Monochrome
+        </button>
+        <button onclick="window.open('https://monochrome.tf/recent','_blank')" style="flex:1;padding:9px;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.6rem;cursor:pointer;">
+          🕒 Recientes
+        </button>
+      </div>
+    </div>`;
+
+  // Save to recents
+  addToRecents({name:q,url:monoUrl,icon:'🎵',genre:'Monochrome'});
 }
 
 // Voice search in music mode
@@ -3804,17 +3856,15 @@ function voiceSearchMusic(){
   if(btn){btn.style.color='#ff6b6b';btn.style.background='rgba(255,80,80,0.15)';}
   _musicRecognition.onresult=e=>{
     const text=e.results[0][0].transcript;
-    // Check if it's a radio station name
-    const lw=text.toLowerCase();
-    let matched=null;
-    for(const s of RADIO_STATIONS){
-      if(lw.includes(s.name.toLowerCase().split(' ')[0].toLowerCase())||
-         lw.includes(s.name.toLowerCase())){matched=s;break;}
-    }
+    // Try to match a station with the smart fuzzy finder
+    const matched=findStation(text);
     if(matched){
       playMusicTrack(RADIO_STATIONS.indexOf(matched),'station');
     } else {
-      // Search on YouTube
+      // Not a station — open Monochrome directly with the search
+      const monoUrl=`https://monochrome.tf/?search=${encodeURIComponent(text)}`;
+      window.open(monoUrl,'_blank');
+      // Also show in the panel
       const inp=document.getElementById('musicSearchInput');
       if(inp)inp.value=text;
       searchMusicMode();
