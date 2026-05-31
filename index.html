@@ -547,13 +547,15 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .music-open-btn{background:var(--green-dim);border:1px solid var(--green-border);border-radius:8px;padding:5px 10px;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--green);cursor:pointer;white-space:nowrap;transition:all 0.15s;}
 .music-open-btn:hover{background:rgba(0,191,165,0.2);}
 
-/* ── DRIVING MODE ── */
+/* ── DRIVING MODE (now Music Mode) ── */
 #drivingMode{
   position:fixed;inset:0;z-index:9999;background:var(--black);
-  display:none;flex-direction:column;align-items:center;justify-content:center;
-  gap:24px;padding:40px 24px;
+  display:none;flex-direction:column;align-items:center;justify-content:flex-start;
+  gap:14px;padding:28px 20px 20px;overflow-y:auto;
 }
 #drivingMode.active{display:flex;}
+#drivingMode::-webkit-scrollbar{width:2px;}
+#drivingMode::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);}
 .driving-wave{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
 .driving-wave canvas{width:100%;height:100%;}
 .driving-time{font-family:'Space Mono',monospace;font-size:3.5rem;font-weight:700;color:var(--green);letter-spacing:4px;text-shadow:0 0 30px rgba(0,191,165,0.4);}
@@ -607,6 +609,19 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .img-choice-btns{display:flex;gap:10px;justify-content:center;}
 .img-choice-btn{flex:1;padding:11px 10px;border-radius:12px;border:1px solid var(--green-border);background:var(--green-dim);color:var(--green);font-family:'DM Sans',sans-serif;font-size:0.83rem;font-weight:500;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
 .img-choice-btn:hover{background:rgba(0,191,165,0.25);}
+
+/* ── MUSIC MODE TABS ── */
+.music-mode-tab{padding:6px 14px;border-radius:50px;font-size:0.65rem;font-family:'Space Mono',monospace;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255,255,255,0.07);background:none;color:var(--text-dim);transition:all 0.2s;white-space:nowrap;}
+.music-mode-tab.active{background:var(--green-dim);border-color:var(--green-border);color:var(--green);}
+.music-track-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:10px 12px;cursor:pointer;transition:all 0.15s;}
+.music-track-row:hover{border-color:var(--green-border);background:var(--green-dim);}
+.music-track-row.playing{border-color:var(--green-border);background:var(--green-dim);}
+.music-track-icon{width:36px;height:36px;border-radius:9px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.music-track-info{flex:1;min-width:0;}
+.music-track-name{font-size:0.82rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.music-track-sub{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--text-dim);margin-top:2px;}
+.music-fav-btn{background:none;border:none;cursor:pointer;font-size:1rem;opacity:0.5;transition:opacity 0.15s;flex-shrink:0;}
+.music-fav-btn:hover,.music-fav-btn.active{opacity:1;}
 
 /* ── TRAINING MEJORADO ── */
 .training-tip{background:var(--green-dim);border:1px solid var(--green-border);border-radius:10px;padding:10px 14px;font-size:0.77rem;color:var(--text-mid);margin-bottom:14px;line-height:1.6;}
@@ -721,9 +736,9 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
         Comunidad <span class="notif-dot" id="socialNotifDot"></span>
       </button>
-      <button onclick="toggleDrivingMode()" id="navDriving" class="nav-mode-btn driving-nav">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-        🚗 Conducción
+      <button onclick="toggleMusicMode()" id="navDriving" class="nav-mode-btn driving-nav">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        🎵 Música
       </button>
       <button onclick="switchView('settings')" id="navSettings" class="nav-mode-btn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1062,34 +1077,60 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   <div class="mp-status" id="mpStatus">Listo</div>
 </div>
 
-<!-- ── DRIVING MODE ── -->
+<!-- ── MUSIC MODE ── -->
 <div id="drivingMode">
   <div class="driving-wave"><canvas id="drivingWaveCanvas"></canvas></div>
-  <div class="driving-time" id="drivingClock">--:--</div>
-  <div class="driving-date" id="drivingDate">—</div>
-  <div class="driving-response" id="drivingResponse">Di "Hey LOVA" o toca el micrófono para hablar</div>
-  <div class="driving-music" id="drivingMusicBar" style="display:none;">
-    <div class="driving-music-icon">🎵</div>
-    <div class="driving-music-info">
-      <div class="driving-music-title" id="drivingMusicTitle">Sin música</div>
-      <div class="driving-music-sub">REPRODUCIENDO</div>
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;gap:14px;width:100%;max-width:560px;z-index:1;">
+    <div style="flex:1;">
+      <div style="font-family:'Space Mono',monospace;font-size:0.56rem;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:4px;">LOVA MUSIC</div>
+      <div id="musicModeTitle" style="font-size:1.1rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Sin reproducción</div>
+      <div id="musicModeSource" style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--text-dim);margin-top:2px;">—</div>
     </div>
-  </div>
-  <div class="driving-controls">
-    <button class="driving-btn primary" onclick="startDrivingVoice()" id="drivingMicBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
-      Hablar
-    </button>
-    <button class="driving-btn primary" onclick="toggleMusicPlay()" id="drivingPlayBtn">
-      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      Música
-    </button>
-    <button class="driving-btn exit" onclick="toggleDrivingMode()">
+    <button class="driving-btn exit" onclick="toggleMusicMode()" style="width:44px;height:44px;border-radius:12px;font-size:0.6rem;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      Salir
     </button>
   </div>
-  <div class="driving-mic-label" id="drivingMicLabel">Toca Hablar para dar una instrucción a LOVA</div>
+
+  <!-- Search bar + mic -->
+  <div style="display:flex;gap:8px;width:100%;max-width:560px;z-index:1;">
+    <div style="flex:1;position:relative;">
+      <input id="musicSearchInput" type="text" placeholder="Busca una canción, artista o álbum..." 
+        style="width:100%;background:var(--surface);border:1px solid var(--green-border);border-radius:14px;padding:11px 44px 11px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;"
+        onkeydown="if(event.key==='Enter')searchMusicMode()">
+      <button onclick="searchMusicMode()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--green);font-size:1rem;">🔍</button>
+    </div>
+    <button onclick="voiceSearchMusic()" id="musicVoiceBtn" style="width:46px;height:46px;border-radius:14px;background:var(--green-dim);border:1px solid var(--green-border);color:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex;gap:6px;width:100%;max-width:560px;z-index:1;" id="musicModeTabs">
+    <button class="music-mode-tab active" onclick="setMusicModeTab('emisoras',this)">📻 Barranquilla</button>
+    <button class="music-mode-tab" onclick="setMusicModeTab('recientes',this)">🕒 Recientes</button>
+    <button class="music-mode-tab" onclick="setMusicModeTab('favoritos',this)">❤️ Favoritos</button>
+    <button class="music-mode-tab" onclick="setMusicModeTab('cola',this)">🎶 Cola</button>
+  </div>
+
+  <!-- Content area -->
+  <div id="musicModeContent" style="width:100%;max-width:560px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;z-index:1;min-height:0;padding-bottom:8px;">
+  </div>
+
+  <!-- Player controls -->
+  <div style="display:flex;align-items:center;gap:14px;z-index:1;width:100%;max-width:420px;">
+    <button onclick="musicPrev()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="22" height="22"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+    </button>
+    <button onclick="toggleMusicPlay()" id="musicModePlayBtn" style="width:56px;height:56px;border-radius:50%;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 0 20px rgba(0,191,165,0.4);">
+      <svg id="musicModePlayIcon" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </button>
+    <button onclick="musicNext()" style="background:none;border:none;cursor:pointer;color:var(--text-dim);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="22" height="22"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="4" x2="19" y2="20"/></svg>
+    </button>
+    <input type="range" min="0" max="1" step="0.05" value="0.8" oninput="setMusicVolume(this.value)" style="flex:1;accent-color:var(--green);height:3px;cursor:pointer;">
+  </div>
 </div>
 
 <!-- ── IMAGE CHOICE MODAL ── -->
@@ -2106,6 +2147,8 @@ function renderContacts(){
 
 async function openSocialChat(partnerId, partnerUsername, partnerEmail){
   currentChatPartner={id:partnerId,username:partnerUsername,email:partnerEmail};
+  // Flush any queued messages now that we have a partner context
+  if(_isOnline&&getQueue().length)flushQueue();
   // Close media drawer if open
   document.getElementById('mediaDrawer')?.classList.remove('open');
   document.getElementById('socialEmpty').style.display='none';
@@ -2471,7 +2514,13 @@ function initConnectionWatch(){
     setConnBar('offline','Sin conexión — los mensajes se enviarán al reconectar');
   });
   // Al iniciar, vaciar cola si hay mensajes pendientes de sesión anterior
-  if(getQueue().length)flushQueue();
+  // Espera a que currentUser esté disponible antes de intentar enviar
+  if(getQueue().length){
+    const _waitAndFlush=setInterval(()=>{
+      if(currentUser&&_isOnline){clearInterval(_waitAndFlush);flushQueue();}
+    },800);
+    setTimeout(()=>clearInterval(_waitAndFlush),30000); // máx 30s de espera
+  }
 }
 
 async function reconnectSocialChannel(){
@@ -2511,15 +2560,19 @@ async function resyncMissedMessages(roomId){
   // Get the timestamp of the last displayed message
   const existing=[...box.querySelectorAll('.social-msg[data-msg-id]')];
   const lastEl=existing[existing.length-1];
-  if(!lastEl)return;
-  const lastId=lastEl.dataset.msgId;
-  if(!lastId||lastId.startsWith('tmp_'))return;
+  const lastId=lastEl?.dataset.msgId;
 
-  // Fetch messages newer than last known
-  const{data:msgs}=await sb.from('social_messages')
-    .select('*').eq('room_id',roomId)
-    .gt('id',lastId) // UUIDs are ordered by creation in Supabase
-    .order('created_at',{ascending:true}).limit(50);
+  let query=sb.from('social_messages').select('*').eq('room_id',roomId).order('created_at',{ascending:true}).limit(80);
+  if(lastId&&!lastId.startsWith('tmp_')){
+    // Fetch messages newer than last known real ID
+    query=query.gt('id',lastId);
+  } else {
+    // No valid anchor — fetch everything from the last 24h to catch any missed messages
+    const since=new Date(Date.now()-86400000).toISOString();
+    query=query.gte('created_at',since);
+  }
+
+  const{data:msgs}=await query;
 
   if(!msgs||!msgs.length)return;
 
@@ -3186,15 +3239,6 @@ let musicQueue=[];
 let musicIndex=0;
 let musicPlaying=false;
 
-const RADIO_STATIONS=[
-  {name:'El Gran Llano',url:'https://stream.zeno.fm/ynq0vfqwtzuuv',icon:'🎸',genre:'Llanera'},
-  {name:'Tropicana Colombia',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_SC',icon:'🌴',genre:'Tropical'},
-  {name:'La Mega Bogotá',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/LAMEGASC',icon:'🔥',genre:'Urban/Pop'},
-  {name:'Olímpica Stereo',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/OLIMPICA_STEREOSC',icon:'🏅',genre:'Vallenato/Pop'},
-  {name:'Amor Stereo',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/AMOR_STEREOSC',icon:'❤️',genre:'Romántica'},
-  {name:'Blu Radio',url:'https://stream.blu.com.co/BLURadio',icon:'💙',genre:'Noticias/Variada'},
-];
-
 function initMusicPlayer(){
   if(!musicAudio){
     musicAudio=new Audio();
@@ -3273,7 +3317,7 @@ function closeMusicPlayer(){
 
 // Intercept music commands in sendMessage
 const MUSIC_TRIGGERS=/\b(pon|reproduce|escuchar|toca|play|suena|dale|manda|activa)\b.*\b(música|canción|song|radio|emisora|stream|tune|playlist)\b|\b(pon\s+la|pon\s+el|pon\s+a|reproduce\s+a|dale\s+con|escucha\s+a)\b/i;
-const RADIO_TRIGGERS=/\b(el\s+gran\s+llano|tropicana|la\s+mega|olimpica|amor\s+stereo|blu\s+radio|emisora|radio\s+colombia)\b/i;
+const RADIO_TRIGGERS=/\b(el\s+gran\s+lobo|tropicana|la\s+mega|olimpica|amor\s+stereo|blu\s+radio|radio\s+uno|vibra|todelar|emisora|radio\s+colombia|barranquilla)\b/i;
 const YOUTUBE_SEARCH_TRIGGERS=/\b(busca|pon|reproduce|toca|play)\b.*\b(en\s+youtube|de\s+youtube|youtube)\b|\b(pon\s+la\s+canc[ií]on|reproduce\s+la\s+canc[ií]on)\b/i;
 
 const _origSendMsgBeforeMusic=window.sendMessage;
@@ -3466,7 +3510,10 @@ function createWAAudioBubble(audioEl){
   
   playBtn.onclick=()=>{
     playing=!playing;
-    if(playing){audioEl.play();}else{audioEl.pause();}
+    if(playing){
+      const p=audioEl.play();
+      if(p&&p.catch)p.catch(()=>{playing=false;playBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;});
+    }else{audioEl.pause();}
     playBtn.innerHTML=playing
       ?`<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`
       :`<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
@@ -3561,109 +3608,259 @@ window.appendSocialMsg=function(side,text,ts,seen=false,replyTo=null,msgId=null)
 };
 
 // ══════════════════════════════════════════
-// ── DRIVING MODE ──
+// ── MUSIC MODE (reemplaza modo conducción) ──
 // ══════════════════════════════════════════
-let drivingActive=false;
-let drivingRecognition=null;
-let drivingClockInterval=null;
+let drivingActive=false; // keep var name for compat
+let _musicModeTab='emisoras';
+let _musicRecognition=null;
 
-function toggleDrivingMode(){
+// Emisoras enfocadas en Barranquilla y Colombia Caribe
+const RADIO_STATIONS=[
+  {name:'El Gran Lobo',url:'https://stream.zeno.fm/ymcvmqrp8rhvv',icon:'🐺',genre:'Barranquilla · Vallenato/Pop'},
+  {name:'Tropicana Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_BQSC',icon:'🌴',genre:'Barranquilla · Tropical'},
+  {name:'La Mega Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/LAMEGABQSC',icon:'🔥',genre:'Barranquilla · Urban/Pop'},
+  {name:'Olímpica Stereo Bq',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/OLIMPICA_BQSC',icon:'🏅',genre:'Barranquilla · Vallenato'},
+  {name:'Amor Stereo Bq',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/AMOR_BQSC',icon:'❤️',genre:'Barranquilla · Romántica'},
+  {name:'Radio Uno Bq',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_UNO_BQSC',icon:'1️⃣',genre:'Barranquilla · Variada'},
+  {name:'Vibra Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/VIBRA_BQSC',icon:'⚡',genre:'Barranquilla · Electrónica/Pop'},
+  {name:'Blu Radio Caribe',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/BLU_CARIBESC',icon:'💙',genre:'Barranquilla · Noticias'},
+  {name:'Todelar Vallenata',url:'https://stream.zeno.fm/todelar',icon:'🎸',genre:'Costa · Vallenato'},
+  {name:'La Voz de Barranquilla',url:'https://stream.zeno.fm/lavozde',icon:'📻',genre:'Barranquilla · Clásica'},
+];
+
+// Persistencia local de favoritos y recientes
+function getMusicFavs(){try{return JSON.parse(localStorage.getItem('lova_music_favs')||'[]');}catch{return[];}}
+function saveMusicFavs(f){localStorage.setItem('lova_music_favs',JSON.stringify(f));}
+function getMusicRecents(){try{return JSON.parse(localStorage.getItem('lova_music_recents')||'[]');}catch{return[];}}
+function addToRecents(track){
+  let r=getMusicRecents().filter(t=>t.name!==track.name);
+  r.unshift({...track,ts:Date.now()});
+  if(r.length>20)r=r.slice(0,20);
+  localStorage.setItem('lova_music_recents',JSON.stringify(r));
+}
+function toggleMusicFav(track){
+  let favs=getMusicFavs();
+  const idx=favs.findIndex(f=>f.name===track.name);
+  if(idx>=0)favs.splice(idx,1);else favs.unshift({...track});
+  saveMusicFavs(favs);
+  renderMusicModeContent();
+}
+function isFav(name){return getMusicFavs().some(f=>f.name===name);}
+
+function toggleMusicMode(){
   drivingActive=!drivingActive;
   const el=document.getElementById('drivingMode');
   el.classList.toggle('active',drivingActive);
   const btn=document.getElementById('navDriving');
   btn.classList.toggle('active',drivingActive);
-  // Close sidebar on mobile
   if(window.innerWidth<=640)closeSidebarMobile();
   if(drivingActive){
-    updateDrivingClock();
-    drivingClockInterval=setInterval(updateDrivingClock,1000);
     startDrivingWave();
-    // Speak welcome
-    speakDriving('Modo conducción activo. Estoy lista para ayudarte. Toca el micrófono para dar instrucciones.');
+    renderMusicModeContent();
+    syncMusicModePlayer();
   } else {
-    clearInterval(drivingClockInterval);
-    if(drivingRecognition){drivingRecognition.abort();drivingRecognition=null;}
     stopDrivingWave();
+    if(_musicRecognition){_musicRecognition.abort();_musicRecognition=null;}
+  }
+}
+// Legacy alias
+function toggleDrivingMode(){toggleMusicMode();}
+
+function setMusicModeTab(tab,btn){
+  _musicModeTab=tab;
+  document.querySelectorAll('.music-mode-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMusicModeContent();
+}
+
+function renderMusicModeContent(){
+  const box=document.getElementById('musicModeContent');
+  if(!box)return;
+  if(_musicModeTab==='emisoras'){
+    box.innerHTML='<div style="font-family:\'Space Mono\',monospace;font-size:0.56rem;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;">EMISORAS EN VIVO · BARRANQUILLA</div>';
+    RADIO_STATIONS.forEach((s,i)=>{
+      const row=document.createElement('div');
+      row.className='music-track-row'+(musicAudio&&!musicAudio.paused&&musicQueue[musicIndex]?.name===s.name?' playing':'');
+      row.innerHTML=`<div class="music-track-icon">${s.icon}</div>
+        <div class="music-track-info" onclick="playMusicTrack(${i},'station')">
+          <div class="music-track-name">${s.name}</div>
+          <div class="music-track-sub">${s.genre}</div>
+        </div>
+        <button class="music-fav-btn${isFav(s.name)?' active':''}" onclick="toggleMusicFav(${JSON.stringify(s).replace(/"/g,'&quot;')})" title="${isFav(s.name)?'Quitar de favoritos':'Agregar a favoritos'}">${isFav(s.name)?'❤️':'🤍'}</button>`;
+      box.appendChild(row);
+    });
+  } else if(_musicModeTab==='recientes'){
+    const recents=getMusicRecents();
+    if(!recents.length){box.innerHTML='<div style="color:var(--text-dim);font-size:0.78rem;text-align:center;padding:20px;">Sin escuchados recientes</div>';return;}
+    box.innerHTML='<div style="font-family:\'Space Mono\',monospace;font-size:0.56rem;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;">ESCUCHADOS RECIENTEMENTE</div>';
+    recents.forEach(t=>{
+      const row=document.createElement('div');
+      row.className='music-track-row';
+      const timeStr=t.ts?new Date(t.ts).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}):'';
+      row.innerHTML=`<div class="music-track-icon">${t.icon||'🎵'}</div>
+        <div class="music-track-info" onclick="playMusicTrack(null,'recent',${JSON.stringify(t).replace(/"/g,'&quot;')})">
+          <div class="music-track-name">${t.name}</div>
+          <div class="music-track-sub">${t.genre||''} ${timeStr?'· '+timeStr:''}</div>
+        </div>
+        <button class="music-fav-btn${isFav(t.name)?' active':''}" onclick="toggleMusicFav(${JSON.stringify(t).replace(/"/g,'&quot;')})">${isFav(t.name)?'❤️':'🤍'}</button>`;
+      box.appendChild(row);
+    });
+  } else if(_musicModeTab==='favoritos'){
+    const favs=getMusicFavs();
+    if(!favs.length){box.innerHTML='<div style="color:var(--text-dim);font-size:0.78rem;text-align:center;padding:20px;">Toca ❤️ en cualquier canción para guardar aquí</div>';return;}
+    box.innerHTML='<div style="font-family:\'Space Mono\',monospace;font-size:0.56rem;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;">MIS FAVORITOS</div>';
+    favs.forEach(t=>{
+      const row=document.createElement('div');
+      row.className='music-track-row';
+      row.innerHTML=`<div class="music-track-icon">${t.icon||'🎵'}</div>
+        <div class="music-track-info" onclick="playMusicTrack(null,'fav',${JSON.stringify(t).replace(/"/g,'&quot;')})">
+          <div class="music-track-name">${t.name}</div>
+          <div class="music-track-sub">${t.genre||''}</div>
+        </div>
+        <button class="music-fav-btn active" onclick="toggleMusicFav(${JSON.stringify(t).replace(/"/g,'&quot;')})">❤️</button>`;
+      box.appendChild(row);
+    });
+  } else if(_musicModeTab==='cola'){
+    if(!musicQueue.length){box.innerHTML='<div style="color:var(--text-dim);font-size:0.78rem;text-align:center;padding:20px;">La cola está vacía. Busca canciones para agregar.</div>';return;}
+    box.innerHTML='<div style="font-family:\'Space Mono\',monospace;font-size:0.56rem;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;">COLA DE REPRODUCCIÓN</div>';
+    musicQueue.forEach((t,i)=>{
+      const row=document.createElement('div');
+      row.className='music-track-row'+(i===musicIndex?' playing':'');
+      row.innerHTML=`<div class="music-track-icon" style="${i===musicIndex?'background:var(--green-dim);border:1px solid var(--green-border);':''}">${i===musicIndex?'▶':t.icon||'🎵'}</div>
+        <div class="music-track-info" onclick="musicIndex=${i};const s=musicQueue[${i}];openMusicPlayer(s.name,s.url,s.icon,s.genre);">
+          <div class="music-track-name">${t.name}</div>
+          <div class="music-track-sub">${t.genre||''}</div>
+        </div>
+        <button onclick="musicQueue.splice(${i},1);if(musicIndex>=${i}&&musicIndex>0)musicIndex--;renderMusicModeContent();" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:0.75rem;padding:4px;">✕</button>`;
+      box.appendChild(row);
+    });
   }
 }
 
-function updateDrivingClock(){
-  const now=new Date();
-  const h=String(now.getHours()).padStart(2,'0');
-  const m=String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('drivingClock').textContent=h+':'+m;
-  const days=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  document.getElementById('drivingDate').textContent=
-    `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`;
+function playMusicTrack(stationIdx, source, trackObj){
+  let track;
+  if(source==='station'){track=RADIO_STATIONS[stationIdx];}
+  else{track=trackObj;}
+  if(!track)return;
+  musicQueue=[...RADIO_STATIONS]; // keep stations as queue base
+  musicIndex=RADIO_STATIONS.findIndex(s=>s.name===track.name);
+  if(musicIndex<0){musicQueue=[track,...musicQueue];musicIndex=0;}
+  openMusicPlayer(track.name,track.url,track.icon,track.genre);
+  addToRecents(track);
+  renderMusicModeContent();
 }
 
-function speakDriving(text){
-  if(!window.speechSynthesis)return;
-  speechSynthesis.cancel();
-  const utt=new SpeechSynthesisUtterance(text);
-  utt.lang='es-ES';utt.rate=1.05;utt.pitch=1;
-  speechSynthesis.speak(utt);
-  document.getElementById('drivingResponse').textContent=text;
+function syncMusicModePlayer(){
+  if(!musicAudio)return;
+  const playIcon=document.getElementById('musicModePlayIcon');
+  if(playIcon){
+    const playing=!musicAudio.paused;
+    playIcon.outerHTML=playing
+      ?`<svg id="musicModePlayIcon" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`
+      :`<svg id="musicModePlayIcon" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+  }
+  const title=document.getElementById('musicModeTitle');
+  const src=document.getElementById('musicModeSource');
+  if(title&&musicQueue[musicIndex]){
+    title.textContent=musicQueue[musicIndex].name;
+    if(src)src.textContent=musicQueue[musicIndex].genre||'—';
+  }
 }
 
-async function startDrivingVoice(){
+// Search music via YouTube embed
+async function searchMusicMode(){
+  const input=document.getElementById('musicSearchInput');
+  const q=(input?.value||'').trim();
+  if(!q)return;
+  input.value='';
+  const box=document.getElementById('musicModeContent');
+  box.innerHTML=`<div style="color:var(--text-dim);font-size:0.78rem;font-family:'Space Mono',monospace;margin-bottom:8px;">🔍 Resultados para: <span style="color:var(--green)">${q}</span></div>`;
+  // Embed YouTube search iframe — functional player
+  const ytQ=encodeURIComponent(q+' audio');
+  const frame=document.createElement('iframe');
+  frame.src=`https://www.youtube.com/embed?listType=search&list=${ytQ}&autoplay=1`;
+  frame.allow='accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture';
+  frame.allowFullscreen=true;
+  frame.style.cssText='width:100%;height:200px;border-radius:14px;border:1px solid var(--green-border);';
+  box.appendChild(frame);
+  // Also add as track in recents/queue
+  const searchTrack={name:q,url:'yt:'+q,icon:'▶',genre:'YouTube'};
+  addToRecents(searchTrack);
+  // Add tabs back at bottom with small hint
+  const hint=document.createElement('div');
+  hint.style.cssText='font-family:Space Mono,monospace;font-size:0.6rem;color:var(--text-dim);margin-top:8px;text-align:center;';
+  hint.textContent='Reproduce directamente en el iframe ↑ · El audio del iframe es independiente';
+  box.appendChild(hint);
+}
+
+// Voice search in music mode
+function voiceSearchMusic(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){speakDriving('Tu navegador no soporta reconocimiento de voz.');return;}
-  const btn=document.getElementById('drivingMicBtn');
-  const label=document.getElementById('drivingMicLabel');
-  
-  if(drivingRecognition){drivingRecognition.abort();drivingRecognition=null;btn.style.background='';label.textContent='Toca Hablar para dar una instrucción';return;}
-  
-  drivingRecognition=new SR();
-  drivingRecognition.lang='es-ES';drivingRecognition.continuous=false;drivingRecognition.interimResults=false;
-  label.textContent='Escuchando...';
-  btn.style.background='rgba(255,80,80,0.2)';
-  btn.style.borderColor='rgba(255,80,80,0.4)';
-  btn.style.color='#ff6b6b';
-  
-  drivingRecognition.onresult=async(e)=>{
+  const btn=document.getElementById('musicVoiceBtn');
+  if(!SR){return;}
+  if(_musicRecognition){_musicRecognition.abort();_musicRecognition=null;if(btn)btn.style.color='';return;}
+  _musicRecognition=new SR();
+  _musicRecognition.lang='es-CO';_musicRecognition.continuous=false;_musicRecognition.interimResults=false;
+  if(btn){btn.style.color='#ff6b6b';btn.style.background='rgba(255,80,80,0.15)';}
+  _musicRecognition.onresult=e=>{
     const text=e.results[0][0].transcript;
-    document.getElementById('drivingResponse').textContent='Procesando: "'+text+'"';
-    label.textContent='Procesando...';
-    
-    // Check for music command in driving mode
-    if(MUSIC_TRIGGERS.test(text)||RADIO_TRIGGERS.test(text)){
-      let matched=null;
-      const lw=text.toLowerCase();
-      for(const s of RADIO_STATIONS){if(lw.includes(s.name.toLowerCase().split(' ')[0])){matched=s;break;}}
-      if(!matched)matched=RADIO_STATIONS[0];
-      musicQueue=[matched];musicIndex=0;
-      openMusicPlayer(matched.name,matched.url,matched.icon,matched.genre);
-      speakDriving('Reproduciendo '+matched.name);
-      btn.style.cssText='';label.textContent='Toca Hablar para dar una instrucción';
-      drivingRecognition=null;
-      return;
+    // Check if it's a radio station name
+    const lw=text.toLowerCase();
+    let matched=null;
+    for(const s of RADIO_STATIONS){
+      if(lw.includes(s.name.toLowerCase().split(' ')[0].toLowerCase())||
+         lw.includes(s.name.toLowerCase())){matched=s;break;}
     }
-    
-    // Send to AI
-    try{
-      const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-        system:'Eres LOVA en modo conducción. Responde MUY brevemente (máx 2 oraciones). Sin markdown. Sin listas. Solo texto simple para ser leído en voz alta.',
-        messages:[{role:'user',content:text}],max_tokens:120,mode:'chat'
-      })});
-      const data=await res.json();
-      const reply=data?.content?.[0]?.text||'No pude entender eso. Intenta de nuevo.';
-      speakDriving(reply);
-    }catch{speakDriving('Sin conexión. Verifica tu red.');}
-    
-    btn.style.cssText='';label.textContent='Toca Hablar para dar una instrucción';
-    drivingRecognition=null;
+    if(matched){
+      playMusicTrack(RADIO_STATIONS.indexOf(matched),'station');
+    } else {
+      // Search on YouTube
+      const inp=document.getElementById('musicSearchInput');
+      if(inp)inp.value=text;
+      searchMusicMode();
+    }
+    _musicRecognition=null;
+    if(btn){btn.style.color='';btn.style.background='';}
   };
-  drivingRecognition.onend=()=>{
-    if(drivingRecognition){drivingRecognition=null;btn.style.cssText='';label.textContent='Toca Hablar para dar una instrucción';}
-  };
-  drivingRecognition.onerror=()=>{btn.style.cssText='';drivingRecognition=null;label.textContent='Error de micrófono. Intenta de nuevo.';}; 
-  drivingRecognition.start();
+  _musicRecognition.onend=()=>{_musicRecognition=null;if(btn){btn.style.color='';btn.style.background='';}};
+  _musicRecognition.onerror=()=>{_musicRecognition=null;if(btn){btn.style.color='';btn.style.background='';}};
+  _musicRecognition.start();
 }
 
-// Driving mode wave animation
+// Override openMusicPlayer to also update music mode panel
+const _origOpenMusicPlayer=openMusicPlayer;
+function openMusicPlayer(title,url,icon,source){
+  _origOpenMusicPlayer(title,url,icon,source);
+  // Update music mode header
+  const t=document.getElementById('musicModeTitle');
+  const s=document.getElementById('musicModeSource');
+  if(t)t.textContent=title;
+  if(s)s.textContent=source||'—';
+  // Sync play icon in music mode
+  setTimeout(syncMusicModePlayer,300);
+  // Add to recents
+  addToRecents({name:title,url,icon:icon||'🎵',genre:source||''});
+}
+
+// Override updateMusicPlayBtn to also sync music mode panel icon
+const _origUpdateMusicPlayBtn=updateMusicPlayBtn;
+function updateMusicPlayBtn(playing){
+  _origUpdateMusicPlayBtn(playing);
+  const icon=document.getElementById('musicModePlayIcon');
+  if(!icon)return;
+  icon.outerHTML=playing
+    ?`<svg id="musicModePlayIcon" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`
+    :`<svg id="musicModePlayIcon" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+}
+
+// Initialize stations in queue
+musicQueue=[...RADIO_STATIONS];
+
+// Driving clock/wave (kept for compat, no-op now)
+function updateDrivingClock(){}
+function startDrivingVoice(){}
+
+// Driving wave animation
 let drivingWaveRAF=null;
 function startDrivingWave(){
   const canvas=document.getElementById('drivingWaveCanvas');
@@ -3679,11 +3876,9 @@ function startDrivingWave(){
     for(let r=0;r<4;r++){
       const radius=120+r*80+Math.sin(t*0.5+r)*20;
       const alpha=0.03-r*0.006;
-      ctx.beginPath();
-      ctx.arc(cx,cy,radius,0,Math.PI*2);
+      ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);
       ctx.strokeStyle=`rgba(0,191,165,${alpha})`;
-      ctx.lineWidth=1.5;
-      ctx.stroke();
+      ctx.lineWidth=1.5;ctx.stroke();
     }
     t+=0.02;
     drivingWaveRAF=requestAnimationFrame(draw);
@@ -3970,9 +4165,9 @@ window.appendSocialMsg=function(side,text,ts,seen,replyTo,msgId){
       const time=ts?new Date(ts).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}):'';
       const seenMark=side==='me'?`<span class="social-seen">${seen?'✓✓':'✓'}</span>`:'';
       const audioEl=document.createElement('audio');
-      audioEl.preload='metadata';
-      const src=document.createElement('source');
-      src.src=url;audioEl.appendChild(src);
+      audioEl.crossOrigin='anonymous';
+      audioEl.preload='auto';
+      audioEl.src=url; // set directly so browser loads it immediately
       const waBubble=createWAAudioBubble(audioEl)||audioEl;
       const arrowSvg=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>`;
       const wrap=document.createElement('div');wrap.className='social-msg-wrap';
