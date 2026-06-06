@@ -48,6 +48,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .sidebar:hover .chat-item-title,.sidebar:hover .chat-item-actions,.sidebar:hover .sidebar-logo-name{display:block;}
 .sidebar:hover .chat-list{align-items:flex-start;padding:4px 8px;}
 .sidebar:hover .chat-item{width:100%;}
+.sidebar:hover .sidebar-section{display:block;}
 .sidebar.collapsed{width:0;transform:translateX(-100%);position:absolute;height:100%;}
 .sidebar-top{padding:14px 0 10px;border-bottom:1px solid rgba(255,255,255,0.04);flex-shrink:0;width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;}
 .sidebar-logo{display:flex;align-items:center;justify-content:center;padding:0;}
@@ -62,7 +63,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .chat-item{width:100%;padding:8px 10px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px;transition:background 0.15s;border:none;background:none;text-align:left;margin-bottom:2px;}
 .chat-item:hover{background:rgba(255,255,255,0.05);}
 .chat-item.active{background:var(--green-dim);border:1px solid var(--green-border);}
-.chat-item-title{font-size:0.75rem;color:rgba(238,238,238,0.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;font-family:'DM Sans',sans-serif;display:none;}
+.chat-item-title{font-size:0.75rem;color:rgba(238,238,238,0.82);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;font-family:'DM Sans',sans-serif;display:none;}
 .chat-item-actions{display:none;}
 .chat-item-actions button{background:none;border:none;color:rgba(238,238,238,0.3);cursor:pointer;font-size:0.7rem;padding:2px 4px;border-radius:4px;flex-shrink:0;opacity:0;transition:opacity 0.15s;}
 .chat-item:hover .chat-item-actions button{opacity:1;}
@@ -324,11 +325,11 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 }
 /* NAV MODE BUTTONS */
 .nav-mode-btn{width:40px;height:40px;padding:0;border-radius:12px;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;margin-bottom:4px;background:none;border:1px solid rgba(255,255,255,0.05);position:relative;}
-.nav-mode-btn svg{width:17px;height:17px;color:rgba(238,238,238,0.55);opacity:1;flex-shrink:0;}
+.nav-mode-btn svg{width:17px;height:17px;color:rgba(238,238,238,0.82);opacity:1;flex-shrink:0;}
 .nav-mode-btn span:not(.notif-dot){display:none;}
-.nav-mode-btn:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.1);}
+.nav-mode-btn:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);}
 .nav-mode-btn:hover svg{color:#eeeeee;}
-.nav-mode-btn.active{background:var(--green-dim);border-color:var(--green-border);box-shadow:0 0 10px rgba(0,191,165,0.1);}
+.nav-mode-btn.active{background:var(--green-dim);border-color:var(--green-border);box-shadow:0 0 10px rgba(0,191,165,0.15);}
 .nav-mode-btn.active svg{color:#00bfa5;}
 /* Tooltip on hover */
 .nav-mode-btn::after{content:attr(data-tip);position:absolute;left:52px;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.72rem;padding:4px 10px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transform:translateX(-4px);transition:all 0.15s;z-index:100;}
@@ -512,8 +513,6 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 /* ── BUBBLE COLOR THEMING ── */
 :root { --bubble-color: #00bfa5; --bubble-color-dim: rgba(0,191,165,0.12); --bubble-color-border: rgba(0,191,165,0.25); }
 .social-msg.me .social-bubble{background:var(--bubble-color-dim);border:1px solid var(--bubble-color-border);border-bottom-right-radius:4px;}
-.social-msg.them .social-bubble{background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-bottom-left-radius:4px;}
-
 /* Chat theme picker */
 .chat-theme-btn{width:32px;height:32px;background:var(--surface2);border:1px solid rgba(255,255,255,0.07);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-dim);transition:all 0.2s;flex-shrink:0;position:relative;}
 .chat-theme-btn:hover{color:var(--green);border-color:var(--green-border);}
@@ -525,7 +524,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .chat-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.18s;position:relative;flex-shrink:0;}
 .chat-swatch:hover{transform:scale(1.18);}
 .chat-swatch.active{border-color:#fff;box-shadow:0 0 0 2px var(--bubble-color);}
-.chat-swatch-label{display:none;}
+.social-msg.them .social-bubble{background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-bottom-left-radius:4px;}
 .social-msg-time{font-size:0.58rem;color:var(--text-dim);font-family:"Space Mono",monospace;display:flex;align-items:center;gap:4px;}
 .social-seen{font-size:0.6rem;color:var(--green);}
 .social-file-bubble{display:flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:10px;padding:8px 12px;font-size:0.78rem;color:var(--green);cursor:pointer;text-decoration:none;max-width:200px;}
@@ -4456,63 +4455,38 @@ const BUBBLE_THEMES = [
   { id:'carbon',  label:'Carbón',   color:'#374151', dim:'rgba(55,65,81,0.35)',    border:'rgba(55,65,81,0.55)' },
   { id:'midnight',label:'Midnight', color:'#1e293b', dim:'rgba(30,41,59,0.55)',    border:'rgba(100,116,139,0.3)' },
 ];
-
-function applyBubbleTheme(theme, save=true){
-  const root = document.documentElement.style;
-  root.setProperty('--bubble-color', theme.color);
-  root.setProperty('--bubble-color-dim', theme.dim);
-  root.setProperty('--bubble-color-border', theme.border);
-  // Update seen tick color
-  const style = document.getElementById('bubbleThemeStyle') || (() => {
-    const s = document.createElement('style'); s.id='bubbleThemeStyle'; document.head.appendChild(s); return s;
-  })();
-  style.textContent = `.social-seen{color:${theme.color}!important;} .social-msg.me .reply-quote{border-left-color:${theme.color}!important;}`;
-  // Mark active swatch
-  document.querySelectorAll('.chat-swatch').forEach(s => s.classList.toggle('active', s.dataset.id === theme.id));
-  if(save) localStorage.setItem('lova_bubble_theme', theme.id);
+function applyBubbleTheme(theme,save=true){
+  const r=document.documentElement.style;
+  r.setProperty('--bubble-color',theme.color);
+  r.setProperty('--bubble-color-dim',theme.dim);
+  r.setProperty('--bubble-color-border',theme.border);
+  const s=document.getElementById('bubbleThemeStyle')||(() => {const el=document.createElement('style');el.id='bubbleThemeStyle';document.head.appendChild(el);return el;})();
+  s.textContent=`.social-seen{color:${theme.color}!important;}.social-msg.me .reply-quote{border-left-color:${theme.color}!important;}`;
+  document.querySelectorAll('.chat-swatch').forEach(sw=>sw.classList.toggle('active',sw.dataset.id===theme.id));
+  if(save)localStorage.setItem('lova_bubble_theme',theme.id);
 }
-
 function buildThemeSwatches(){
-  const container = document.getElementById('chatThemeSwatches');
-  if(!container) return;
-  container.innerHTML = '';
-  BUBBLE_THEMES.forEach(t => {
-    const btn = document.createElement('button');
-    btn.className = 'chat-swatch';
-    btn.dataset.id = t.id;
-    btn.title = t.label;
-    btn.style.background = t.color;
-    btn.onclick = () => { applyBubbleTheme(t); closeChatTheme(); };
-    container.appendChild(btn);
+  const c=document.getElementById('chatThemeSwatches');if(!c)return;
+  c.innerHTML='';
+  BUBBLE_THEMES.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='chat-swatch';b.dataset.id=t.id;b.title=t.label;b.style.background=t.color;
+    b.onclick=()=>{applyBubbleTheme(t);closeChatTheme();};
+    c.appendChild(b);
   });
-  // Apply saved or default
-  const saved = localStorage.getItem('lova_bubble_theme') || 'teal';
-  const theme = BUBBLE_THEMES.find(t => t.id === saved) || BUBBLE_THEMES[0];
-  applyBubbleTheme(theme, false);
+  const saved=localStorage.getItem('lova_bubble_theme')||'teal';
+  applyBubbleTheme(BUBBLE_THEMES.find(t=>t.id===saved)||BUBBLE_THEMES[0],false);
 }
-
-function toggleChatTheme(){
-  const dd = document.getElementById('chatThemeDropdown');
-  if(!dd) return;
-  dd.classList.toggle('hidden');
-}
-function closeChatTheme(){
-  const dd = document.getElementById('chatThemeDropdown');
-  if(dd) dd.classList.add('hidden');
-}
-// Close on outside click
-document.addEventListener('click', e => {
-  const btn = document.getElementById('chatThemeBtn');
-  const dd  = document.getElementById('chatThemeDropdown');
-  if(dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) dd.classList.add('hidden');
+function toggleChatTheme(){const d=document.getElementById('chatThemeDropdown');if(d)d.classList.toggle('hidden');}
+function closeChatTheme(){const d=document.getElementById('chatThemeDropdown');if(d)d.classList.add('hidden');}
+document.addEventListener('click',e=>{
+  const btn=document.getElementById('chatThemeBtn');const dd=document.getElementById('chatThemeDropdown');
+  if(dd&&btn&&!btn.contains(e.target)&&!dd.contains(e.target))dd.classList.add('hidden');
 });
+document.addEventListener('DOMContentLoaded',buildThemeSwatches);
+if(document.readyState!=='loading')buildThemeSwatches();
 
-// Init
-document.addEventListener('DOMContentLoaded', buildThemeSwatches);
-// Fallback if DOM already ready
-if(document.readyState !== 'loading') buildThemeSwatches();
-
-
+// ── Update training progress on load ──
 const _origLoadTraining=loadTraining;
 async function loadTraining(){
   await _origLoadTraining();
