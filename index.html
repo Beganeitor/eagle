@@ -117,7 +117,8 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   z-index:0;
   filter:blur(55px);
   animation:heroGlowPulse 5s ease-in-out infinite, heroColorCycle 12s linear infinite;
-  opacity:0.55;
+  opacity:0.85;
+  mix-blend-mode:screen;
 }
 .hero-glow2{
   position:absolute;
@@ -129,20 +130,21 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   z-index:0;
   filter:blur(30px);
   animation:heroGlowPulse 5s ease-in-out infinite 2.5s, heroColorCycle 12s linear infinite 6s;
-  opacity:0.4;
+  opacity:0.7;
+  mix-blend-mode:screen;
 }
 @keyframes heroGlowPulse{
   0%,100%{transform:translate(-50%,-50%) scale(1);}
   50%{transform:translate(-50%,-50%) scale(1.12);}
 }
 @keyframes heroColorCycle{
-  0%  {background:radial-gradient(ellipse at 40% 50%, #00bfa5 0%, transparent 65%);}
-  16% {background:radial-gradient(ellipse at 60% 50%, #00b4d8 0%, transparent 65%);}
-  33% {background:radial-gradient(ellipse at 50% 40%, #6c63ff 0%, transparent 65%);}
-  50% {background:radial-gradient(ellipse at 45% 55%, #f72585 0%, transparent 65%);}
-  66% {background:radial-gradient(ellipse at 55% 50%, #f9a825 0%, transparent 65%);}
-  83% {background:radial-gradient(ellipse at 50% 48%, #e53935 0%, transparent 65%);}
-  100%{background:radial-gradient(ellipse at 40% 50%, #00bfa5 0%, transparent 65%);}
+  0%  {background:radial-gradient(ellipse at 40% 50%, #00ffcc 0%, transparent 65%);}
+  16% {background:radial-gradient(ellipse at 60% 50%, #00d4ff 0%, transparent 65%);}
+  33% {background:radial-gradient(ellipse at 50% 40%, #a855f7 0%, transparent 65%);}
+  50% {background:radial-gradient(ellipse at 45% 55%, #ff0080 0%, transparent 65%);}
+  66% {background:radial-gradient(ellipse at 55% 50%, #ffd700 0%, transparent 65%);}
+  83% {background:radial-gradient(ellipse at 50% 48%, #ff3333 0%, transparent 65%);}
+  100%{background:radial-gradient(ellipse at 40% 50%, #00ffcc 0%, transparent 65%);}
 }
 
 .hero>*{position:relative;z-index:1;}
@@ -277,7 +279,6 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
     display:none;position:fixed;inset:0;
     background:rgba(0,0,0,0.6);
     z-index:299;
-    /* make sure taps pass through to closeSidebarMobile even on social panel */
     -webkit-tap-highlight-color:transparent;
   }
   .sidebar-overlay.visible{display:block;}
@@ -289,23 +290,28 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   .mode-bar::-webkit-scrollbar{display:none;}
   .mode-btn{white-space:nowrap;flex-shrink:0;font-size:0.62rem;padding:4px 12px;}
   .chat-area{padding:12px 10px 8px;}
-  .input-area{padding:8px 10px;padding-bottom:max(12px,env(safe-area-inset-bottom));position:sticky;bottom:0;background:var(--black);z-index:10;}
-  .msg-bubble{max-width:92%;}
+  .input-area{padding:8px 12px;padding-bottom:max(12px,env(safe-area-inset-bottom));position:sticky;bottom:0;background:var(--black);z-index:10;}
+  .msg-bubble{max-width:92vw;}
   .social-panel{flex-direction:column;}
   .social-sidebar{width:100%;height:auto;border-right:none;border-bottom:1px solid rgba(255,255,255,0.04);flex-shrink:0;}
   .social-chat-area{flex:1;min-height:0;}
-  .chips{gap:6px;}
-  .chip{font-size:0.68rem;padding:6px 10px;}
-  .hero-title{font-size:1.4rem;}
+  /* Chips: scroll horizontal en mobile */
+  .chips{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;justify-content:flex-start;padding-bottom:4px;gap:6px;}
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{font-size:0.68rem;padding:6px 10px;flex-shrink:0;}
+  .hero-title{font-size:1.6rem;}
+  .hero-input-wrap{padding:8px 10px 8px 16px;}
+  /* sidebar toggle min touch target */
+  .sidebar-toggle{min-width:44px;min-height:44px;}
   /* Music player smaller on mobile */
   #musicPlayer{bottom:12px;right:12px;min-width:200px;max-width:calc(100vw - 24px);}
 }
 /* NAV MODE BUTTONS */
 .nav-mode-btn{width:40px;height:40px;padding:0;border-radius:12px;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;margin-bottom:4px;background:none;border:1px solid rgba(255,255,255,0.05);position:relative;}
-.nav-mode-btn svg{flex-shrink:0;opacity:0.5;width:17px;height:17px;}
+.nav-mode-btn svg{flex-shrink:0;width:17px;height:17px;color:var(--text-mid);opacity:0.7;}
 .nav-mode-btn span:not(.notif-dot){display:none;}
 .nav-mode-btn:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.1);}
-.nav-mode-btn:hover svg{opacity:1;}
+.nav-mode-btn:hover svg{opacity:1;color:var(--text);}
 .nav-mode-btn.active{background:var(--green-dim);border-color:var(--green-border);box-shadow:0 0 10px rgba(0,191,165,0.1);}
 .nav-mode-btn.active svg{opacity:1;color:var(--green);}
 /* Tooltip on hover */
@@ -817,9 +823,8 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
         </svg>
         <span class="sidebar-logo-name">LOVA</span>
       </div>
-      <button class="new-chat-btn" id="newChatBtn" onclick="newChat()">
+      <button class="new-chat-btn" id="newChatBtn" onclick="newChat()" title="Nuevo chat">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nuevo chat
       </button>
     </div>
     <div class="sidebar-section">Modos</div>
@@ -884,8 +889,8 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
           <p class="hero-sub">Tu asistente con IA, búsqueda web, voz, imágenes y más.</p>
 
           <!-- Gemini-style hero input pill -->
-          <div class="hero-input-wrap" onclick="document.getElementById('inputField').focus();document.getElementById('hero').style.display='none';">
-            <input class="hero-fake-input" readonly placeholder="Escribe lo que necesitas…" onfocus="document.getElementById('inputField').focus();document.getElementById('hero').style.display='none';">
+          <div class="hero-input-wrap" onclick="switchView('ai');document.getElementById('inputField').focus();document.getElementById('hero').style.display='none';">
+            <input class="hero-fake-input" readonly placeholder="Escribe lo que necesitas…" onfocus="switchView('ai');document.getElementById('inputField').focus();document.getElementById('hero').style.display='none';">
             <div class="hero-input-actions">
               <button class="hero-pill-btn" onclick="event.stopPropagation();document.getElementById('fileInput').click();" title="Adjuntar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
@@ -895,18 +900,18 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                 Voz
               </button>
-              <button class="hero-send-circle" onclick="event.stopPropagation();document.getElementById('inputField').focus();document.getElementById('hero').style.display='none';" title="Enviar">
+              <button class="hero-send-circle" onclick="event.stopPropagation();switchView('ai');document.getElementById('inputField').focus();document.getElementById('hero').style.display='none';" title="Enviar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
               </button>
             </div>
           </div>
 
           <div class="chips">
-            <div class="chip" onclick="sendChip('¿Cómo puedo hacer crecer mi negocio?')">🚀 Hacer crecer mi negocio</div>
-            <div class="chip" onclick="sendChip('Dame ideas para generar ingresos online')">💡 Ideas para generar ingresos</div>
-            <div class="chip" onclick="sendChip('Estrategias de marketing digital para mi marca')">📱 Marketing digital</div>
-            <div class="chip" onclick="sendChip('¿Cómo mejorar mi productividad diaria?')">⚡ Productividad</div>
-            <div class="chip" onclick="sendChip('genera imagen de un logo moderno y minimalista')">🎨 Generar imagen</div>
+            <div class="chip" onclick="switchView('ai');sendChip('¿Cómo puedo hacer crecer mi negocio?')">🚀 Hacer crecer mi negocio</div>
+            <div class="chip" onclick="switchView('ai');sendChip('Dame ideas para generar ingresos online')">💡 Ideas para generar ingresos</div>
+            <div class="chip" onclick="switchView('ai');sendChip('Estrategias de marketing digital para mi marca')">📱 Marketing digital</div>
+            <div class="chip" onclick="switchView('ai');sendChip('¿Cómo mejorar mi productividad diaria?')">⚡ Productividad</div>
+            <div class="chip" onclick="switchView('ai');sendChip('genera imagen de un logo moderno y minimalista')">🎨 Generar imagen</div>
           </div>
         </div>
         <div class="messages" id="messages"></div>
@@ -1569,6 +1574,10 @@ function toggleSidebar(){
     s.classList.toggle('collapsed',!sidebarOpen);
   }
 }
+// On mobile, sidebar starts closed
+if(window.innerWidth<=640){
+  sidebarOpen=false;
+}
 function closeSidebarMobile(){
   const s=document.getElementById('sidebar');
   const ov=document.getElementById('sidebarOverlay');
@@ -1587,6 +1596,10 @@ function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMe
 function sendChip(t){document.getElementById('inputField').value=t;sendMessage();}
 
 function hideHero(){
+  // Asegurar que el panel AI esté activo antes de ocultar el hero
+  if(currentView!=='ai'){
+    switchView('ai');
+  }
   const h=document.getElementById('hero');
   if(h&&h.style.display!=='none'){h.style.opacity='0';setTimeout(()=>{h.style.display='none';},200);}
   document.getElementById('panelAI').classList.remove('hero-visible');
@@ -1968,6 +1981,14 @@ function switchView(view){
   // Si haces click en el modo que ya está activo (excepto 'ai'), vuelve a IA
   if(currentView===view && view!=='ai'){view='ai';}
   currentView=view;
+  // Cerrar music mode si estaba abierto y no vamos a music
+  if(view!=='music' && drivingActive){
+    drivingActive=false;
+    document.getElementById('drivingMode')?.classList.remove('active');
+    const btnD=document.getElementById('navDriving');
+    if(btnD)btnD.classList.remove('active');
+    stopDrivingWave();
+  }
   ['ai','code','training','social','settings'].forEach(v=>{
     const panelId='panel'+v.charAt(0).toUpperCase()+v.slice(1);
     const navId='nav'+({ai:'AI',code:'Code',training:'Train',social:'Social',settings:'Settings'}[v]);
@@ -1979,6 +2000,12 @@ function switchView(view){
   if(view==='training'){document.getElementById('navTitle').textContent='Entrenar LOVA';loadTraining();}
   if(view==='social'){document.getElementById('navTitle').textContent='Comunidad';loadContacts();}
   if(view==='settings'){document.getElementById('navTitle').textContent='Ajustes';loadSettingsPanel();}
+  if(view==='music'){
+    document.getElementById('navTitle').textContent='Música';
+    toggleMusicMode();
+    // Ensure AI panel stays visible behind music overlay
+    document.getElementById('panelAI')?.classList.add('active');
+  }
   // On mobile: always close sidebar after selecting a view
   if(window.innerWidth<=640){closeSidebarMobile();}
 }
@@ -3829,6 +3856,13 @@ function toggleMusicMode(){
   el.classList.toggle('active',drivingActive);
   const btn=document.getElementById('navDriving');
   btn.classList.toggle('active',drivingActive);
+  if(drivingActive){
+    currentView='music';
+  } else {
+    // Al cerrar música, volver a AI
+    currentView='ai';
+    document.getElementById('panelAI')?.classList.add('active');
+  }
   if(window.innerWidth<=640)closeSidebarMobile();
   if(drivingActive){
     startDrivingWave();
