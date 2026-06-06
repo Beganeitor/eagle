@@ -102,35 +102,39 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 /* HERO — Gemini-style */
 .hero{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  flex:1;text-align:center;padding:40px 24px;
-  position:relative;overflow:hidden;
+  flex:1;text-align:center;padding:60px 24px 50px;
+  position:relative;
+  min-height:80vh;
+  overflow:hidden;
 }
-/* Radial glow behind the hero that reacts to theme color */
-.hero::before{
-  content:'';
+/* Radial glow backdrop — uses a pseudo element on chat-area instead so it's not clipped */
+.hero-glow{
   position:absolute;
-  inset:0;
-  background:radial-gradient(ellipse 70% 55% at 50% 60%, var(--green-dim) 0%, transparent 70%);
-  pointer-events:none;
-  z-index:0;
-  transition:background 0.5s ease;
-}
-/* Second softer glow ring */
-.hero::after{
-  content:'';
-  position:absolute;
-  width:420px;height:280px;
-  left:50%;top:52%;
+  width:600px;height:400px;
+  left:50%;top:50%;
   transform:translate(-50%,-50%);
   border-radius:50%;
-  background:radial-gradient(ellipse at center, color-mix(in srgb, var(--green) 18%, transparent) 0%, transparent 65%);
+  background:radial-gradient(ellipse at center, var(--green-dim) 0%, transparent 65%);
   pointer-events:none;
   z-index:0;
-  filter:blur(28px);
+  filter:blur(40px);
   animation:heroGlowPulse 4s ease-in-out infinite;
   transition:background 0.5s ease;
 }
-@keyframes heroGlowPulse{0%,100%{opacity:0.7;transform:translate(-50%,-50%) scale(1);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.08);}}
+.hero-glow2{
+  position:absolute;
+  width:340px;height:220px;
+  left:50%;top:48%;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(ellipse at center, var(--hero-glow-color, rgba(0,191,165,0.18)) 0%, transparent 70%);
+  pointer-events:none;
+  z-index:0;
+  filter:blur(20px);
+  animation:heroGlowPulse 4s ease-in-out infinite 2s;
+  transition:background 0.5s ease;
+}
+@keyframes heroGlowPulse{0%,100%{opacity:0.8;transform:translate(-50%,-50%) scale(1);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}}
 
 .hero>*{position:relative;z-index:1;}
 .hero-label{font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:4px;color:var(--green);text-transform:uppercase;margin-bottom:20px;opacity:0;animation:fadeUp 0.5s ease forwards 0.1s;}
@@ -152,19 +156,19 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   display:flex;align-items:center;gap:10px;
   opacity:0;animation:fadeUp 0.5s ease forwards 0.35s;
   margin-bottom:28px;
-  box-shadow:0 0 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+  box-shadow:0 4px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
   transition:border-color 0.25s, box-shadow 0.25s;
   cursor:text;
 }
-.hero-input-wrap:focus-within{
-  border-color:var(--green-border);
-  box-shadow:0 0 32px rgba(0,0,0,0.4), 0 0 18px var(--green-dim);
+.hero-input-wrap:hover{
+  border-color:rgba(255,255,255,0.15);
 }
 .hero-fake-input{
   flex:1;font-size:0.92rem;color:var(--text-dim);
   background:transparent;border:none;outline:none;
   font-family:'DM Sans',sans-serif;
-  cursor:text;
+  cursor:pointer;
+  pointer-events:none;
 }
 .hero-input-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .hero-pill-btn{
@@ -860,6 +864,8 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
       </div>
       <div class="chat-area" id="chatArea">
         <div class="hero" id="hero">
+          <div class="hero-glow" id="heroGlow"></div>
+          <div class="hero-glow2" id="heroGlow2"></div>
           <div class="hero-label">Agente de Negocios IA</div>
           <h1 class="hero-title" id="heroGreeting">Hola. ¿En qué puedo <strong>ayudarte</strong>?</h1>
           <p class="hero-sub">Tu asistente con IA, búsqueda web, voz, imágenes y más.</p>
@@ -3017,7 +3023,11 @@ function setThemeColor(color,dim,border,silent=false){
     s.classList.toggle('active',s.style.background===color||s.style.backgroundColor===color);
   });
   if(!silent)localStorage.setItem('lova_theme',JSON.stringify({c:color,d:dim,b:border}));
-  // Refresh hero glow
+  // Update hero glows with new color
+  const g1=document.getElementById('heroGlow');
+  const g2=document.getElementById('heroGlow2');
+  if(g1)g1.style.background='radial-gradient(ellipse at center,'+dim+' 0%,transparent 65%)';
+  if(g2)g2.style.background='radial-gradient(ellipse at center,'+dim+' 0%,transparent 70%)';
   const hs=document.querySelector('.hero-send-circle');
   if(hs)hs.style.boxShadow='0 0 20px '+dim;
 }
