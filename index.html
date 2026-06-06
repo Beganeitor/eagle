@@ -405,36 +405,247 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .color-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.18s;}
 .color-swatch.active,.color-swatch:hover{border-color:#fff;transform:scale(1.15);}
 
-/* SOCIAL PANEL */
+/* ══════════════════════════════════
+   SOCIAL PANEL — Instagram-style
+   ══════════════════════════════════ */
 .social-panel{display:flex;flex:1;overflow:hidden;width:100%;height:100%;}
-.social-sidebar{width:300px;min-width:260px;background:var(--surface);border-right:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;flex-shrink:0;height:100%;}
-.social-sidebar-top{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,0.04);}
-.social-tabs{display:flex;gap:4px;margin-bottom:10px;}
-.social-tab{flex:1;padding:6px 4px;border-radius:8px;font-size:0.62rem;font-family:"Space Mono",monospace;cursor:pointer;border:1px solid rgba(255,255,255,0.07);background:none;color:var(--text-dim);transition:all 0.2s;text-align:center;}
-.social-tab.active{background:var(--green-dim);border-color:var(--green-border);color:var(--green);}
-.social-search-input{width:100%;background:var(--surface2);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px 11px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:0.82rem;outline:none;margin-bottom:7px;}
-.social-search-input:focus{border-color:var(--green-border);}
-.social-search-btn{width:100%;padding:8px;background:var(--green);border:none;border-radius:9px;color:#fff;font-size:0.8rem;font-family:"DM Sans",sans-serif;font-weight:600;cursor:pointer;}
-.contacts-list{flex:1;overflow-y:auto;padding:6px;}
-.contacts-list::-webkit-scrollbar{width:2px;}
-.contact-item{display:flex;align-items:center;gap:8px;padding:8px 7px;border-radius:10px;cursor:pointer;transition:background 0.15s;position:relative;}
-.contact-item:hover{background:var(--surface2);}
-.contact-item.active{background:var(--green-dim);border:1px solid var(--green-border);}
-.contact-avatar{width:32px;height:32px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green-border);display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:var(--green);font-weight:600;flex-shrink:0;position:relative;}
-.contact-avatar .online-dot{position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;background:#4caf50;border:2px solid var(--surface);display:none;}
+
+/* ── Sidebar ── */
+.social-sidebar{
+  width:320px;min-width:280px;
+  background:#0a0a0a;
+  border-right:1px solid rgba(255,255,255,0.06);
+  display:flex;flex-direction:column;flex-shrink:0;height:100%;
+}
+.social-sidebar-top{
+  padding:18px 16px 10px;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  flex-shrink:0;
+}
+.social-tabs{
+  display:flex;gap:0;margin-bottom:14px;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.social-tab{
+  flex:1;padding:8px 4px;
+  font-size:0.75rem;font-weight:600;font-family:'DM Sans',sans-serif;
+  cursor:pointer;border:none;background:none;color:var(--text-dim);
+  transition:all 0.18s;text-align:center;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.social-tab.active{color:var(--text);border-bottom-color:var(--text);}
+.social-tab:hover:not(.active){color:rgba(238,238,238,0.7);}
+.social-search-input{
+  width:100%;
+  background:rgba(255,255,255,0.06);
+  border:none;border-radius:50px;
+  padding:9px 16px 9px 38px;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;
+  outline:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(238,238,238,0.35)' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:13px center;
+  transition:background-color 0.2s;margin-bottom:10px;
+}
+.social-search-input::placeholder{color:rgba(238,238,238,0.35);}
+.social-search-input:focus{background-color:rgba(255,255,255,0.09);}
+.social-search-btn{display:none;}
+/* Stories row */
+.stories-row{
+  display:flex;gap:14px;padding:10px 16px 14px;
+  overflow-x:auto;flex-shrink:0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  scrollbar-width:none;
+}
+.stories-row::-webkit-scrollbar{display:none;}
+.story-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;}
+.story-ring{
+  width:54px;height:54px;border-radius:50%;
+  background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
+  padding:2.5px;display:flex;align-items:center;justify-content:center;
+  transition:transform 0.2s;
+}
+.story-ring:hover{transform:scale(1.06);}
+.story-ring.seen{background:rgba(255,255,255,0.15);}
+.story-avatar-inner{
+  width:100%;height:100%;border-radius:50%;
+  background:var(--surface2);border:2.5px solid #0a0a0a;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;color:var(--text);font-weight:700;overflow:hidden;
+}
+.story-name{font-size:0.58rem;color:var(--text-dim);white-space:nowrap;max-width:54px;overflow:hidden;text-overflow:ellipsis;text-align:center;}
+/* Contacts */
+.contacts-list{flex:1;overflow-y:auto;padding:4px 0;}
+.contacts-list::-webkit-scrollbar{width:0;}
+.contact-item{display:flex;align-items:center;gap:11px;padding:10px 16px;cursor:pointer;transition:background 0.12s;position:relative;}
+.contact-item:hover{background:rgba(255,255,255,0.04);}
+.contact-item.active{background:rgba(255,255,255,0.07);}
+.contact-avatar{
+  width:50px;height:50px;border-radius:50%;
+  background:var(--surface2);border:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;color:var(--text);font-weight:700;
+  flex-shrink:0;position:relative;overflow:hidden;
+}
+.contact-avatar .online-dot{position:absolute;bottom:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#22c55e;border:2.5px solid #0a0a0a;display:none;}
 .contact-avatar .online-dot.show{display:block;}
-.social-chat-header .contact-avatar{width:34px;height:34px;}
-/* Typing indicator in social chat */
-.social-typing{display:flex;align-items:center;gap:5px;padding:7px 12px;background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-radius:12px;border-bottom-left-radius:3px;width:fit-content;align-self:flex-start;}
-.social-typing span{width:5px;height:5px;border-radius:50%;background:var(--text-dim);animation:socialBounce 1.3s infinite ease-in-out;}
+.social-chat-header .contact-avatar{width:36px;height:36px;font-size:0.85rem;}
+.contact-info{flex:1;min-width:0;}
+.contact-name{font-size:0.87rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.contact-last{font-size:0.75rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.contact-unread{width:9px;height:9px;border-radius:50%;background:#3797f0;flex-shrink:0;align-self:center;}
+/* Typing indicator */
+.social-typing{display:flex;align-items:center;gap:4px;padding:9px 14px;background:rgba(255,255,255,0.08);border-radius:18px;border-bottom-left-radius:4px;width:fit-content;align-self:flex-start;}
+.social-typing span{width:6px;height:6px;border-radius:50%;background:rgba(238,238,238,0.5);animation:socialBounce 1.3s infinite ease-in-out;}
 .social-typing span:nth-child(2){animation-delay:0.18s;}
 .social-typing span:nth-child(3){animation-delay:0.36s;}
-@keyframes socialBounce{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-5px);opacity:1}}
-.contact-info{flex:1;min-width:0;}
-.contact-name{font-size:0.8rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.contact-last{font-size:0.67rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-/* ── MEDIA DRAWER ── */
-.social-chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+@keyframes socialBounce{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}
+/* ── Chat area ── */
+.social-chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;background:#000;}
+
+/* Header — IG style */
+.social-chat-header{
+  padding:12px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+  background:#000;
+}
+.social-chat-title{font-size:0.93rem;font-weight:700;color:var(--text);letter-spacing:-0.2px;}
+.social-chat-sub{font-size:0.72rem;color:var(--text-dim);}
+/* Header action icons */
+.sc-header-actions{display:flex;align-items:center;gap:4px;margin-left:auto;}
+.sc-icon-btn{
+  width:34px;height:34px;border-radius:50%;background:none;border:none;
+  color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s;
+}
+.sc-icon-btn:hover{background:rgba(255,255,255,0.07);}
+.sc-icon-btn svg{width:20px;height:20px;}
+
+/* Messages */
+.social-messages{
+  flex:1;overflow-y:auto;
+  padding:16px 16px 8px;
+  display:flex;flex-direction:column;gap:3px;
+  background:#000;
+}
+.social-messages::-webkit-scrollbar{width:0;}
+
+/* Date separator */
+.msg-date-sep{
+  align-self:center;
+  font-size:0.65rem;color:var(--text-dim);
+  padding:12px 0 6px;font-family:'DM Sans',sans-serif;
+}
+
+/* Messages */
+.social-msg{display:flex;flex-direction:column;gap:2px;max-width:68%;}
+.social-msg.me{align-self:flex-end;align-items:flex-end;}
+.social-msg.them{align-self:flex-start;align-items:flex-start;}
+
+/* Bubbles — IG pill style */
+.social-bubble{
+  padding:10px 15px;
+  border-radius:22px;
+  font-size:0.9rem;line-height:1.5;
+  word-break:break-word;
+  max-width:100%;
+  border:none;
+}
+/* ── BUBBLE COLOR THEMING ── */
+:root { --bubble-color: #3797f0; --bubble-color-dim: #3797f0; --bubble-color-border: transparent; }
+.social-msg.me .social-bubble{
+  background:var(--bubble-color);
+  color:#fff;
+  border-bottom-right-radius:5px;
+}
+.social-msg.them .social-bubble{
+  background:rgba(255,255,255,0.1);
+  color:var(--text);
+  border-bottom-left-radius:5px;
+}
+/* Consecutive bubble tightening */
+.social-msg.me .social-bubble:not(:last-child){border-bottom-right-radius:5px;}
+.social-msg.them .social-bubble:not(:last-child){border-bottom-left-radius:5px;}
+
+/* Time + seen */
+.social-msg-time{
+  font-size:0.62rem;color:var(--text-dim);
+  font-family:'DM Sans',sans-serif;
+  display:flex;align-items:center;gap:3px;
+  padding:0 4px;
+}
+.social-seen{font-size:0.65rem;color:var(--text-dim);}
+
+/* Request item */
+.request-item{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.req-btn{padding:6px 14px;border-radius:8px;font-size:0.75rem;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;}
+.req-btn.accept{background:#3797f0;color:#fff;}
+.req-btn.reject{background:rgba(255,255,255,0.07);color:var(--text-dim);}
+
+/* Input row — IG pill */
+.social-input-row{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px 14px;
+  background:#000;flex-shrink:0;
+}
+.social-input{
+  flex:1;
+  background:transparent;
+  border:1.5px solid rgba(255,255,255,0.18);
+  border-radius:50px;
+  padding:10px 18px;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.88rem;
+  outline:none;transition:border-color 0.2s;
+}
+.social-input::placeholder{color:rgba(238,238,238,0.35);}
+.social-input:focus{border-color:rgba(255,255,255,0.4);}
+/* Input action icons */
+.social-input-icon{
+  width:34px;height:34px;border-radius:50%;
+  background:none;border:none;color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:color 0.15s;flex-shrink:0;
+}
+.social-input-icon:hover{color:rgba(255,255,255,0.7);}
+.social-input-icon svg{width:22px;height:22px;}
+/* Hide old send btn, replace with icon */
+.social-send-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:none;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:#3797f0;flex-shrink:0;transition:color 0.15s;
+}
+.social-send-btn:hover{color:#60aef5;}
+.social-send-btn svg{width:22px;height:22px;}
+
+/* File bubble */
+.social-file-bubble{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.1);border:none;
+  border-radius:16px;padding:10px 14px;
+  font-size:0.8rem;color:var(--text);cursor:pointer;text-decoration:none;max-width:220px;
+}
+.social-file-bubble svg{width:16px;height:16px;flex-shrink:0;color:rgba(255,255,255,0.6);}
+
+/* Empty state */
+.social-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex:1;color:var(--text-dim);font-size:0.88rem;gap:10px;background:#000;
+}
+.social-empty svg{width:48px;height:48px;opacity:0.25;}
+
+/* Chat theme picker */
+.chat-theme-btn{width:34px;height:34px;background:none;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);transition:background 0.15s;flex-shrink:0;position:relative;}
+.chat-theme-btn:hover{background:rgba(255,255,255,0.07);}
+.chat-theme-btn svg{width:20px;height:20px;}
+.chat-theme-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#1a1a1a;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px;z-index:200;width:220px;box-shadow:0 8px 32px rgba(0,0,0,0.7);animation:fadeUp 0.15s ease;}
+.chat-theme-dropdown.hidden{display:none;}
+.chat-theme-title{font-size:0.72rem;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;}
+.chat-theme-swatches{display:flex;flex-wrap:wrap;gap:9px;}
+.chat-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.18s;flex-shrink:0;}
+.chat-swatch:hover{transform:scale(1.18);}
+.chat-swatch.active{border-color:#fff;box-shadow:0 0 0 2px var(--bubble-color);}
 .media-drawer{position:absolute;top:0;right:0;bottom:0;width:260px;background:var(--surface);border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;z-index:20;transform:translateX(100%);transition:transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94);}
 .media-drawer.open{transform:translateX(0);}
 .media-drawer-header{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px;border-bottom:1px solid rgba(255,255,255,0.05);flex-shrink:0;font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;}
@@ -1060,14 +1271,25 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
       <div class="social-panel">
         <div class="social-sidebar">
           <div class="social-sidebar-top">
+            <!-- Username + compose -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div style="font-size:1rem;font-weight:700;color:var(--text);letter-spacing:-0.3px;" id="socialSidebarUsername">Mensajes</div>
+              <button style="width:32px;height:32px;border-radius:50%;background:none;border:none;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='none'" title="Nuevo mensaje">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </div>
             <div class="social-tabs">
-              <button class="social-tab active" onclick="setSocialTab('chats',this)">Chats</button>
+              <button class="social-tab active" onclick="setSocialTab('chats',this)">Mensajes</button>
               <button class="social-tab" onclick="setSocialTab('search',this)">Buscar</button>
               <button class="social-tab" onclick="setSocialTab('requests',this)" id="reqTab">Solicitudes</button>
             </div>
             <div id="socialTabContent">
               <!-- filled by JS -->
             </div>
+          </div>
+          <!-- Stories row -->
+          <div class="stories-row" id="storiesRow" style="display:none;">
+            <!-- populated by JS if contacts available -->
           </div>
           <div class="contacts-list" id="contactsList"></div>
         </div>
@@ -1079,23 +1301,31 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
           <div id="socialActiveChatWrapper" style="display:none;flex:1;flex-direction:column;overflow:hidden;display:none;">
             <div class="social-chat-header">
               <div class="contact-avatar" id="scAvatar" style="position:relative;">?</div>
-              <div style="flex:1;min-width:0;">
+              <div style="min-width:0;">
                 <div class="social-chat-title" id="scTitle">—</div>
                 <div class="social-chat-sub" id="scSub">en línea</div>
               </div>
-              <!-- Chat theme picker -->
-              <div style="position:relative;flex-shrink:0;">
-                <button class="chat-theme-btn" id="chatThemeBtn" onclick="toggleChatTheme()" title="Color de burbujas">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                </button>
-                <div class="chat-theme-dropdown hidden" id="chatThemeDropdown">
-                  <div class="chat-theme-title">Color de burbujas</div>
-                  <div class="chat-theme-swatches" id="chatThemeSwatches"></div>
+              <div class="sc-header-actions">
+                <!-- Chat theme picker -->
+                <div style="position:relative;flex-shrink:0;">
+                  <button class="sc-icon-btn chat-theme-btn" id="chatThemeBtn" onclick="toggleChatTheme()" title="Color de burbujas">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                  </button>
+                  <div class="chat-theme-dropdown hidden" id="chatThemeDropdown">
+                    <div class="chat-theme-title">Color de burbujas</div>
+                    <div class="chat-theme-swatches" id="chatThemeSwatches"></div>
+                  </div>
                 </div>
+                <button class="sc-icon-btn" title="Llamada de voz">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.9a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </button>
+                <button class="sc-icon-btn" onclick="toggleMediaDrawer()" title="Video / Archivos">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="15" height="10" rx="2"/><polygon points="23 8 17 12 23 16 23 8"/></svg>
+                </button>
+                <button class="sc-icon-btn" title="Info">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+                </button>
               </div>
-              <button class="icon-btn" id="mediaDrawerBtn" onclick="toggleMediaDrawer()" title="Archivos compartidos" style="flex-shrink:0;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              </button>
             </div>
 
             <!-- ── MEDIA DRAWER ── -->
@@ -1149,16 +1379,23 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
             </div>
             <div class="social-input-row">
               <input type="file" id="socialFileInput" style="display:none" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" onchange="sendSocialFile(this)">
-              <button class="icon-btn" onclick="document.getElementById('socialFileInput').click()" title="Enviar archivo" style="flex-shrink:0;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              <!-- Emoji placeholder -->
+              <button class="social-input-icon" title="Emoji">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
               </button>
-              <button class="icon-btn" id="socialAudioBtn" onclick="toggleSocialAudio()" title="Grabar audio" style="flex-shrink:0;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+              <input class="social-input" id="socialInput" placeholder="Enviar mensaje..." oninput="broadcastTyping()" onkeydown="if(event.key==='Enter')sendSocialMsg()">
+              <!-- Image icon -->
+              <button class="social-input-icon" onclick="document.getElementById('socialFileInput').click()" title="Imagen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </button>
+              <!-- Audio icon -->
+              <button class="social-input-icon" id="socialAudioBtn" onclick="toggleSocialAudio()" title="Audio">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
               </button>
               <div class="social-audio-timer" id="socialRecTimer"><span class="rec-dot"></span><span class="rec-time">0:00</span></div>
-              <input class="social-input" id="socialInput" placeholder="Escribe un mensaje..." oninput="broadcastTyping()" onkeydown="if(event.key==='Enter')sendSocialMsg()">
+              <!-- Send — heart/paper-plane IG style -->
               <button class="social-send-btn" onclick="sendSocialMsg()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
               </button>
             </div>
           </div>
@@ -2324,9 +2561,10 @@ function renderContacts(){
     return`<div class="contact-item${currentChatPartner?.id===p.id?' active':''}" onclick="openSocialChat('${p.id}','${(p.username||'').replace(/'/g,"\\'")}','${(p.email||'').replace(/'/g,"\\'")}')">
       <div class="contact-avatar">${avatar}<span class="online-dot${isOnline?' show':''}"></span></div>
       <div class="contact-info">
-        <div class="contact-name">${displayName}</div>
-        <div class="contact-last" id="lastMsg_${p.id}">...</div>
+        <div class="contact-name">${p.username||p.email||p.id}</div>
+        <div class="contact-last" id="lastMsg_${p.id}" style="color:rgba(238,238,238,0.45);">...</div>
       </div>
+      ${isOnline?'<div class="contact-unread"></div>':''}
     </div>`;
   }).join('');
 }
@@ -4445,15 +4683,15 @@ window.appendSocialMsg=function(side,text,ts,seen,replyTo,msgId){
 // ── BUBBLE COLOR THEMES ──
 // ══════════════════════════════════════════
 const BUBBLE_THEMES = [
-  { id:'teal',    label:'Teal',     color:'#00bfa5', dim:'rgba(0,191,165,0.12)',   border:'rgba(0,191,165,0.25)' },
-  { id:'blue',    label:'Azul',     color:'#3b82f6', dim:'rgba(59,130,246,0.13)',  border:'rgba(59,130,246,0.28)' },
-  { id:'violet',  label:'Violeta',  color:'#7c3aed', dim:'rgba(124,58,237,0.13)', border:'rgba(124,58,237,0.28)' },
-  { id:'cyan',    label:'Cian',     color:'#0891b2', dim:'rgba(8,145,178,0.13)',   border:'rgba(8,145,178,0.28)' },
-  { id:'emerald', label:'Esmeralda',color:'#059669', dim:'rgba(5,150,105,0.13)',   border:'rgba(5,150,105,0.28)' },
-  { id:'pink',    label:'Rosa',     color:'#db2777', dim:'rgba(219,39,119,0.13)',  border:'rgba(219,39,119,0.28)' },
-  { id:'orange',  label:'Naranja',  color:'#ea580c', dim:'rgba(234,88,12,0.13)',   border:'rgba(234,88,12,0.28)' },
-  { id:'carbon',  label:'Carbón',   color:'#374151', dim:'rgba(55,65,81,0.35)',    border:'rgba(55,65,81,0.55)' },
-  { id:'midnight',label:'Midnight', color:'#1e293b', dim:'rgba(30,41,59,0.55)',    border:'rgba(100,116,139,0.3)' },
+  { id:'igblue',  label:'IG Azul',  color:'#3797f0', dim:'#3797f0', border:'transparent' },
+  { id:'teal',    label:'Teal',     color:'#00bfa5', dim:'#00bfa5', border:'transparent' },
+  { id:'violet',  label:'Violeta',  color:'#7c3aed', dim:'#7c3aed', border:'transparent' },
+  { id:'pink',    label:'Rosa',     color:'#e1306c', dim:'#e1306c', border:'transparent' },
+  { id:'orange',  label:'Naranja',  color:'#ea580c', dim:'#ea580c', border:'transparent' },
+  { id:'emerald', label:'Verde',    color:'#059669', dim:'#059669', border:'transparent' },
+  { id:'red',     label:'Rojo',     color:'#ef4444', dim:'#ef4444', border:'transparent' },
+  { id:'gold',    label:'Dorado',   color:'#d97706', dim:'#d97706', border:'transparent' },
+  { id:'carbon',  label:'Carbón',   color:'rgba(255,255,255,0.12)', dim:'rgba(255,255,255,0.12)', border:'transparent' },
 ];
 function applyBubbleTheme(theme,save=true){
   const r=document.documentElement.style;
@@ -4461,7 +4699,13 @@ function applyBubbleTheme(theme,save=true){
   r.setProperty('--bubble-color-dim',theme.dim);
   r.setProperty('--bubble-color-border',theme.border);
   const s=document.getElementById('bubbleThemeStyle')||(() => {const el=document.createElement('style');el.id='bubbleThemeStyle';document.head.appendChild(el);return el;})();
-  s.textContent=`.social-seen{color:${theme.color}!important;}.social-msg.me .reply-quote{border-left-color:${theme.color}!important;}`;
+  s.textContent=`
+    .social-msg.me .social-bubble{background:${theme.color}!important;color:#fff!important;border:none!important;}
+    .social-seen{color:${theme.color}!important;}
+    .social-msg.me .reply-quote{border-left-color:${theme.color}!important;}
+    .social-send-btn{color:${theme.color}!important;}
+    .chat-swatch.active{box-shadow:0 0 0 2px ${theme.color}!important;}
+  `;
   document.querySelectorAll('.chat-swatch').forEach(sw=>sw.classList.toggle('active',sw.dataset.id===theme.id));
   if(save)localStorage.setItem('lova_bubble_theme',theme.id);
 }
@@ -4474,7 +4718,7 @@ function buildThemeSwatches(){
     b.onclick=()=>{applyBubbleTheme(t);closeChatTheme();};
     c.appendChild(b);
   });
-  const saved=localStorage.getItem('lova_bubble_theme')||'teal';
+  const saved=localStorage.getItem('lova_bubble_theme')||'igblue';
   applyBubbleTheme(BUBBLE_THEMES.find(t=>t.id===saved)||BUBBLE_THEMES[0],false);
 }
 function toggleChatTheme(){const d=document.getElementById('chatThemeDropdown');if(d)d.classList.toggle('hidden');}
