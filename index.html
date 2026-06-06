@@ -43,23 +43,29 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .app{display:flex;flex:1;overflow:hidden;}
 
 /* SIDEBAR */
-.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;flex-shrink:0;transition:width 0.3s,transform 0.3s;z-index:50;overflow:hidden;align-items:center;}
+.sidebar{width:64px;background:var(--surface);border-right:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;flex-shrink:0;transition:width 0.25s cubic-bezier(0.4,0,0.2,1),transform 0.3s;z-index:50;overflow:hidden;align-items:center;}
+.sidebar:hover{width:200px;}
+.sidebar:hover .chat-item-title,.sidebar:hover .chat-item-actions,.sidebar:hover .sidebar-logo-name{display:block;}
+.sidebar:hover .chat-list{align-items:flex-start;padding:4px 8px;}
+.sidebar:hover .chat-item{width:100%;}
 .sidebar.collapsed{width:0;transform:translateX(-100%);position:absolute;height:100%;}
 .sidebar-top{padding:14px 0 10px;border-bottom:1px solid rgba(255,255,255,0.04);flex-shrink:0;width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;}
 .sidebar-logo{display:flex;align-items:center;justify-content:center;padding:0;}
 .sidebar-logo-name{display:none;}
-.new-chat-btn{box-shadow:0 0 14px rgba(0,191,165,0.15);width:40px;height:40px;padding:0;background:var(--green-dim);border:1px solid var(--green-border);border-radius:12px;color:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
-.new-chat-btn:hover{background:rgba(0,191,165,0.18);}
+.new-chat-btn{width:40px;height:40px;border-radius:50%;background:rgba(0,191,165,0.12);border:1px solid rgba(0,191,165,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#00bfa5;transition:all 0.2s;flex-shrink:0;padding:0;}
+.new-chat-btn:hover{background:rgba(0,191,165,0.22);}
 .new-chat-btn svg{width:16px;height:16px;flex-shrink:0;}
 .new-chat-btn span{display:none;}
 .sidebar-section{display:none;}
 .chat-list{flex:1;overflow-y:auto;padding:4px 0;width:100%;display:flex;flex-direction:column;align-items:center;}
 .chat-list::-webkit-scrollbar{width:2px;}.chat-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px;}
-.chat-item{padding:8px;border-radius:10px;cursor:pointer;transition:background 0.15s;display:flex;align-items:center;justify-content:center;width:40px;height:40px;margin-bottom:2px;}
-.chat-item:hover{background:var(--surface2);}
+.chat-item{width:100%;padding:8px 10px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px;transition:background 0.15s;border:none;background:none;text-align:left;margin-bottom:2px;}
+.chat-item:hover{background:rgba(255,255,255,0.05);}
 .chat-item.active{background:var(--green-dim);border:1px solid var(--green-border);}
-.chat-item-title{display:none;}
+.chat-item-title{font-size:0.75rem;color:rgba(238,238,238,0.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;font-family:'DM Sans',sans-serif;display:none;}
 .chat-item-actions{display:none;}
+.chat-item-actions button{background:none;border:none;color:rgba(238,238,238,0.3);cursor:pointer;font-size:0.7rem;padding:2px 4px;border-radius:4px;flex-shrink:0;opacity:0;transition:opacity 0.15s;}
+.chat-item:hover .chat-item-actions button{opacity:1;}
 .chat-action-btn{width:20px;height:20px;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:color 0.15s;}
 .chat-action-btn:hover{color:var(--green);}
 .sidebar-bottom{padding:10px 0;border-top:1px solid rgba(255,255,255,0.04);flex-shrink:0;width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;}
@@ -318,12 +324,12 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 }
 /* NAV MODE BUTTONS */
 .nav-mode-btn{width:40px;height:40px;padding:0;border-radius:12px;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;margin-bottom:4px;background:none;border:1px solid rgba(255,255,255,0.05);position:relative;}
-.nav-mode-btn svg{flex-shrink:0;opacity:0.5;width:17px;height:17px;}
+.nav-mode-btn svg{width:17px;height:17px;color:rgba(238,238,238,0.55);opacity:1;flex-shrink:0;}
 .nav-mode-btn span:not(.notif-dot){display:none;}
 .nav-mode-btn:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.1);}
-.nav-mode-btn:hover svg{opacity:1;}
+.nav-mode-btn:hover svg{color:#eeeeee;}
 .nav-mode-btn.active{background:var(--green-dim);border-color:var(--green-border);box-shadow:0 0 10px rgba(0,191,165,0.1);}
-.nav-mode-btn.active svg{opacity:1;color:var(--green);}
+.nav-mode-btn.active svg{color:#00bfa5;}
 /* Tooltip on hover */
 .nav-mode-btn::after{content:attr(data-tip);position:absolute;left:52px;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.72rem;padding:4px 10px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transform:translateX(-4px);transition:all 0.15s;z-index:100;}
 .nav-mode-btn:hover::after{opacity:1;transform:translateX(0);}
@@ -833,9 +839,8 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
         </svg>
         <span class="sidebar-logo-name">LOVA</span>
       </div>
-      <button class="new-chat-btn" id="newChatBtn" onclick="newChat()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nuevo chat
+      <button class="new-chat-btn" id="newChatBtn" onclick="newChat()" title="Nuevo chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
     </div>
     <div class="sidebar-section">Modos</div>
@@ -1462,7 +1467,7 @@ async function loadChatList(){
     const div=document.createElement('div');
     div.className='chat-item'+(conv.id===currentChatId?' active':'');
     div.dataset.id=conv.id;
-    div.innerHTML=`<span class="chat-item-title" id="title-${conv.id}">${conv.title||'Nueva conversación'}</span><div class="chat-item-actions"><button class="chat-action-btn" title="Renombrar" onclick="renameChat('${conv.id}',event)">✏️</button><button class="chat-action-btn" title="Eliminar" onclick="deleteChat('${conv.id}',event)">✕</button></div>`;
+    div.innerHTML=`<div class="chat-item-title" id="title-${conv.id}">${conv.title||'Conversación'}</div><div class="chat-item-actions"><button onclick="event.stopPropagation();deleteChat('${conv.id}')">✕</button></div>`;
     div.onclick=(e)=>{if(e.target.closest('.chat-item-actions'))return;loadChat(conv.id);};
     list.appendChild(div);
   });
