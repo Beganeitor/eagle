@@ -99,29 +99,26 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .chat-area::-webkit-scrollbar{width:3px;}.chat-area::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.07);border-radius:3px;}
 
 /* HERO — Gemini-style */
-/* Gemini-style hero: overlay sobre el chat, transición suave */
-.chat-area{position:relative;}
+/* Gemini-style hero: overlay sobre el panel completo */
 .hero{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:60px 24px 50px;
-  position:absolute;inset:0;
+  position:absolute;
+  inset:0;
   overflow:hidden;
-  z-index:5;
+  z-index:10;
   background:var(--black);
-  /* Estado inicial visible */
   opacity:1;
   transform:translateY(0) scale(1);
   transition:opacity 0.35s cubic-bezier(0.4,0,0.2,1),
               transform 0.35s cubic-bezier(0.4,0,0.2,1);
   pointer-events:auto;
 }
-/* Estado: ocultándose */
 .hero.is-hiding{
   opacity:0;
-  transform:translateY(-20px) scale(0.97);
+  transform:translateY(-22px) scale(0.97);
   pointer-events:none;
 }
-/* Estado: ya oculto (tras la transición) */
 .hero.is-gone{
   display:none;
 }
@@ -888,14 +885,8 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 
     <!-- ── AI PANEL ── -->
     <div class="panel active" id="panelAI">
-      <div class="mode-bar">
-        <button class="mode-btn active" id="modeNormal" onclick="setMode('normal')">Normal</button>
-        <button class="mode-btn" id="modeChat" onclick="setMode('chat')">Chat</button>
-        <button class="mode-btn" id="modeSim" onclick="setMode('sim')" style="display:none;" title="Modo simulación activo — habla con el personaje">Simulando</button>
-        <div class="web-indicator"><div class="web-dot"></div>Web activa</div>
-      </div>
-      <div class="chat-area" id="chatArea">
-        <div class="hero" id="hero">
+      <!-- HERO: fuera del chat-area para evitar que overflow:hidden lo recorte -->
+      <div class="hero" id="hero">
           <div class="hero-glow" id="heroGlow"></div>
           <div class="hero-glow2" id="heroGlow2"></div>
           <div class="hero-label">Agente de Negocios IA</div>
@@ -928,6 +919,13 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
             <div class="chip" onclick="hideHero();sendChip('genera imagen de un logo moderno y minimalista')">🎨 Generar imagen</div>
           </div>
         </div>
+      <div class="mode-bar">
+        <button class="mode-btn active" id="modeNormal" onclick="setMode('normal')">Normal</button>
+        <button class="mode-btn" id="modeChat" onclick="setMode('chat')">Chat</button>
+        <button class="mode-btn" id="modeSim" onclick="setMode('sim')" style="display:none;" title="Modo simulación activo — habla con el personaje">Simulando</button>
+        <div class="web-indicator"><div class="web-dot"></div>Web activa</div>
+      </div>
+      <div class="chat-area" id="chatArea">
         <div class="messages" id="messages"></div>
       </div>
       <div class="input-area">
