@@ -2304,81 +2304,70 @@ async function generateImage(prompt, searchMode=false){
   msgDiv.innerHTML='<div class="msg-label">LOVA</div>';
   const loadDiv=document.createElement('div');
   loadDiv.className='img-gen-loading msg-bubble';
-  loadDiv.textContent=searchMode?'Buscando imágenes...':'Generando imágenes...';
+  loadDiv.textContent=searchMode?'Buscando imágenes...':'Generando imágenes con IA... (puede tardar ~20 seg)';
   msgDiv.appendChild(loadDiv);
   document.getElementById('messages').appendChild(msgDiv);
   scrollChat();
 
-  const cleanPrompt=prompt.replace(/(genera|crea|diseña|haz|dibuja|muestra|imagina|imagen|foto|ilustración|de|un|una|el|la|busca|buscar|imágenes)/gi,'').trim()||prompt;
+  const cleanPrompt=prompt.replace(/(genera|crea|diseña|haz|dibuja|muestra|imagina|imagen|foto|ilustración|de|un|una|el|la|busca|buscar|imágenes)/gi,'').trim()||prompt;
+
+  // Build URL helper — model=flux, private=true avoids rate-limit issues on anonymous tier
+  function buildUrl(p, seed){
+    return 'https://image.pollinations.ai/prompt/'+encodeURIComponent(p)+'?model=flux&width=512&height=512&seed='+seed+'&private=true';
+  }
 
   if(searchMode){
-    // Search mode: use Pollinations with different styles/seeds
     const styles=['photography, realistic','illustration, artistic','digital art','minimalist design','cinematic'];
-    const seeds=[Date.now(),Date.now()+1,Date.now()+2,Date.now()+3,Date.now()+4];
-    const urls=styles.map((s,i)=>{
-      const q=encodeURIComponent(cleanPrompt+', '+s+', high quality');
-      return`https://image.pollinations.ai/prompt/${q}?width=512&height=512&nologo=true&seed=${seeds[i]}`;
-    });
-    try{
-      loadDiv.remove();
-      const bubble=document.createElement('div');
-      bubble.className='msg-bubble';
-      bubble.style.cssText='padding:10px;';
-      bubble.innerHTML=`<div style="font-size:0.68rem;color:var(--green);font-family:'Space Mono',monospace;margin-bottom:10px;letter-spacing:1px;">🔍 5 RESULTADOS PARA: "${cleanPrompt}"</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;" id="imgGrid_${Date.now()}">
-          ${urls.map((url,i)=>`
-            <div style="border-radius:10px;overflow:hidden;background:var(--surface2);aspect-ratio:1;position:relative;cursor:pointer;" onclick="window.open('${url}','_blank')">
-              <img src="${url}" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.2s;" onload="this.style.opacity=1" onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.6rem;color:var(--text-dim);\'>Sin imagen</div>'" style="opacity:0;transition:opacity 0.3s;">
-              <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));padding:6px 8px;font-size:0.55rem;color:rgba(255,255,255,0.7);font-family:'Space Mono',monospace;">${styles[i]}</div>
-            </div>`).join('')}
-        </div>
-        <div style="font-size:0.62rem;color:var(--text-dim);margin-top:8px;font-family:'Space Mono',monospace;">Toca cualquier imagen para verla completa</div>`;
-      msgDiv.appendChild(bubble);
-      scrollChat();
-      return urls[0];
-    }catch{
-      loadDiv.textContent='No se pudieron cargar las imágenes.';
-      return null;
-    }
+    const seeds=[42,123,456,789,1337];
+    const urls=styles.map((s,i)=>buildUrl(cleanPrompt+', '+s+', high quality',seeds[i]));
+    loadDiv.remove();
+    const bubble=document.createElement('div');
+    bubble.className='msg-bubble';
+    bubble.style.cssText='padding:10px;';
+    bubble.innerHTML='<div style="font-size:0.68rem;color:var(--green);font-family:\'Space Mono\',monospace;margin-bottom:10px;letter-spacing:1px;">🔍 5 RESULTADOS PARA: \"'+cleanPrompt+'\"</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">'
+      +urls.map((url,i)=>
+        '<div style="border-radius:10px;overflow:hidden;background:var(--surface2);aspect-ratio:1;position:relative;cursor:pointer;" onclick="window.open(\''+url+'\',\'_blank\')">'
+        +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">⏳</div>'
+        +'<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.35s;position:relative;z-index:1;"'
+        +' onload="this.style.opacity=1;this.previousElementSibling.style.display=\'none\';"'
+        +' onerror="this.style.display=\'none\';this.previousElementSibling.innerHTML=\'❌\';">'
+        +'<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));padding:6px 8px;font-size:0.55rem;color:rgba(255,255,255,0.7);font-family:\'Space Mono\',monospace;z-index:2;">'+styles[i]+'</div>'
+        +'</div>'
+      ).join('')
+      +'</div>'
+      +'<div style="font-size:0.62rem;color:var(--text-dim);margin-top:8px;font-family:\'Space Mono\',monospace;">Toca cualquier imagen para verla completa</div>';
+    msgDiv.appendChild(bubble);
+    scrollChat();
+    return urls[0];
   } else {
-    // Generate mode: 5 variations with different seeds
-    const seeds=[Date.now(),Date.now()+111,Date.now()+222,Date.now()+333,Date.now()+444];
-    const encoded=encodeURIComponent(cleanPrompt+', high quality, detailed');
-    const urls=seeds.map(s=>`https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&nologo=true&seed=${s}`);
-    try{
-      // Load first image to test
-      await new Promise((res,rej)=>{
-        const img=new Image();
-        img.onload=res;
-        img.onerror=rej;
-        img.src=urls[0];
-      });
-      loadDiv.remove();
-      const bubble=document.createElement('div');
-      bubble.className='msg-bubble';
-      bubble.style.cssText='padding:10px;';
-      bubble.innerHTML=`<div style="font-size:0.68rem;color:var(--green);font-family:'Space Mono',monospace;margin-bottom:10px;letter-spacing:1px;">✨ 5 VARIACIONES GENERADAS</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">
-          ${urls.map((url,i)=>`
-            <div style="border-radius:10px;overflow:hidden;background:var(--surface2);aspect-ratio:1;position:relative;cursor:pointer;" onclick="window.open('${url}','_blank')" title="Variación ${i+1} — toca para ver">
-              <img src="${url}" style="width:100%;height:100%;object-fit:cover;display:block;" onload="this.style.opacity=1" onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.6rem;color:var(--text-dim);\'>Generando...</div>'" style="opacity:0;transition:opacity 0.35s;">
-              <div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:#fff;font-family:'Space Mono',monospace;">${i+1}</div>
-            </div>`).join('')}
-        </div>
-        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-          <a href="${urls[0]}" download="lova_img_1.png" style="font-size:0.62rem;color:var(--green);font-family:'Space Mono',monospace;text-decoration:none;background:var(--green-dim);border:1px solid var(--green-border);padding:4px 10px;border-radius:20px;">↓ Descargar #1</a>
-          <span style="font-size:0.62rem;color:var(--text-dim);font-family:'Space Mono',monospace;padding:4px 0;">Toca para ver completa</span>
-        </div>`;
-      msgDiv.appendChild(bubble);
-      scrollChat();
-      return urls[0];
-    }catch{
-      loadDiv.textContent='No se pudo generar la imagen. Intenta con otra descripción.';
-      return null;
-    }
+    const seeds=[Math.floor(Math.random()*99999),111,222,333,444];
+    const urls=seeds.map(s=>buildUrl(cleanPrompt+', high quality, detailed, cinematic lighting',s));
+    loadDiv.remove();
+    const bubble=document.createElement('div');
+    bubble.className='msg-bubble';
+    bubble.style.cssText='padding:10px;';
+    bubble.innerHTML='<div style="font-size:0.68rem;color:var(--green);font-family:\'Space Mono\',monospace;margin-bottom:10px;letter-spacing:1px;">✨ 5 VARIACIONES GENERADAS</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">'
+      +urls.map((url,i)=>
+        '<div style="border-radius:10px;overflow:hidden;background:var(--surface2);aspect-ratio:1;position:relative;cursor:pointer;" onclick="window.open(\''+url+'\',\'_blank\')" title="Variación '+(i+1)+'">'
+        +'<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:0.55rem;color:var(--text-dim);font-family:\'Space Mono\',monospace;"><span style="font-size:1.2rem;">🎨</span>Generando...</div>'
+        +'<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.35s;position:relative;z-index:1;"'
+        +' onload="this.style.opacity=1;this.previousElementSibling.style.display=\'none\';"'
+        +' onerror="this.style.display=\'none\';this.previousElementSibling.innerHTML=\'❌ Error\';">'
+        +'<div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:#fff;font-family:\'Space Mono\',monospace;z-index:2;">'+(i+1)+'</div>'
+        +'</div>'
+      ).join('')
+      +'</div>'
+      +'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'
+      +'<a href="'+urls[0]+'" target="_blank" rel="noopener" style="font-size:0.62rem;color:var(--green);font-family:\'Space Mono\',monospace;text-decoration:none;background:var(--green-dim);border:1px solid var(--green-border);padding:4px 10px;border-radius:20px;">↗ Abrir #1</a>'
+      +'<span style="font-size:0.62rem;color:var(--text-dim);font-family:\'Space Mono\',monospace;padding:4px 0;">Las imágenes cargan en ~20 seg</span>'
+      +'</div>';
+    msgDiv.appendChild(bubble);
+    scrollChat();
+    return urls[0];
   }
 }
-
 // ══════════════════════════════════════════
 // ── IMAGE GENERATION INTERCEPT ──
 const IMG_TRIGGERS=/\b(genera|crea|diseña|haz|dibuja|muestra|imagina)\b.*\b(imagen|foto|ilustración|dibujo|logo|banner|poster|arte|diseño)\b|\b(imagen de|foto de|genera un|crea un|diseña un)\b/i;
@@ -4389,7 +4378,7 @@ async function searchMusicMode(){
   const box=document.getElementById('musicModeContent');
 
   // Show a card with the search result + open button
-  const monoUrl=`https://monochrome.tf/?search=${encodeURIComponent(q)}`;
+  const monoUrl=`https://monochrome.tf/search?q=${encodeURIComponent(q)}`;
   box.innerHTML=`
     <div style="background:var(--surface);border:1px solid var(--green-border);border-radius:14px;padding:16px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;">
       <div style="font-size:1.8rem;">🎵</div>
@@ -4403,8 +4392,8 @@ async function searchMusicMode(){
         <button onclick="window.open('https://monochrome.tf/','_blank')" style="flex:1;padding:9px;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.6rem;cursor:pointer;">
           🌐 Ir a Monochrome
         </button>
-        <button onclick="window.open('https://monochrome.tf/recent','_blank')" style="flex:1;padding:9px;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.6rem;cursor:pointer;">
-          🕒 Recientes
+        <button onclick="window.open('https://monochrome.tf/','_blank')" style="flex:1;padding:9px;background:var(--surface2);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:0.6rem;cursor:pointer;">
+          🕒 Explorar
         </button>
       </div>
     </div>`;
@@ -4430,7 +4419,7 @@ function voiceSearchMusic(){
       playMusicTrack(RADIO_STATIONS.indexOf(matched),'station');
     } else {
       // Not a station — open Monochrome directly with the search
-      const monoUrl=`https://monochrome.tf/?search=${encodeURIComponent(text)}`;
+      const monoUrl=`https://monochrome.tf/search?q=${encodeURIComponent(text)}`;
       window.open(monoUrl,'_blank');
       // Also show in the panel
       const inp=document.getElementById('musicSearchInput');
@@ -4885,17 +4874,18 @@ function buildEmojiGrid(){
   });
 }
 function toggleEmojiPicker(force,ev){
-  if(ev)ev.stopPropagation();
+  if(ev){ev.stopPropagation();ev.preventDefault();}
   const p=document.getElementById('emojiPicker');
   if(!p)return;
-  const show=force!==undefined?force:p.style.display==='none';
+  const isHidden=p.style.display==='none'||p.style.display==='';
+  const show=force!==undefined?force:isHidden;
   p.style.display=show?'block':'none';
   if(show)buildEmojiGrid();
 }
 document.addEventListener('click',e=>{
   const btn=document.getElementById('emojiBtn');
   const p=document.getElementById('emojiPicker');
-  if(p&&p.style.display!=='none'&&btn&&!btn.contains(e.target)&&!p.contains(e.target)){
+  if(p&&p.style.display==='block'&&btn&&!btn.contains(e.target)&&!p.contains(e.target)){
     p.style.display='none';
   }
 });
