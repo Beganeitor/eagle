@@ -1393,7 +1393,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
               <input type="file" id="socialFileInput" style="display:none" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" onchange="sendSocialFile(this)">
               <!-- Emoji picker -->
               <div style="position:relative;flex-shrink:0;">
-                <button class="social-input-icon" title="Emoji" id="emojiBtn" onclick="toggleEmojiPicker()">
+                <button class="social-input-icon" title="Emoji" id="emojiBtn" onclick="toggleEmojiPicker(undefined,event)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
                 </button>
                 <div id="emojiPicker" style="display:none;position:absolute;bottom:44px;left:0;background:#1a1a1a;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:10px;z-index:200;width:260px;box-shadow:0 8px 32px rgba(0,0,0,0.7);animation:fadeUp 0.15s ease;">
@@ -4870,15 +4870,22 @@ function buildEmojiGrid(){
     btn.textContent=e;
     btn.onmouseover=()=>btn.style.background='rgba(255,255,255,0.08)';
     btn.onmouseout=()=>btn.style.background='none';
-    btn.onclick=()=>{
+    btn.onclick=(ev)=>{
+      ev.stopPropagation();
       const inp=document.getElementById('socialInput');
-      if(inp){const s=inp.selectionStart||inp.value.length;inp.value=inp.value.slice(0,s)+e+inp.value.slice(s);inp.focus();inp.selectionStart=inp.selectionEnd=s+e.length;}
+      if(inp){
+        const s=(inp.selectionStart!=null?inp.selectionStart:inp.value.length);
+        inp.value=inp.value.slice(0,s)+e+inp.value.slice(s);
+        inp.focus();
+        try{inp.selectionStart=inp.selectionEnd=s+[...e].length;}catch{}
+      }
       toggleEmojiPicker(false);
     };
     g.appendChild(btn);
   });
 }
-function toggleEmojiPicker(force){
+function toggleEmojiPicker(force,ev){
+  if(ev)ev.stopPropagation();
   const p=document.getElementById('emojiPicker');
   if(!p)return;
   const show=force!==undefined?force:p.style.display==='none';
@@ -4886,8 +4893,11 @@ function toggleEmojiPicker(force){
   if(show)buildEmojiGrid();
 }
 document.addEventListener('click',e=>{
-  const btn=document.getElementById('emojiBtn');const p=document.getElementById('emojiPicker');
-  if(p&&btn&&!btn.contains(e.target)&&!p.contains(e.target))p.style.display='none';
+  const btn=document.getElementById('emojiBtn');
+  const p=document.getElementById('emojiPicker');
+  if(p&&p.style.display!=='none'&&btn&&!btn.contains(e.target)&&!p.contains(e.target)){
+    p.style.display='none';
+  }
 });
 
 
