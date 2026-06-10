@@ -2069,7 +2069,7 @@ async function sendMessage(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        system:`Eres LOVA, agente de IA para negocios, emprendimiento, marketing digital, e-commerce y finanzas en Colombia y Latinoamérica. Responde siempre en español. Usa markdown cuando sea útil: **negrita** para términos clave, listas con - para enumerar puntos, ### para subtítulos. Sé claro, directo y práctico. Solo habla de dropshipping, Dropi o temas relacionados si el usuario los menciona explícitamente. Cuando te pidan un gráfico, responde con JSON en este formato exacto: {"chart":true,"type":"bar|line|pie","labels":["a","b"],"data":[1,2],"title":"titulo"}`,
+        system:`Eres LOVA, agente de IA para negocios, emprendimiento, marketing digital, e-commerce y finanzas en Colombia y Latinoamérica. Responde siempre en español. Usa markdown cuando sea útil: **negrita** para términos clave, listas con - para enumerar puntos, ### para subtítulos. Sé claro, directo y práctico. Solo habla de dropshipping, Dropi o temas relacionados si el usuario los menciona explícitamente. Cuando te pidan un gráfico, responde con JSON en este formato exacto: {"chart":true,"type":"bar|line|pie","labels":["a","b"],"data":[1,2],"title":"titulo"}. IMPORTANTE: Cuando el usuario pida generar, crear o diseñar una imagen, foto, logo, ilustración, dibujo, banner, arte o similar, responde ÚNICAMENTE con el siguiente JSON y nada más: {"generateImage":true,"prompt":"descripción detallada en inglés de lo que hay que generar"}`,
         messages:apiMessages,
         max_tokens:2048,
         mode:chatMode,
@@ -2083,6 +2083,21 @@ async function sendMessage(){
     if(data.content&&data.content[0]){
       let reply=data.content[0].text;
 
+      // Check if generateImage JSON (fallback when intercept missed)
+      const genImgMatch=reply.match(/\{"generateImage":true[\s\S]*?\}/);
+      if(genImgMatch){
+        try{
+          const imgData=JSON.parse(genImgMatch[0]);
+          removeTyping();
+          await generateImage(imgData.prompt||reply);
+          const imgReply='Imagen generada. ¿Quieres una variación o cambiar algo?';
+          await saveMsg('assistant',imgReply);
+          messageHistory.push({role:'assistant',content:imgReply});
+          isLoading=false;document.getElementById('sendBtn').disabled=false;
+          document.getElementById('inputField').focus();
+          return;
+        }catch{await appendStreamText(reply,data.searched);}
+      }
       // Check if chart JSON
       const chartMatch=reply.match(/\{"chart":true[\s\S]*?\}/);
       if(chartMatch){
@@ -2370,7 +2385,7 @@ async function generateImage(prompt, searchMode=false){
 }
 // ══════════════════════════════════════════
 // ── IMAGE GENERATION INTERCEPT ──
-const IMG_TRIGGERS=/\b(genera|crea|diseña|haz|dibuja|muestra|imagina)\b.*\b(imagen|foto|ilustración|dibujo|logo|banner|poster|arte|diseño)\b|\b(imagen de|foto de|genera un|crea un|diseña un)\b/i;
+const IMG_TRIGGERS=/\b(gen[ae]ra|crea|dise[nñ]a?|haz|dibuja|muestra|imagina)\b.{0,40}\b(im[aá]gen|foto|ilustra|dibujo|logo|banner|poster|arte|dise[nñ]o)\b|\b(im[aá]gen|foto)\s+(de|un|una)\b|(gen[ae]ra|dise[nñ]a|dibuja|crea)\s+.{1,40}(im[aá]gen|foto|ilustra|logo|arte)|\b(quiero|ponme|hazme|dame)\s+.{0,20}\b(im[aá]gen|foto|dibujo|logo|ilustra)\b/i;
 const IMG_SEARCH_TRIGGERS=/\b(busca|buscar|encuentra|muéstrame|ver)\b.*\b(imagen|foto|imágenes|fotos)\b|\b(imágenes de|fotos de|busca imágenes|busca fotos)\b/i;
 // NOTE: music intercept patches window.sendMessage after this, so we store base ref
 const _origSendMessageForImages=sendMessage;
@@ -4508,7 +4523,7 @@ const _origSendMsgBeforeImgChoice=window.sendMessage;
 window.sendMessage=async function(){
   const text=document.getElementById('inputField').value.trim();
   // Already handles music above, so this sits on top
-  const IMG_TRIGGERS_LOCAL=/\b(genera|crea|diseña|haz|dibuja|muestra|imagina)\b.*\b(imagen|foto|ilustración|dibujo|logo|banner|poster|arte|diseño)\b|\b(imagen de|foto de|genera un|crea un|diseña un)\b/i;
+  const IMG_TRIGGERS_LOCAL=/\b(gen[ae]ra|crea|dise[nñ]a?|haz|dibuja|muestra|imagina|genera)\b.{0,40}\b(im[aá]gen|foto|ilustra|dibujo|logo|banner|poster|arte|dise[nñ]o)\b|\b(im[aá]gen|foto)\s+(de|un|una|del|de\s+un)\b|(gen[ae]ra|dise[nñ]a|dibuja|crea)\s+.{1,40}(im[aá]gen|foto|ilustra|logo|arte)|\b(quiero|ponme|hazme|dame)\s+.{0,20}\b(im[aá]gen|foto|dibujo|logo|ilustra)\b/i;
   if(text&&IMG_TRIGGERS_LOCAL.test(text)&&!pendingFiles.length&&!MUSIC_TRIGGERS.test(text)){
     if(isLoading)return;
     isLoading=true;
