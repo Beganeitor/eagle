@@ -108,8 +108,8 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 /* HERO — Gemini-style */
 /* Gemini-style hero: overlay sobre el panel completo */
 .hero{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:60px 24px 50px;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  text-align:center;padding:clamp(28px,8vh,60px) 24px 32px;
   position:absolute;
   inset:0;
   overflow:hidden;
@@ -291,8 +291,23 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 @media(max-width:640px){
   body{height:100dvh;overflow:hidden;}
   /* Sidebar always slides in as a drawer on mobile — never collapses to zero-width */
-  .sidebar{position:fixed;height:100dvh;left:0;top:0;width:82vw;max-width:300px;transform:translateX(-110%);z-index:300;transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);}
+  .sidebar{
+    position:fixed;height:100dvh;left:0;top:0;
+    width:82vw;max-width:300px;
+    transform:translateX(-110%);
+    z-index:300;
+    transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    /* On mobile show full sidebar with labels */
+  }
   .sidebar.open{transform:translateX(0);}
+  /* When sidebar is open on mobile: show text labels */
+  .sidebar.open .chat-item-title,
+  .sidebar.open .sidebar-section,
+  .sidebar.open .sidebar-logo-name{display:block !important;}
+  .sidebar.open .chat-list{align-items:flex-start !important;padding:4px 8px !important;}
+  .sidebar.open .chat-item{width:100% !important;}
+  .sidebar.open .new-chat-btn{width:auto !important;border-radius:10px !important;padding:0 14px !important;gap:8px;}
+  .sidebar.open .new-chat-btn span{display:inline !important;}
   /* collapsed class does the same as default on mobile */
   .sidebar.collapsed{transform:translateX(-110%);}
   /* Overlay sits below sidebar, above everything else */
@@ -300,7 +315,6 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
     display:none;position:fixed;inset:0;
     background:rgba(0,0,0,0.6);
     z-index:299;
-    /* make sure taps pass through to closeSidebarMobile even on social panel */
     -webkit-tap-highlight-color:transparent;
   }
   .sidebar-overlay.visible{display:block;}
@@ -314,12 +328,29 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   .chat-area{padding:12px 10px 8px;}
   .input-area{padding:8px 10px;padding-bottom:max(12px,env(safe-area-inset-bottom));position:sticky;bottom:0;background:var(--black);z-index:10;}
   .msg-bubble{max-width:92%;}
-  .social-panel{flex-direction:column;}
-  .social-sidebar{width:100%;height:auto;border-right:none;border-bottom:1px solid rgba(255,255,255,0.04);flex-shrink:0;}
-  .social-chat-area{flex:1;min-height:0;}
+  .social-panel{flex-direction:column;position:relative;}
+  .social-sidebar{
+    position:absolute;inset:0;width:100%;height:100%;
+    border-right:none;border-bottom:none;
+    z-index:2;background:#0a0a0a;
+    transform:translateX(0);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  }
+  .social-sidebar.chat-open{transform:translateX(-100%);pointer-events:none;}
+  .social-chat-area{
+    position:absolute;inset:0;width:100%;height:100%;
+    z-index:1;
+    transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  }
+  .social-chat-area.chat-open{transform:translateX(0);}
+  .mobile-back-btn{display:flex !important;}
   .chips{gap:6px;}
   .chip{font-size:0.68rem;padding:6px 10px;}
-  .hero-title{font-size:1.4rem;}
+  .hero-title{font-size:1.3rem;}
+  .hero{padding:clamp(16px,5vh,36px) 16px 20px;}
+  .hero-sub{font-size:0.78rem;margin-bottom:24px;}
+  .hero-input-wrap{padding:8px 10px 8px 16px;}
+  .chips{gap:5px;}
+  .chip{font-size:0.65rem;padding:5px 9px;}
   /* Music player smaller on mobile */
   #musicPlayer{bottom:12px;right:12px;min-width:200px;max-width:calc(100vw - 24px);}
 }
@@ -521,6 +552,9 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 }
 .sc-icon-btn:hover{background:rgba(255,255,255,0.07);}
 .sc-icon-btn svg{width:20px;height:20px;}
+.mobile-back-btn{display:none;width:34px;height:34px;border-radius:50%;background:none;border:none;color:var(--text);cursor:pointer;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0;}
+.mobile-back-btn:hover{background:rgba(255,255,255,0.07);}
+.mobile-back-btn svg{width:20px;height:20px;}
 
 /* Messages */
 .social-messages{
@@ -597,6 +631,12 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
   padding:10px 18px;
   color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.88rem;
   outline:none;transition:border-color 0.2s;
+  min-width:0;
+}
+@media(max-width:640px){
+  .social-input-row{padding:8px 10px 10px;}
+  .social-input{padding:9px 14px;font-size:0.85rem;}
+  .social-input-icon svg{width:20px;height:20px;}
 }
 .social-input::placeholder{color:rgba(238,238,238,0.35);}
 .social-input:focus{border-color:rgba(255,255,255,0.4);}
@@ -712,48 +752,16 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
 .lightbox-nav.next{right:16px;}
 .lightbox-nav svg{width:18px;height:18px;}
 .lightbox-nav:disabled{opacity:0.25;cursor:default;}
-.social-chat-header{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.social-chat-title{font-size:0.9rem;font-weight:500;}
-.social-chat-sub{font-size:0.68rem;color:var(--text-dim);}
-.social-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;}
-.social-messages::-webkit-scrollbar{width:3px;}
-.social-msg{display:flex;flex-direction:column;gap:3px;max-width:75%;}
-.social-msg.me{align-self:flex-end;align-items:flex-end;}
-.social-msg.them{align-self:flex-start;}
-.social-bubble{padding:9px 13px;border-radius:14px;font-size:0.85rem;line-height:1.6;word-break:break-word;}
-/* ── BUBBLE COLOR THEMING ── */
-:root { --bubble-color: #00bfa5; --bubble-color-dim: rgba(0,191,165,0.12); --bubble-color-border: rgba(0,191,165,0.25); }
-.social-msg.me .social-bubble{background:var(--bubble-color-dim);border:1px solid var(--bubble-color-border);border-bottom-right-radius:4px;}
-/* Chat theme picker */
-.chat-theme-btn{width:32px;height:32px;background:var(--surface2);border:1px solid rgba(255,255,255,0.07);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-dim);transition:all 0.2s;flex-shrink:0;position:relative;}
-.chat-theme-btn:hover{color:var(--green);border-color:var(--green-border);}
-.chat-theme-btn svg{width:14px;height:14px;}
-.chat-theme-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:14px;z-index:200;width:220px;box-shadow:0 8px 32px rgba(0,0,0,0.5);animation:fadeUp 0.15s ease;}
-.chat-theme-dropdown.hidden{display:none;}
-.chat-theme-title{font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:12px;}
-.chat-theme-swatches{display:flex;flex-wrap:wrap;gap:9px;}
-.chat-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.18s;position:relative;flex-shrink:0;}
-.chat-swatch:hover{transform:scale(1.18);}
-.chat-swatch.active{border-color:#fff;box-shadow:0 0 0 2px var(--bubble-color);}
-.social-msg.them .social-bubble{background:var(--surface);border:1px solid rgba(255,255,255,0.06);border-bottom-left-radius:4px;}
-.social-msg-time{font-size:0.58rem;color:var(--text-dim);font-family:"Space Mono",monospace;display:flex;align-items:center;gap:4px;}
-.social-seen{font-size:0.6rem;color:var(--green);}
-.social-file-bubble{display:flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:10px;padding:8px 12px;font-size:0.78rem;color:var(--green);cursor:pointer;text-decoration:none;max-width:200px;}
-.social-file-bubble svg{width:14px;height:14px;flex-shrink:0;}
-.social-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(255,255,255,0.04);flex-shrink:0;}
-.social-input{flex:1;background:var(--surface2);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:8px 12px;color:var(--text);font-family:"DM Sans",sans-serif;font-size:0.86rem;outline:none;}
-.social-input:focus{border-color:var(--green-border);}
-.social-send-btn{width:36px;height:36px;border-radius:50%;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
-.social-send-btn svg{width:13px;height:13px;}
-.social-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--text-dim);font-size:0.83rem;gap:8px;}
-.request-item{display:flex;align-items:center;gap:8px;padding:8px 7px;border-radius:10px;background:var(--surface2);margin-bottom:5px;}
-.req-btn{padding:4px 10px;border-radius:7px;font-size:0.65rem;font-family:"Space Mono",monospace;cursor:pointer;border:none;transition:all 0.2s;}
-.req-btn.accept{background:var(--green);color:#fff;}
-.req-btn.reject{background:rgba(255,50,50,0.1);color:#ff6b6b;border:1px solid rgba(255,50,50,0.2);}
+/* Duplicate social CSS removed — canonical definitions below */
 .notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:#ff5252;border-radius:50%;border:2px solid var(--black);display:none;}
 .img-gen-loading{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--text-dim);font-family:"Space Mono",monospace;padding:8px 0;}
 .img-gen-loading::before{content:"";width:11px;height:11px;border:2px solid var(--green-border);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Image gallery responsive */
+@media(max-width:640px){
+  .msg-bubble img{max-width:100% !important;}
+  .msg-bubble div[style*="grid-template-columns"]{grid-template-columns:repeat(2,1fr) !important;}
+}
 
 /* OFFLINE / CONNECTION STATUS */
 .conn-bar{display:none;align-items:center;gap:7px;padding:5px 14px;font-size:0.7rem;font-family:'Space Mono',monospace;flex-shrink:0;}
@@ -1147,6 +1155,7 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
             <div class="chip" onclick="hideHero();sendChip('Estrategias de marketing digital para mi marca')">📱 Marketing digital</div>
             <div class="chip" onclick="hideHero();sendChip('¿Cómo mejorar mi productividad diaria?')">⚡ Productividad</div>
             <div class="chip" onclick="hideHero();sendChip('genera imagen de un logo moderno y minimalista')">🎨 Generar imagen</div>
+            <div class="chip" onclick="hideHero();sendChip('busca imágenes de paisajes de Colombia')">🔍 Buscar imágenes</div>
           </div>
         </div>
       <div class="mode-bar">
@@ -1298,8 +1307,11 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             Selecciona un chat para comenzar
           </div>
-          <div id="socialActiveChatWrapper" style="display:none;flex:1;flex-direction:column;overflow:hidden;display:none;">
+          <div id="socialActiveChatWrapper" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
             <div class="social-chat-header">
+              <button class="mobile-back-btn" id="socialBackBtn" onclick="closeSocialChatMobile()" title="Volver">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
               <div class="contact-avatar" id="scAvatar" style="position:relative;">?</div>
               <div style="min-width:0;">
                 <div class="social-chat-title" id="scTitle">—</div>
@@ -1379,11 +1391,17 @@ body{background:var(--black);font-family:'DM Sans',sans-serif;color:var(--text);
             </div>
             <div class="social-input-row">
               <input type="file" id="socialFileInput" style="display:none" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" onchange="sendSocialFile(this)">
-              <!-- Emoji placeholder -->
-              <button class="social-input-icon" title="Emoji">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-              </button>
-              <input class="social-input" id="socialInput" placeholder="Enviar mensaje..." oninput="broadcastTyping()" onkeydown="if(event.key==='Enter')sendSocialMsg()">
+              <!-- Emoji picker -->
+              <div style="position:relative;flex-shrink:0;">
+                <button class="social-input-icon" title="Emoji" id="emojiBtn" onclick="toggleEmojiPicker()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                </button>
+                <div id="emojiPicker" style="display:none;position:absolute;bottom:44px;left:0;background:#1a1a1a;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:10px;z-index:200;width:260px;box-shadow:0 8px 32px rgba(0,0,0,0.7);animation:fadeUp 0.15s ease;">
+                  <div style="font-size:0.55rem;font-family:'Space Mono',monospace;color:var(--text-dim);letter-spacing:2px;margin-bottom:8px;">EMOJIS FRECUENTES</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:4px;" id="emojiGrid"></div>
+                </div>
+              </div>
+              <input class="social-input" id="socialInput" placeholder="Mensaje..." oninput="broadcastTyping()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendSocialMsg();}" autocomplete="off" autocorrect="off">
               <!-- Image icon -->
               <button class="social-input-icon" onclick="document.getElementById('socialFileInput').click()" title="Imagen">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -1728,7 +1746,7 @@ async function loadChatList(){
     const div=document.createElement('div');
     div.className='chat-item'+(conv.id===currentChatId?' active':'');
     div.dataset.id=conv.id;
-    div.innerHTML=`<div class="chat-item-title" id="title-${conv.id}">${conv.title||'Conversación'}</div><div class="chat-item-actions"><button onclick="event.stopPropagation();deleteChat('${conv.id}')">✕</button></div>`;
+    div.innerHTML=`<div class="chat-item-title" id="title-${conv.id}">${conv.title||'Conversación'}</div><div class="chat-item-actions"><button title="Renombrar" onclick="event.stopPropagation();renameChat('${conv.id}',event)" style="font-size:0.65rem;">✏️</button><button title="Eliminar" onclick="event.stopPropagation();deleteChat('${conv.id}',event)">✕</button></div>`;
     div.onclick=(e)=>{if(e.target.closest('.chat-item-actions'))return;loadChat(conv.id);};
     list.appendChild(div);
   });
@@ -1783,7 +1801,7 @@ async function loadChat(id){
 }
 
 async function deleteChat(id,e){
-  e.stopPropagation();
+  if(e)e.stopPropagation();
   await sb.from('messages').delete().eq('conversation_id',id);
   await sb.from('conversations').delete().eq('id',id);
   if(currentChatId===id){currentChatId=null;await newChat();}
@@ -2279,56 +2297,99 @@ function switchView(view){
   if(window.innerWidth<=640){closeSidebarMobile();}
 }
 
-// ── IMAGE GENERATION ──
-async function generateImage(prompt){
+// ── IMAGE GENERATION — 5 images gallery ──
+async function generateImage(prompt, searchMode=false){
   const msgDiv=document.createElement('div');
   msgDiv.className='msg bot';
+  msgDiv.innerHTML='<div class="msg-label">LOVA</div>';
   const loadDiv=document.createElement('div');
   loadDiv.className='img-gen-loading msg-bubble';
-  loadDiv.textContent='Generando imagen...';
-  msgDiv.innerHTML='<div class="msg-label">LOVA</div>';
+  loadDiv.textContent=searchMode?'Buscando imágenes...':'Generando imágenes...';
   msgDiv.appendChild(loadDiv);
   document.getElementById('messages').appendChild(msgDiv);
   scrollChat();
-  // Clean prompt for image gen
-  const cleanPrompt=prompt.replace(/genera|crea|diseña|haz|dibuja|muestra|imagina|imagen|foto|ilustración|de|un|una|el|la/gi,'').trim()||prompt;
-  const encoded=encodeURIComponent(cleanPrompt+', high quality, detailed');
-  const imgUrl=`https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&nologo=true&seed=${Date.now()}`;
-  try{
-    await new Promise((res,rej)=>{
-      const img=new Image();
-      img.onload=res;img.onerror=rej;
-      img.src=imgUrl;
+
+  const cleanPrompt=prompt.replace(/(genera|crea|diseña|haz|dibuja|muestra|imagina|imagen|foto|ilustración|de|un|una|el|la|busca|buscar|imágenes)/gi,'').trim()||prompt;
+
+  if(searchMode){
+    // Search mode: use Pollinations with different styles/seeds
+    const styles=['photography, realistic','illustration, artistic','digital art','minimalist design','cinematic'];
+    const seeds=[Date.now(),Date.now()+1,Date.now()+2,Date.now()+3,Date.now()+4];
+    const urls=styles.map((s,i)=>{
+      const q=encodeURIComponent(cleanPrompt+', '+s+', high quality');
+      return`https://image.pollinations.ai/prompt/${q}?width=512&height=512&nologo=true&seed=${seeds[i]}`;
     });
-    loadDiv.remove();
-    const img=document.createElement('img');
-    img.src=imgUrl;
-    img.style.cssText='max-width:300px;border-radius:14px;border:1px solid rgba(0,191,165,0.3);display:block;margin-top:4px;';
-    const dl=document.createElement('a');
-    dl.href=imgUrl;dl.target='_blank';
-    dl.style.cssText='font-size:0.68rem;color:var(--green);font-family:"Space Mono",monospace;margin-top:6px;display:block;';
-    dl.textContent='↗ Ver / Descargar';
-    const bubble=document.createElement('div');
-    bubble.className='msg-bubble';
-    bubble.style.padding='8px';
-    bubble.appendChild(img);
-    bubble.appendChild(dl);
-    msgDiv.appendChild(bubble);
-    scrollChat();
-    return imgUrl;
-  }catch{
-    loadDiv.textContent='No se pudo generar la imagen. Intenta con otra descripción.';
-    return null;
+    try{
+      loadDiv.remove();
+      const bubble=document.createElement('div');
+      bubble.className='msg-bubble';
+      bubble.style.cssText='padding:10px;';
+      bubble.innerHTML=`<div style="font-size:0.68rem;color:var(--green);font-family:'Space Mono',monospace;margin-bottom:10px;letter-spacing:1px;">🔍 5 RESULTADOS PARA: "${cleanPrompt}"</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;" id="imgGrid_${Date.now()}">
+          ${urls.map((url,i)=>`
+            <div style="border-radius:10px;overflow:hidden;background:var(--surface2);aspect-ratio:1;position:relative;cursor:pointer;" onclick="window.open('${url}','_blank')">
+              <img src="${url}" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.2s;" onload="this.style.opacity=1" onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.6rem;color:var(--text-dim);\'>Sin imagen</div>'" style="opacity:0;transition:opacity 0.3s;">
+              <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));padding:6px 8px;font-size:0.55rem;color:rgba(255,255,255,0.7);font-family:'Space Mono',monospace;">${styles[i]}</div>
+            </div>`).join('')}
+        </div>
+        <div style="font-size:0.62rem;color:var(--text-dim);margin-top:8px;font-family:'Space Mono',monospace;">Toca cualquier imagen para verla completa</div>`;
+      msgDiv.appendChild(bubble);
+      scrollChat();
+      return urls[0];
+    }catch{
+      loadDiv.textContent='No se pudieron cargar las imágenes.';
+      return null;
+    }
+  } else {
+    // Generate mode: 5 variations with different seeds
+    const seeds=[Date.now(),Date.now()+111,Date.now()+222,Date.now()+333,Date.now()+444];
+    const encoded=encodeURIComponent(cleanPrompt+', high quality, detailed');
+    const urls=seeds.map(s=>`https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&nologo=true&seed=${s}`);
+    try{
+      // Load first image to test
+      await new Promise((res,rej)=>{
+        const img=new Image();
+        img.onload=res;
+        img.onerror=rej;
+        img.src=urls[0];
+      });
+      loadDiv.remove();
+      const bubble=document.createElement('div');
+      bubble.className='msg-bubble';
+      bubble.style.cssText='padding:10px;';
+      bubble.innerHTML=`<div style="font-size:0.68rem;color:var(--green);font-family:'Space Mono',monospace;margin-bottom:10px;letter-spacing:1px;">✨ 5 VARIACIONES GENERADAS</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">
+          ${urls.map((url,i)=>`
+            <div style="border-radius:10px;overflow:hidden;background:var(--surface2);aspect-ratio:1;position:relative;cursor:pointer;" onclick="window.open('${url}','_blank')" title="Variación ${i+1} — toca para ver">
+              <img src="${url}" style="width:100%;height:100%;object-fit:cover;display:block;" onload="this.style.opacity=1" onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;font-size:0.6rem;color:var(--text-dim);\'>Generando...</div>'" style="opacity:0;transition:opacity 0.35s;">
+              <div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:#fff;font-family:'Space Mono',monospace;">${i+1}</div>
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          <a href="${urls[0]}" download="lova_img_1.png" style="font-size:0.62rem;color:var(--green);font-family:'Space Mono',monospace;text-decoration:none;background:var(--green-dim);border:1px solid var(--green-border);padding:4px 10px;border-radius:20px;">↓ Descargar #1</a>
+          <span style="font-size:0.62rem;color:var(--text-dim);font-family:'Space Mono',monospace;padding:4px 0;">Toca para ver completa</span>
+        </div>`;
+      msgDiv.appendChild(bubble);
+      scrollChat();
+      return urls[0];
+    }catch{
+      loadDiv.textContent='No se pudo generar la imagen. Intenta con otra descripción.';
+      return null;
+    }
   }
 }
 
 // ══════════════════════════════════════════
 // ── IMAGE GENERATION INTERCEPT ──
 const IMG_TRIGGERS=/\b(genera|crea|diseña|haz|dibuja|muestra|imagina)\b.*\b(imagen|foto|ilustración|dibujo|logo|banner|poster|arte|diseño)\b|\b(imagen de|foto de|genera un|crea un|diseña un)\b/i;
-const _origSendMessage=sendMessage;
+const IMG_SEARCH_TRIGGERS=/\b(busca|buscar|encuentra|muéstrame|ver)\b.*\b(imagen|foto|imágenes|fotos)\b|\b(imágenes de|fotos de|busca imágenes|busca fotos)\b/i;
+// NOTE: music intercept patches window.sendMessage after this, so we store base ref
+const _origSendMessageForImages=sendMessage;
 window.sendMessage=async function(){
   const text=document.getElementById('inputField').value.trim();
-  if(text&&IMG_TRIGGERS.test(text)&&!pendingFiles.length){
+  const isImgSearch=text&&IMG_SEARCH_TRIGGERS.test(text)&&!pendingFiles.length;
+  const isImgGen=text&&IMG_TRIGGERS.test(text)&&!pendingFiles.length&&!isImgSearch;
+  if(isImgSearch||isImgGen){
     if(isLoading)return;
     isLoading=true;
     document.getElementById('sendBtn').disabled=true;
@@ -2340,8 +2401,10 @@ window.sendMessage=async function(){
     if(messageHistory.length===0)updateTitle(text.slice(0,45));
     messageHistory.push({role:'user',content:text});
     spawnParticles();
-    await generateImage(text);
-    const reply='Imagen generada. ¿Quieres alguna variación o un estilo diferente?';
+    await generateImage(text, isImgSearch);
+    const reply=isImgSearch
+      ?'Aquí tienes 5 imágenes relacionadas. Toca cualquiera para verla completa.'
+      :'Generé 5 variaciones. ¿Quieres ajustar el estilo, colores o descripción?';
     await saveMsg('assistant',reply);
     messageHistory.push({role:'assistant',content:reply});
     isLoading=false;
@@ -2349,7 +2412,7 @@ window.sendMessage=async function(){
     document.getElementById('inputField').focus();
     return;
   }
-  return _origSendMessage();
+  return _origSendMessageForImages();
 };
 
 // ── CODE SANDBOX ──
@@ -2569,6 +2632,17 @@ function renderContacts(){
   }).join('');
 }
 
+function closeSocialChatMobile(){
+  if(window.innerWidth>640)return;
+  document.querySelector('.social-sidebar')?.classList.remove('chat-open');
+  document.querySelector('.social-chat-area')?.classList.remove('chat-open');
+}
+function openSocialChatMobile(){
+  if(window.innerWidth>640)return;
+  document.querySelector('.social-sidebar')?.classList.add('chat-open');
+  document.querySelector('.social-chat-area')?.classList.add('chat-open');
+}
+
 async function openSocialChat(partnerId, partnerUsername, partnerEmail){
   currentChatPartner={id:partnerId,username:partnerUsername,email:partnerEmail};
   // Flush any queued messages now that we have a partner context
@@ -2578,6 +2652,8 @@ async function openSocialChat(partnerId, partnerUsername, partnerEmail){
   document.getElementById('socialEmpty').style.display='none';
   const w=document.getElementById('socialActiveChatWrapper');
   w.style.display='flex';w.style.flexDirection='column';
+  // Mobile: slide to chat view
+  openSocialChatMobile();
   const displayName=partnerUsername?('@'+partnerUsername):partnerEmail||partnerId;
   const avatar=(partnerUsername||partnerEmail||'?')[0].toUpperCase();
   document.getElementById('scAvatar').textContent=avatar;
@@ -3685,8 +3761,20 @@ function initMusicPlayer(){
     musicAudio.onended=()=>musicNext();
     musicAudio.onplay=()=>updateMusicPlayBtn(true);
     musicAudio.onpause=()=>updateMusicPlayBtn(false);
-    musicAudio.onerror=()=>{
-      document.getElementById('mpStatus').textContent='Error cargando. Prueba otra.';
+    musicAudio.onerror=(e)=>{
+      console.warn('Audio error',e);
+      document.getElementById('mpStatus').textContent='⚠️ Error — toca otra emisora';
+      updateMusicPlayBtn(false);
+      musicPlaying=false;
+    };
+    musicAudio.onstalled=()=>{
+      document.getElementById('mpStatus').textContent='⏳ Cargando stream...';
+    };
+    musicAudio.onwaiting=()=>{
+      document.getElementById('mpStatus').textContent='⏳ Buffering...';
+    };
+    musicAudio.oncanplay=()=>{
+      if(!musicPlaying)document.getElementById('mpStatus').textContent='Listo — toca ▶';
     };
   }
 }
@@ -3699,19 +3787,37 @@ function openMusicPlayer(title,url,icon,source){
   document.getElementById('mpIcon').textContent=icon||'🎵';
   document.getElementById('mpStatus').textContent='Cargando...';
   player.classList.add('visible');
+  // Try direct URL first; fallback via streamable proxy
+  musicAudio.src='';
+  musicAudio.crossOrigin='anonymous';
   musicAudio.src=url;
-  musicAudio.play().then(()=>{
-    musicPlaying=true;
-    document.getElementById('mpStatus').textContent='Reproduciendo';
-    updateMusicPlayBtn(true);
-    // Update driving mode bar
-    const dmb=document.getElementById('drivingMusicBar');
-    document.getElementById('drivingMusicTitle').textContent=title;
-    dmb.style.display='flex';
-  }).catch(e=>{
-    document.getElementById('mpStatus').textContent='No se pudo reproducir';
-    console.error(e);
-  });
+  musicAudio.load();
+  const playPromise=musicAudio.play();
+  if(playPromise){
+    playPromise.then(()=>{
+      musicPlaying=true;
+      document.getElementById('mpStatus').textContent='▶ Reproduciendo';
+      updateMusicPlayBtn(true);
+      syncMusicModePlayer();
+      const dmb=document.getElementById('drivingMusicBar');
+      if(dmb){document.getElementById('drivingMusicTitle').textContent=title;dmb.style.display='flex';}
+    }).catch(e=>{
+      // Autoplay policy: try muted first to unlock, then unmute
+      musicAudio.muted=true;
+      musicAudio.play().then(()=>{
+        musicAudio.muted=false;
+        musicPlaying=true;
+        document.getElementById('mpStatus').textContent='▶ Reproduciendo';
+        updateMusicPlayBtn(true);
+        const dmb=document.getElementById('drivingMusicBar');
+        if(dmb){document.getElementById('drivingMusicTitle').textContent=title;dmb.style.display='flex';}
+      }).catch(()=>{
+        document.getElementById('mpStatus').textContent='⚠️ Toca ▶ para reproducir';
+        updateMusicPlayBtn(false);
+      });
+      console.warn('Autoplay blocked, user interaction required',e);
+    });
+  }
 }
 
 function toggleMusicPlay(){
@@ -3762,7 +3868,7 @@ const YOUTUBE_SEARCH_TRIGGERS=/\b(busca|pon|reproduce|toca|play)\b.*\b(en\s+yout
 const _origSendMsgBeforeMusic=window.sendMessage;
 window.sendMessage=async function(){
   const text=document.getElementById('inputField').value.trim();
-  if(!text)return _origSendMsgBeforeMusic();
+  if(!text)return _origSendMsgBeforeMusic?.();
   
   // Check radio station requests
   if(MUSIC_TRIGGERS.test(text)||RADIO_TRIGGERS.test(text)){
@@ -3858,25 +3964,41 @@ window.sendMessage=async function(){
         messageHistory.push({role:'user',content:text});
         spawnParticles();
         
-        // Embed YouTube search
-        const ytQuery=encodeURIComponent(songQuery+' official audio');
+        // Open YouTube Music search in a nice card
+        const ytMusicUrl=`https://music.youtube.com/search?q=${encodeURIComponent(songQuery)}`;
+        const ytUrl=`https://www.youtube.com/results?search_query=${encodeURIComponent(songQuery+' official audio')}`;
         const msgDiv=document.createElement('div');
         msgDiv.className='msg bot';
         msgDiv.innerHTML='<div class="msg-label">LOVA</div>';
         const bubble=document.createElement('div');
         bubble.className='msg-bubble';
-        bubble.style.cssText='padding:8px;max-width:340px;';
+        bubble.style.cssText='padding:12px;max-width:320px;';
         bubble.innerHTML=`
-          <div style="font-size:0.75rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:8px;">🎵 Buscando: <span style="color:var(--green)">${songQuery}</span></div>
-          <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;">
-            <iframe src="https://www.youtube.com/embed?listType=search&list=${ytQuery}&autoplay=1" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:10px;"></iframe>
-          </div>
-          <div style="font-size:0.65rem;color:var(--text-dim);margin-top:6px;font-family:'Space Mono',monospace;">Vía YouTube · Controla el audio desde el reproductor</div>`;
+          <div style="font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:10px;letter-spacing:1px;">🎵 CANCIÓN BUSCADA</div>
+          <div style="font-size:0.98rem;font-weight:600;color:var(--text);margin-bottom:12px;">${songQuery}</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <a href="${ytMusicUrl}" target="_blank" style="display:flex;align-items:center;gap:10px;background:rgba(255,0,0,0.1);border:1px solid rgba(255,0,0,0.2);border-radius:12px;padding:10px 14px;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,0,0,0.18)'" onmouseout="this.style.background='rgba(255,0,0,0.1)'">
+              <span style="font-size:1.3rem;">🎵</span>
+              <div>
+                <div style="font-size:0.82rem;font-weight:600;color:#fff;">YouTube Music</div>
+                <div style="font-size:0.62rem;color:rgba(255,255,255,0.5);font-family:'Space Mono',monospace;">Calidad HD · Sin anuncios</div>
+              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round" width="14" height="14" style="margin-left:auto;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+            <a href="${ytUrl}" target="_blank" style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:10px 14px;text-decoration:none;" onmouseover="this.style.borderColor='var(--green-border)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+              <span style="font-size:1.3rem;">▶️</span>
+              <div>
+                <div style="font-size:0.82rem;font-weight:600;color:var(--text);">YouTube</div>
+                <div style="font-size:0.62rem;color:var(--text-dim);font-family:'Space Mono',monospace;">Videos con video oficial</div>
+              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round" width="14" height="14" style="margin-left:auto;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>`;
         msgDiv.appendChild(bubble);
         document.getElementById('messages').appendChild(msgDiv);
         scrollChat();
         
-        const replyText=`🎵 Buscando **${songQuery}** en YouTube. ¡Disfruta!`;
+        const replyText=`🎵 Te muestro dónde escuchar **${songQuery}**. También puedes usar las emisoras de la sección Música.`;
         await saveMsg('assistant',replyText);
         messageHistory.push({role:'assistant',content:replyText});
         isLoading=false;
@@ -3887,7 +4009,7 @@ window.sendMessage=async function(){
     }
   }
   
-  return _origSendMsgBeforeMusic();
+  return _origSendMsgBeforeMusic?.();
 };
 
 // ══════════════════════════════════════════
@@ -4051,24 +4173,28 @@ let _musicRecognition=null;
 const RADIO_STATIONS=[
   {name:'El Gran Lobo',url:'https://stream.zeno.fm/ymcvmqrp8rhvv',icon:'🐺',genre:'Barranquilla · Vallenato/Pop',
    keywords:['gran lobo','lobo','el lobo','gran lobo barranquilla','lobo barranquilla']},
-  {name:'Tropicana Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/TROPICANA_BQSC',icon:'🌴',genre:'Barranquilla · Tropical',
+  {name:'Tropicana',url:'https://stream.zeno.fm/tropicana-colombia',icon:'🌴',genre:'Barranquilla · Tropical',
    keywords:['tropicana','tropical','tropicana barranquilla','tropicana colombia']},
-  {name:'La Mega Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/LAMEGABQSC',icon:'🔥',genre:'Barranquilla · Urban/Pop',
+  {name:'La Mega',url:'https://stream.zeno.fm/la-mega-colombia',icon:'🔥',genre:'Barranquilla · Urban/Pop',
    keywords:['la mega','mega barranquilla','la mega barranquilla','mega']},
-  {name:'Olímpica Stereo',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/OLIMPICA_BQSC',icon:'🏅',genre:'Barranquilla · Vallenato',
+  {name:'Olímpica Stereo',url:'https://stream.zeno.fm/olimpica-stereo',icon:'🏅',genre:'Barranquilla · Vallenato',
    keywords:['olimpica','olímpica','olimpica stereo','olimpica barranquilla','olimpica bq']},
-  {name:'Amor Stereo',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/AMOR_BQSC',icon:'❤️',genre:'Barranquilla · Romántica',
+  {name:'Amor Stereo',url:'https://stream.zeno.fm/amor-stereo-colombia',icon:'❤️',genre:'Colombia · Romántica',
    keywords:['amor','amor stereo','amor stereo barranquilla','la del amor']},
-  {name:'Radio Uno',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_UNO_BQSC',icon:'1️⃣',genre:'Barranquilla · Variada',
+  {name:'Radio Uno',url:'https://stream.zeno.fm/radio-uno-colombia',icon:'1️⃣',genre:'Colombia · Variada',
    keywords:['radio uno','radio 1','uno barranquilla']},
-  {name:'Vibra Barranquilla',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/VIBRA_BQSC',icon:'⚡',genre:'Barranquilla · Electrónica/Pop',
+  {name:'Vibra',url:'https://stream.zeno.fm/vibra-colombia',icon:'⚡',genre:'Colombia · Electrónica/Pop',
    keywords:['vibra','vibra barranquilla','vibra colombia']},
-  {name:'Blu Radio',url:'https://playerservices.streamtheworld.com/api/livestream-redirect/BLU_CARIBESC',icon:'💙',genre:'Barranquilla · Noticias',
+  {name:'Blu Radio',url:'https://stream.zeno.fm/blu-radio',icon:'💙',genre:'Colombia · Noticias',
    keywords:['blu','blu radio','blue radio','blú']},
-  {name:'Todelar Vallenata',url:'https://stream.zeno.fm/todelar',icon:'🎸',genre:'Costa · Vallenato',
+  {name:'Todelar Vallenata',url:'https://stream.zeno.fm/y5yn9ve27m8uv',icon:'🎸',genre:'Costa · Vallenato',
    keywords:['todelar','vallenata','vallenato','la vallenata']},
-  {name:'La Voz de Barranquilla',url:'https://stream.zeno.fm/lavozde',icon:'📻',genre:'Barranquilla · Clásica',
+  {name:'La Voz de Barranquilla',url:'https://stream.zeno.fm/d9n3e3xyh6hvv',icon:'📻',genre:'Barranquilla · Clásica',
    keywords:['la voz','voz de barranquilla','la voz barranquilla']},
+  {name:'W Radio Colombia',url:'https://stream.zeno.fm/w-radio-colombia',icon:'📡',genre:'Colombia · Noticias/Talk',
+   keywords:['w radio','wradio','la w']},
+  {name:'Los 40 Colombia',url:'https://stream.zeno.fm/los40-colombia',icon:'🎤',genre:'Colombia · Pop/Hits',
+   keywords:['los 40','los cuarenta','40 principales']},
 ];
 
 // Fuzzy station match — returns best match or null
@@ -4153,13 +4279,16 @@ function renderMusicModeContent(){
     box.innerHTML='<div style="font-family:\'Space Mono\',monospace;font-size:0.56rem;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;">EMISORAS EN VIVO · BARRANQUILLA</div>';
     RADIO_STATIONS.forEach((s,i)=>{
       const row=document.createElement('div');
-      row.className='music-track-row'+(musicAudio&&!musicAudio.paused&&musicQueue[musicIndex]?.name===s.name?' playing':'');
-      row.innerHTML=`<div class="music-track-icon">${s.icon}</div>
-        <div class="music-track-info" onclick="playMusicTrack(${i},'station')">
-          <div class="music-track-name">${s.name}</div>
-          <div class="music-track-sub">${s.genre}</div>
+      const isCurrentlyPlaying=musicAudio&&!musicAudio.paused&&musicQueue[musicIndex]?.name===s.name;
+      row.className='music-track-row'+(isCurrentlyPlaying?' playing':'');
+      row.innerHTML=`<div class="music-track-icon" style="${isCurrentlyPlaying?'background:var(--green-dim);border-color:var(--green);':''}">
+          ${isCurrentlyPlaying?'<svg viewBox="0 0 24 24" fill="var(--green)" width="18" height="18"><rect x="6" y="4" width="3" height="16"/><rect x="15" y="4" width="3" height="16"/></svg>':s.icon}
         </div>
-        <button class="music-fav-btn${isFav(s.name)?' active':''}" onclick="toggleMusicFav(${JSON.stringify(s).replace(/"/g,'&quot;')})" title="${isFav(s.name)?'Quitar de favoritos':'Agregar a favoritos'}">${isFav(s.name)?'❤️':'🤍'}</button>`;
+        <div class="music-track-info" onclick="playMusicTrack(${i},'station')">
+          <div class="music-track-name" style="${isCurrentlyPlaying?'color:var(--green);':''}">${s.name}</div>
+          <div class="music-track-sub">${s.genre} ${isCurrentlyPlaying?'· <span style="color:var(--green);font-size:0.58rem;">EN VIVO</span>':''}</div>
+        </div>
+        <button class="music-fav-btn${isFav(s.name)?' active':''}" onclick="event.stopPropagation();toggleMusicFav(${JSON.stringify(s).replace(/"/g,'&quot;')})" title="${isFav(s.name)?'Quitar de favoritos':'Agregar a favoritos'}">${isFav(s.name)?'❤️':'🤍'}</button>`;
       box.appendChild(row);
     });
   } else if(_musicModeTab==='recientes'){
@@ -4729,6 +4858,38 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('DOMContentLoaded',buildThemeSwatches);
 if(document.readyState!=='loading')buildThemeSwatches();
+
+// ── EMOJI PICKER ──
+const EMOJIS=['😀','😂','🥰','😍','🤩','😎','🥳','😊','😇','🤔','😅','🤣','❤️','🔥','✨','👏','🙌','💪','👍','🎉','🎊','🚀','💯','⚡','🌟','💎','🏆','🎯','💡','✅','❌','⚠️','📱','💻','🎵','🎶','🎤','🎨','📸','🤝','🙏','💬','📩','🔔','👀','💸','🤑','💰','📈','🏠','🌎','🇨🇴'];
+function buildEmojiGrid(){
+  const g=document.getElementById('emojiGrid');
+  if(!g||g.children.length)return;
+  EMOJIS.forEach(e=>{
+    const btn=document.createElement('button');
+    btn.style.cssText='background:none;border:none;cursor:pointer;font-size:1.3rem;padding:4px;border-radius:8px;transition:background 0.12s;width:36px;height:36px;display:flex;align-items:center;justify-content:center;';
+    btn.textContent=e;
+    btn.onmouseover=()=>btn.style.background='rgba(255,255,255,0.08)';
+    btn.onmouseout=()=>btn.style.background='none';
+    btn.onclick=()=>{
+      const inp=document.getElementById('socialInput');
+      if(inp){const s=inp.selectionStart||inp.value.length;inp.value=inp.value.slice(0,s)+e+inp.value.slice(s);inp.focus();inp.selectionStart=inp.selectionEnd=s+e.length;}
+      toggleEmojiPicker(false);
+    };
+    g.appendChild(btn);
+  });
+}
+function toggleEmojiPicker(force){
+  const p=document.getElementById('emojiPicker');
+  if(!p)return;
+  const show=force!==undefined?force:p.style.display==='none';
+  p.style.display=show?'block':'none';
+  if(show)buildEmojiGrid();
+}
+document.addEventListener('click',e=>{
+  const btn=document.getElementById('emojiBtn');const p=document.getElementById('emojiPicker');
+  if(p&&btn&&!btn.contains(e.target)&&!p.contains(e.target))p.style.display='none';
+});
+
 
 // ── Update training progress on load ──
 const _origLoadTraining=loadTraining;
